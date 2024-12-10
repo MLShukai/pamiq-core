@@ -3,7 +3,7 @@ FROM python:3.12-slim
 # Setup workspace
 RUN mkdir /workspace
 WORKDIR /workspace
-COPY * /workspace/
+COPY ./ /workspace/
 
 # Install dependencies
 ARG DEBIAN_FRONTEND=noninteractive
