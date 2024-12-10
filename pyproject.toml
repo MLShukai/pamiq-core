@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pamiq-core"
+version = "0.1.0"
+description = "The core package for creating autonomous machine intelligence"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+    {include = "pamiq_core", from = "src"}
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
