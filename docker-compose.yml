@@ -7,9 +7,6 @@ services:
       - pamiq-core:/workspace
       - poetry_cache:/root/.cache/pypoetry
       - pip_cache:/root/.cache/pip
-    environment:
-      - POETRY_VIRTUALENVS_CREATE=false
-      - POETRY_VIRTUALENVS_IN_PROJECT=false
     tty: true
     stdin_open: true
     command: /bin/bash
