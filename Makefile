@@ -25,7 +25,7 @@ format: ## Run pre-commit hooks
 	poetry run pre-commit run -a
 
 test: ## Run tests
-	poetry run pytest -v
+	poetry run pytest -v --cov
 
 type: ## Run type check
 	poetry run pyright
