@@ -29,3 +29,5 @@ test: ## Run tests
 
 type: ## Run type check
 	poetry run pyright
+
+run: format test type ## Run all workflow.
