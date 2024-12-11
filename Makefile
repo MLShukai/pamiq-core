@@ -23,3 +23,6 @@ docker-attach: ## Attach to development container
 
 format: ## Run pre-commit hooks
 	poetry run pre-commit run -a
+
+test: ## Run tests
+	poetry run pytest -v
