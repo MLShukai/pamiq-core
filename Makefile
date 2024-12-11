@@ -26,3 +26,6 @@ format: ## Run pre-commit hooks
 
 test: ## Run tests
 	poetry run pytest -v
+
+type: ## Run type check
+	poetry run pyright

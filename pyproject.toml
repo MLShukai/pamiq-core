@@ -16,6 +16,7 @@ python = "^3.12"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"
 pytest = "^8.3.4"
+pyright = "^1.1.390"
 
 [build-system]
 requires = ["poetry-core"]
@@ -36,3 +37,12 @@ log_cli = "True"
 
 minversion = "6.0"
 testpaths = "tests/"
+
+[tool.pyright]
+pythonVersion = "3.12"
+exclude = [
+  "**/node_modules",
+  "**/__pycache__",
+]
+strict = ["./src/"]
+reportMissingTypeStubs = false
