@@ -20,3 +20,6 @@ docker-down: ## Stop docker containers
 
 docker-attach: ## Attach to development container
 	docker compose exec dev bash
+
+format: ## Run pre-commit hooks
+	poetry run pre-commit run -a
