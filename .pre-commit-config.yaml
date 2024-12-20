@@ -33,28 +33,18 @@ repos:
       # Update the uv lockfile
       - id: uv-lock
 
-  # Python code formatting
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
+  # Python code linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.8.4
     hooks:
-      - id: black
-        args: [--line-length, "79"]
-
-  # Python import sorting
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args:
-          [
-            "--profile",
-            "black",
-            "--filter-files",
-            "-a",
-            "from __future__ import annotations",
-            "--line-length",
-            "79",
-          ]
+      # Run the linter.
+      - id: ruff
+        types_or: [ python, pyi ]
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
+        types_or: [ python, pyi ]
 
   # Python syntax upgrading
   - repo: https://github.com/asottile/pyupgrade
@@ -69,19 +59,6 @@ repos:
     hooks:
       - id: docformatter
         args: [--in-place, --wrap-summaries=79, --wrap-descriptions=72]
-
-  # Python code quality checks
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.1
-    hooks:
-      - id: flake8
-        args:
-          [
-            "--extend-ignore",
-            "E203,E402,E501,F401,F841",
-            "--exclude",
-            "logs/*,data/*",
-          ]
 
   # Remove unused imports
   - repo: https://github.com/hadialqattan/pycln

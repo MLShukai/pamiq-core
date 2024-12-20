@@ -7,6 +7,7 @@ services:
       - pamiq-core:/workspace
       - uv_cache:/root/.cache/uv
       - pip_cache:/root/.cache/pip
+      - pre-commit_cache:/root/.cache/pre-commit
     tty: true
     stdin_open: true
     command: /bin/bash
@@ -17,3 +18,4 @@ volumes:
     name: pamiq-core
   uv_cache:
   pip_cache:
+  pre-commit_cache:
