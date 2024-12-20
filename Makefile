@@ -18,6 +18,9 @@ docker-up: ## Start docker containers
 docker-down: ## Stop docker containers
 	docker compose down
 
+docker-down-volume:  ## Stop docker containers with removing volumes.
+	docker compose down -v
+
 docker-attach: ## Attach to development container
 	docker compose exec dev bash
 

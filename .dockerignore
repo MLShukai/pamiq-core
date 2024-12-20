@@ -1,5 +1,7 @@
 # Our project
 .pytest_cache
+.coverage
+.venv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
