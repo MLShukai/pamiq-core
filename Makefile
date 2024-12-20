@@ -18,16 +18,19 @@ docker-up: ## Start docker containers
 docker-down: ## Stop docker containers
 	docker compose down
 
+docker-down-volume:  ## Stop docker containers with removing volumes.
+	docker compose down -v
+
 docker-attach: ## Attach to development container
 	docker compose exec dev bash
 
 format: ## Run pre-commit hooks
-	poetry run pre-commit run -a
+	uv run pre-commit run -a
 
 test: ## Run tests
-	poetry run pytest -v --cov
+	uv run pytest -v --cov
 
 type: ## Run type check
-	poetry run pyright
+	uv run pyright
 
 run: format test type ## Run all workflow.

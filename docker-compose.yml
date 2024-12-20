@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - pamiq-core:/workspace
-      - poetry_cache:/root/.cache/pypoetry
+      - uv_cache:/root/.cache/uv
       - pip_cache:/root/.cache/pip
     tty: true
     stdin_open: true
@@ -15,5 +15,5 @@ services:
 volumes:
   pamiq-core:
     name: pamiq-core
-  poetry_cache:
+  uv_cache:
   pip_cache:

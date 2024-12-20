@@ -25,6 +25,14 @@ repos:
       - id: mixed-line-ending
       - id: requirements-txt-fixer
 
+  # To ensure the lockfile is up-to-date
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version.
+    rev: 0.5.10
+    hooks:
+      # Update the uv lockfile
+      - id: uv-lock
+
   # Python code formatting
   - repo: https://github.com/psf/black
     rev: 24.10.0
