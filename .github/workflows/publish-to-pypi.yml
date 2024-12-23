@@ -1,6 +1,10 @@
 name: Publish Python 🐍 distribution 📦 to TestPyPI
 
-on: push
+on:
+  push:
+    branches: ["released"]
+  pull_request:
+    branches: ["release/*"]
 
 env:
   PYTHON_VERSION: "3.12"
