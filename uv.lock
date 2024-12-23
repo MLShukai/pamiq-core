@@ -113,7 +113,7 @@ wheels = [
 
 [[package]]
 name = "pamiq-core"
-version = "0.1.0"
+version = "0.0.3"
 source = { editable = "." }
 
 [package.dev-dependencies]
