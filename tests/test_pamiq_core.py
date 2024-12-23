@@ -4,4 +4,4 @@ import pamiq_core
 
 
 def test_version() -> None:
-    assert pamiq_core.__version__ == "0.0.0"
+    assert pamiq_core.__version__ == "0.0.1"
