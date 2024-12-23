@@ -1,10 +1,6 @@
 name: Publish Python 🐍 distribution 📦 to PyPI
 
-on:
-  push:
-    branches: [released]
-  pull_request:
-    branches: [released]
+on: push
 
 env:
   PYTHON_VERSION: "3.12"
