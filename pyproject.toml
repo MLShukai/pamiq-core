@@ -1,6 +1,6 @@
 [project]
 name = "pamiq-core"
-version = "0.0.1"
+version = "0.0.2"
 description = "The core package for creating autonomous machine intelligence"
 license = {file = "LICENSE"}
 readme = "README.md"
