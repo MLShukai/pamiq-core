@@ -34,6 +34,15 @@ PAMIQ Core への貢献に興味を持っていただき、ありがとうござ
    make docker-attach
    ```
 
+   Visual Studio Codeなどを用いて開発コンテナにアタッチして作業することを推奨します。
+
+4. Gitのユーザ名、Emailアドレスを登録
+
+   ```shell
+   git config user.name <your-username>
+   git config user.email <your-email>
+   ```
+
 開発コンテナには以下の環境が整っています：
 
 - パッケージマネージャー ([**uv**](https://docs.astral.sh/uv/))
