@@ -18,7 +18,7 @@ PAMIQ Core への貢献に興味を持っていただき、ありがとうござ
 1. リポジトリをクローン
 
    ```shell
-   git clone https://github.com/your-username/pamiq-core.git
+   git clone https://github.com/MLShukai/pamiq-core.git
    cd pamiq-core
    ```
 
