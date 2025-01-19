@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y \
     make \
     && rm -rf /var/lib/apt/lists/* \
     && uv sync \
+    # Install pre-commit hook.
+    && uv run pre-commit install \
     # Shell completion
     && echo 'eval "$(uv generate-shell-completion bash)"' >> ~/.bashrc \
     # Auto activate venv
