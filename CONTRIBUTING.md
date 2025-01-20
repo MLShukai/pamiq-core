@@ -2,46 +2,75 @@
 
 PAMIQ Core への貢献に興味を持っていただき、ありがとうございます。このガイドでは開発環境のセットアップ方法について説明します。
 
-## セットアップ
+## 📋 前提条件
 
-### 前提条件
+以下のツールを事前にインストールしてください:
 
-- [**Docker**](https://www.docker.com/ja-jp/get-started/)
-- **make**
-  - Windows ユーザーは [**chocolatey**](https://chocolatey.org) または [**scoop**](https://scoop.sh) を使用してインストールしてください
-  - macOS ユーザーは事前にインストールされています
-  - Linux ユーザーはディストリビューションのパッケージマネージャーを使用してインストールしてください（例：Ubuntu の場合 `sudo apt install make`）
-- [**git**](https://git-scm.com)
+### 必須ツール
 
-### 開発環境の構築
+- 🐳 **Docker (Docker Compose)**
 
-1. リポジトリをクローン
+  - Docker Desktop: <https://www.docker.com/ja-jp/get-started/>
+  - Docker Engine (Linux 限定): <https://docs.docker.com/engine/install/>
+  - 確認コマンド:
+    ```sh
+    docker version && docker compose version
+    ```
 
-   ```shell
+- 🔨 **make**
+
+  - Windows: [`scoop`](https://scoop.sh)か[`chocolate`](https://chocolatey.org)でインストール
+  - macOS: 事前にインストール済み
+  - Linux: ディストリビューションのパッケージマネージャーを使用（例：Ubuntu の場合 `sudo apt install make`）
+  - 確認コマンド:
+    ```sh
+    make -v
+    ```
+
+- 🌲 **git**
+
+  - ダウンロード: <https://git-scm.com/downloads>
+  - 確認コマンド:
+    ```sh
+    git -v
+    ```
+
+## 🚀 開発環境の構築
+
+1. リポジトリのセットアップ
+
+   ```sh
    git clone https://github.com/MLShukai/pamiq-core.git
    cd pamiq-core
    ```
 
-2. Docker環境を起動
+2. Docker環境の構築
 
-   ```shell
+   ```sh
+   # イメージのビルド
+   make docker-build
+
+   # コンテナの起動
    make docker-up
-   ```
 
-3. 開発コンテナにアタッチ
-
-   ```shell
+   # コンテナへの接続
    make docker-attach
    ```
 
-   Visual Studio Codeなどを用いて開発コンテナにアタッチして作業することを推奨します。
+3. Gitの初期設定
 
-4. Gitのユーザ名、Emailアドレスを登録
-
-   ```shell
-   git config user.name <your-username>
-   git config user.email <your-email>
+   ```sh
+   git config user.name <あなたのGitHubユーザー名>
+   git config user.email <あなたのGitHubメールアドレス>
    ```
+
+## 💻 開発環境の設定
+
+### VSCode での開発
+
+お好みのエディタ（VSCode 推奨）からコンテナにアタッチして開発を行えます。
+
+📚 参考: [VSCode Dev Containers 拡張機能のチュートリアル](https://learn.microsoft.com/ja-jp/training/modules/use-docker-container-dev-env-vs-code/1-introduction)
 
 開発コンテナには以下の環境が整っています：
 
@@ -50,7 +79,7 @@ PAMIQ Core への貢献に興味を持っていただき、ありがとうござ
 - 開発の依存関係パッケージ
 - 仮想環境の自動アクティベーション (`source .venv/bin/activate`)
 
-## 開発ワークフロー
+## 🔄 開発ワークフロー
 
 以下のコマンドで開発を行います：
 
@@ -68,15 +97,28 @@ make type
 make run
 ```
 
-## 開発環境のクリーンアップ
+## ⚙️ 環境の管理
 
-不要なファイルやキャッシュを削除する場合：
+### コンテナの停止
+
+```sh
+make docker-down
+```
+
+### 開発環境のクリーンアップ
 
 ```sh
 make clean
 ```
 
-## コントリビューションの流れ
+### ⚠️ 完全削除（要注意）
+
+```sh
+# 警告: 全ての作業データが削除されます！
+make docker-down-volume
+```
+
+## 🤝 コントリビューションの流れ
 
 1. 機能追加やバグ修正用の新しいブランチを作成
 2. 変更を加える
