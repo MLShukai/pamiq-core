@@ -1,3 +1,4 @@
 {
-    "python.defaultInterpreterPath": "./.venv/bin/python3"
+    "python.defaultInterpreterPath": "./.venv/bin/python3",
+    "makefile.configureOnOpen": false
 }
