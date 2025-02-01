@@ -70,7 +70,7 @@ PAMIQ Core への貢献に興味を持っていただき、ありがとうござ
 
 お好みのエディタ（VSCode 推奨）からコンテナにアタッチして開発を行えます。
 
-📚 参考: [VSCode Dev Containers 拡張機能のチュートリアル](https://learn.microsoft.com/ja-jp/training/modules/use-docker-container-dev-env-vs-code/1-introduction)
+📚 参考: [VSCode Dev Containers 拡張機能でアタッチ](https://code.visualstudio.com/docs/devcontainers/attach-container)
 
 開発コンテナには以下の環境が整っています：
 
