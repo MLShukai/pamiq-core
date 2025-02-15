@@ -12,6 +12,7 @@ services:
     stdin_open: true
     command: /bin/bash
     working_dir: /workspace
+    stop_grace_period: 0s
 
 volumes:
   pamiq-core:
