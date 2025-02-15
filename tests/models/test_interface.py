@@ -4,7 +4,7 @@ from typing import Any, override
 
 import pytest
 
-from pamiq_core.models import InferenceModel, TrainingModel
+from pamiq_core.model import InferenceModel, TrainingModel
 
 
 class DummyInferenceModel(InferenceModel):
