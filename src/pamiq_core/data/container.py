@@ -1,0 +1,79 @@
+from __future__ import annotations
+
+from collections import UserDict
+from collections.abc import Mapping
+from typing import Any, Self, override
+
+from .buffer import DataBuffer
+from .interface import DataCollector, DataUser
+
+
+class DataUsersDict(UserDict[str, DataUser[Any]]):
+    """A dictionary mapping names to data users with helper methods for
+    collector management.
+
+    Provides utilities for managing multiple data users and their
+    associated collectors, with convenient initialization from data
+    buffers.
+    """
+
+    def get_data_collectors(self) -> DataCollectorsDict:
+        """Creates a dictionary of data collectors from all users.
+
+        Returns:
+            Dictionary mapping user names to their associated collectors.
+        """
+        return DataCollectorsDict({k: v._collector for k, v in self.items()})
+
+    @classmethod
+    def from_data_buffers(
+        cls, dict: Mapping[str, DataBuffer] | None = None, /, **kwds: DataBuffer
+    ) -> Self:
+        """Creates a DataUsersDict from a mapping of data buffers.
+
+        Args:
+            dict: Optional mapping of names to data buffers.
+            **kwds: Additional name-buffer pairs as keyword arguments.
+
+        Returns:
+            New DataUsersDict instance with users created from buffers.
+        """
+        data = {}
+        if dict is not None:
+            data.update(dict)
+        if len(kwds) > 0:
+            data.update(kwds)
+        return cls({k: DataUser(buf) for k, buf in data.items()})
+
+
+class DataCollectorsDict(UserDict[str, DataCollector[Any]]):
+    """A dictionary for managing exclusive access to data collectors.
+
+    Manages exclusive access to data collectors to ensure each collector
+    is only used once per step. Collectors must be explicitly acquired
+    before use and can only be acquired once at a time.
+    """
+
+    @override
+    def __init__(self, *args: Any, **kwds: Any) -> None:
+        super().__init__(*args, **kwds)
+        self._acquired_collectors: set[str] = set()
+
+    def acquire(self, collector_name: str) -> DataCollector[Any]:
+        """Acquires a data collector for exclusive use within a step.
+
+        Args:
+            collector_name: Name of the collector to acquire.
+
+        Returns:
+            The requested data collector.
+
+        Raises:
+            KeyError: If collector is already acquired or not found.
+        """
+        if collector_name in self._acquired_collectors:
+            raise KeyError(f"Data collector '{collector_name}' is already acquired.")
+        if collector_name not in self:
+            raise KeyError(f"Data collector '{collector_name}' not found.")
+        self._acquired_collectors.add(collector_name)
+        return self[collector_name]
