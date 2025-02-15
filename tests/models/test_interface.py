@@ -32,27 +32,28 @@ class TestInferenceModel:
         assert output == expected_output
 
 
-@pytest.mark.parametrize("has_inference", [True, False])
+@pytest.mark.parametrize("has_inference_model", [True, False])
 @pytest.mark.parametrize("inference_only", [True, False])
 class TestTrainingModel:
     @pytest.fixture
     def dummy_training_model(
-        self, has_inference: bool, inference_only: bool
+        self, has_inference_model: bool, inference_only: bool
     ) -> TrainingModel:
-        if inference_only and not has_inference:
+        if inference_only and not has_inference_model:
             with pytest.raises(ValueError):
                 DummyTrainingModel(
-                    has_inference=has_inference, inference_only=inference_only
+                    has_inference_model=has_inference_model,
+                    inference_only=inference_only,
                 )
             pytest.skip()
         return DummyTrainingModel(
-            has_inference=has_inference, inference_only=inference_only
+            has_inference_model=has_inference_model, inference_only=inference_only
         )
 
     def test_inference_model(
-        self, dummy_training_model: TrainingModel, has_inference: bool
+        self, dummy_training_model: TrainingModel, has_inference_model: bool
     ) -> None:
-        if has_inference:
+        if has_inference_model:
             dummy_inference_model = dummy_training_model.inference_model
             assert isinstance(dummy_inference_model, InferenceModel)
         else:

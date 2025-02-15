@@ -44,20 +44,20 @@ class TrainingModel(ABC):
     Needed for multi-thread training and inference in parallel.
     """
 
-    def __init__(self, has_inference: bool = True, inference_only: bool = False):
+    def __init__(self, has_inference_model: bool = True, inference_only: bool = False):
         """Initialize.
 
         Args:
-            has_inference (bool):
+            has_inference_model (bool):
                 Whether to have InferenceModel.
                 Default to True.
             inference_only (bool):
                 Whether to do Inference only.
                 Default to False.
         """
-        if inference_only and not has_inference:
+        if inference_only and not has_inference_model:
             raise ValueError
-        self.has_inference = has_inference
+        self.has_inference_model = has_inference_model
         self.Inference_only = inference_only
 
     _inference_model: InferenceModel | None = None
@@ -69,7 +69,7 @@ class TrainingModel(ABC):
         Returns:
             InferenceModel: A model to infer.
         """
-        if not self.has_inference:
+        if not self.has_inference_model:
             raise RuntimeError
 
         if self._inference_model is None:
