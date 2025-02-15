@@ -1,3 +1,4 @@
+from collections import deque
 from collections.abc import Iterable
 from typing import Any
 
@@ -11,8 +12,8 @@ class DataBufferImpl(DataBuffer):
 
     def __init__(self, collecting_data_names: Iterable[str], max_size: int) -> None:
         super().__init__(collecting_data_names, max_size)
-        self._buffer: dict[str, list[Any]] = {
-            name: [] for name in collecting_data_names
+        self._buffer: dict[str, deque[Any]] = {
+            name: deque(maxlen=max_size) for name in collecting_data_names
         }
 
     def add(self, step_data: StepData) -> None:
@@ -20,9 +21,6 @@ class DataBufferImpl(DataBuffer):
             if name not in step_data:
                 raise KeyError(f"Required data '{name}' not found in step_data")
             self._buffer[name].append(step_data[name])
-
-            if len(self._buffer[name]) > self._max_size:
-                self._buffer[name].pop(0)
 
     def get_data(self) -> BufferData:
         return self._buffer.copy()
