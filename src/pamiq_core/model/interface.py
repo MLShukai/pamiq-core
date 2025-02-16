@@ -45,7 +45,7 @@ class TrainingModel(ABC):
             has_inference_model: Whether to have InferenceModel.
             inference_only: Whether to do Inference only.
         """
-        if inference_only and not has_inference_model:
+        if (not has_inference_model) and (inference_only):
             raise ValueError
         self.has_inference_model = has_inference_model
         self.inference_only = inference_only
