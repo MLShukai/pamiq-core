@@ -1,7 +1,8 @@
 import pytest
 
-from pamiq_core.data.buffer import BufferData, DataBuffer, StepData
 from pamiq_core.data.interface import DataUser, TimestampingQueuesDict
+
+from .helpers import MockDataBuffer
 
 
 class TestTimestampingQueuesDict:
@@ -70,23 +71,6 @@ class TestTimestampingQueuesDict:
         """Test popleft from empty queues raises IndexError."""
         with pytest.raises(IndexError):
             queues_dict.popleft()
-
-
-class MockDataBuffer(DataBuffer):
-    """Mock buffer implementation for testing."""
-
-    def __init__(self, collecting_data_names: list[str], max_size: int) -> None:
-        super().__init__(collecting_data_names, max_size)
-        self.data: list[StepData] = []
-
-    def add(self, step_data: StepData) -> None:
-        if len(self.data) < self.max_size:
-            self.data.append(step_data)
-
-    def get_data(self) -> BufferData:
-        return {
-            name: [d[name] for d in self.data] for name in self._collecting_data_names
-        }
 
 
 class TestDataUserAndCollector:

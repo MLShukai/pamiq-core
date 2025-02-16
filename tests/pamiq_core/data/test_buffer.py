@@ -1,29 +1,6 @@
-from collections import deque
-from collections.abc import Iterable
-from typing import Any
-
 import pytest
 
-from pamiq_core.data.buffer import BufferData, DataBuffer, StepData
-
-
-class DataBufferImpl(DataBuffer):
-    """Simple implementation of DataBuffer using lists to store data."""
-
-    def __init__(self, collecting_data_names: Iterable[str], max_size: int) -> None:
-        super().__init__(collecting_data_names, max_size)
-        self._buffer: dict[str, deque[Any]] = {
-            name: deque(maxlen=max_size) for name in collecting_data_names
-        }
-
-    def add(self, step_data: StepData) -> None:
-        for name in self._collecting_data_names:
-            if name not in step_data:
-                raise KeyError(f"Required data '{name}' not found in step_data")
-            self._buffer[name].append(step_data[name])
-
-    def get_data(self) -> BufferData:
-        return self._buffer.copy()
+from .helpers import DataBufferImpl
 
 
 class TestDataBuffer:
