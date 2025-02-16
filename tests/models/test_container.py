@@ -40,7 +40,7 @@ class DummyTrainingModel(TrainingModel):
         pass
 
 
-class TestTrainingModel:
+class TestTrainingModelsDict:
     def test_inference_models_dict(self) -> None:
         # Make training_models_dict.
         training_models_dict = TrainingModelsDict({})
