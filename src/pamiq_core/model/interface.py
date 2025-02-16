@@ -3,7 +3,7 @@ from typing import Any
 
 
 class InferenceModel(ABC):
-    """Interface class for model to infer in InferenceThread.
+    """Base interface class for model to infer in InferenceThread.
 
     Needed for multi-thread training and inference in parallel.
     """
