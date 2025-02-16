@@ -48,7 +48,7 @@ class TrainingModel(ABC):
         if inference_only and not has_inference_model:
             raise ValueError
         self.has_inference_model = has_inference_model
-        self.Inference_only = inference_only
+        self.inference_only = inference_only
 
     _inference_model: InferenceModel | None = None
 
