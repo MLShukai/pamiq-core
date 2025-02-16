@@ -24,13 +24,10 @@ class InferenceModel(ABC):
         """Perform inference using a model.
 
         Args:
-            *args:
-                Positional arguments required for inference.
-            **kwds:
-                Keyword arguments required for inference.
+            *args:  Positional arguments required for inference.
+            **kwds: Keyword arguments required for inference.
         Returns:
-            Any:
-                The result of the inference.
+            Any: The result of the inference.
         """
         return self.infer(*args, **kwds)
 
