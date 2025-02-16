@@ -3,7 +3,7 @@ from typing import Any
 
 
 class InferenceModel(ABC):
-    """Wrapper class for model to infer.
+    """Interface class for model to infer in InferenceThread.
 
     Needed for multi-thread training and inference in parallel.
     """
@@ -13,13 +13,10 @@ class InferenceModel(ABC):
         """Perform inference using a model.
 
         Args:
-            *args:
-                Positional arguments required for inference.
-            **kwds:
-                Keyword arguments required for inference.
+            *args: Positional arguments required for inference.
+            **kwds: Keyword arguments required for inference.
         Returns:
-            Any:
-                The result of the inference.
+            Any: The result of the inference.
         """
         raise NotImplementedError
 
@@ -39,21 +36,17 @@ class InferenceModel(ABC):
 
 
 class TrainingModel(ABC):
-    """Wrapper class to train model.
+    """Base interface class to train model in TrainingThread.
 
     Needed for multi-thread training and inference in parallel.
     """
 
     def __init__(self, has_inference_model: bool = True, inference_only: bool = False):
-        """Initialize.
+        """Initialize the TrainingModel.
 
         Args:
-            has_inference_model (bool):
-                Whether to have InferenceModel.
-                Default to True.
-            inference_only (bool):
-                Whether to do Inference only.
-                Default to False.
+            has_inference_model: Whether to have InferenceModel.
+            inference_only: Whether to do Inference only.
         """
         if inference_only and not has_inference_model:
             raise ValueError
@@ -64,11 +57,7 @@ class TrainingModel(ABC):
 
     @property
     def inference_model(self) -> InferenceModel:
-        """Get inference model.
-
-        Returns:
-            InferenceModel: A model to infer.
-        """
+        """Get inference model."""
         if not self.has_inference_model:
             raise RuntimeError
 
@@ -87,29 +76,16 @@ class TrainingModel(ABC):
 
     @abstractmethod
     def forward(self, *args, **kwds) -> Any:
-        """Running model for training.
+        """Forward path of model.
 
         Args:
-            *args:
-                Positional arguments required for training.
-            **kwds:
-                Keyword arguments required for training.
+            *args: Positional arguments required for forward path.
+            **kwds: Keyword arguments required for forward path.
         Returns:
-            Any:
-                Result of running the model.
+            Result of forward path of the model.
         """
         raise NotImplementedError
 
     def __call__(self, *args, **kwds) -> Any:
-        """Running model for training.
-
-        Args:
-            *args:
-                Positional arguments required for training.
-            **kwds:
-                Keyword arguments required for training.
-        Returns:
-            Any:
-                Result of running the model.
-        """
+        """Calls `forward` method."""
         return self.forward(*args, **kwds)
