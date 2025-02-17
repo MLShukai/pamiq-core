@@ -19,7 +19,7 @@ class TrainingModelsDict(UserDict[str, TrainingModel]):
 
     @property
     def inference_models_dict(self) -> InferenceModelsDict:  # Define getter only
-        """Doc string here."""
+        """Getter of self._inference_models_dict."""
         return self._inference_models_dict
 
     @override
