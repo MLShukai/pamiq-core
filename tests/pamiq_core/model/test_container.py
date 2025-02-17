@@ -1,3 +1,4 @@
+import dataclasses
 import random
 from collections import deque
 from collections.abc import Iterable
@@ -40,31 +41,78 @@ class DummyTrainingModel(TrainingModel):
         pass
 
 
+@dataclasses.dataclass
+class DataclassForTest:
+    has_inference_model: bool
+    inference_only: bool
+    key: str
+    model_id: int
+
+
 class TestTrainingModelsDict:
-    def test_inference_models_dict(self) -> None:
-        # Make training_models_dict.
-        training_models_dict = TrainingModelsDict({})
-        expected_keys = []
-        expected_ids = []
-        for i in range(10):
-            key = f"model_{i}"
+    @pytest.fixture
+    def dataclasses_for_test(self) -> list[DataclassForTest]:
+        dataclasses_for_test = []
+        randnums = list(range(0, 9999))
+        random.shuffle(randnums)
+        for _ in range(10):
             has_inference_model, inference_only = random.choice(
                 [(True, True), (True, False), (False, False)]
             )
-            training_models_dict[key] = DummyTrainingModel(
-                model_id=i,
-                has_inference_model=has_inference_model,
-                inference_only=inference_only,
+            dataclasses_for_test.append(
+                DataclassForTest(
+                    has_inference_model=has_inference_model,
+                    inference_only=inference_only,
+                    key=f"test_model_{randnums.pop(0)}",
+                    model_id=randnums.pop(0),
+                )
             )
-            if has_inference_model and not inference_only:
-                expected_keys.append(key)
-                expected_ids.append(i)
-        # Get inference_models_dict.
+        return dataclasses_for_test
+
+    @pytest.fixture
+    def training_models_dict(
+        self, dataclasses_for_test: list[DataclassForTest]
+    ) -> TrainingModelsDict:
+        training_models_dict = TrainingModelsDict()
+        for dataclass in dataclasses_for_test:
+            training_models_dict[dataclass.key] = DummyTrainingModel(
+                model_id=dataclass.model_id,
+                has_inference_model=dataclass.has_inference_model,
+                inference_only=dataclass.inference_only,
+            )
+        return training_models_dict
+
+    def test_inference_models_dict(
+        self,
+        training_models_dict: TrainingModelsDict,
+        dataclasses_for_test: list[DataclassForTest],
+    ) -> None:
         inference_models_dict = training_models_dict.inference_models_dict
-        # Check if all keys are correct.
-        assert list(inference_models_dict.keys()) == expected_keys
         # For each key, check if the correct inference model is registered or not.
-        for expected_key, expected_id in zip(expected_keys, expected_ids):
-            inference_model = inference_models_dict[expected_key]
-            assert isinstance(inference_model, DummyInferenceModel)
-            assert inference_model.model_id == expected_id
+        for dataclass in dataclasses_for_test:
+            if dataclass.has_inference_model:
+                inference_model = inference_models_dict[dataclass.key]
+                assert isinstance(inference_model, DummyInferenceModel)
+                assert inference_model.model_id == dataclass.model_id
+        # Check if all keys are correct.
+        expected_keys: list[str] = [
+            dataclass.key
+            for dataclass in dataclasses_for_test
+            if dataclass.has_inference_model
+        ]
+        assert list(inference_models_dict.keys()) == expected_keys
+
+    def test_getitem(
+        self,
+        training_models_dict: TrainingModelsDict,
+        dataclasses_for_test: list[DataclassForTest],
+    ) -> None:
+        for dataclass in dataclasses_for_test:
+            if dataclass.inference_only:
+                with pytest.raises(KeyError):
+                    training_models_dict[dataclass.key]
+            else:
+                # For each key, check if the correct training model is registered or not.
+                training_model = training_models_dict[dataclass.key]
+                assert isinstance(training_model, DummyTrainingModel)
+                assert training_model.model_id == dataclass.model_id
