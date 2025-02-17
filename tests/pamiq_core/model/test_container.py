@@ -52,22 +52,26 @@ class DataclassForTest:
 class TestTrainingModelsDict:
     @pytest.fixture
     def dataclasses_for_test(self) -> list[DataclassForTest]:
-        dataclasses_for_test = []
-        randnums = list(range(0, 9999))
-        random.shuffle(randnums)
-        for _ in range(10):
-            has_inference_model, inference_only = random.choice(
-                [(True, True), (True, False), (False, False)]
-            )
-            dataclasses_for_test.append(
-                DataclassForTest(
-                    has_inference_model=has_inference_model,
-                    inference_only=inference_only,
-                    key=f"test_model_{randnums.pop(0)}",
-                    model_id=randnums.pop(0),
-                )
-            )
-        return dataclasses_for_test
+        return [
+            DataclassForTest(
+                has_inference_model=True,
+                inference_only=True,
+                key="test_model_99999",
+                model_id=99999,
+            ),
+            DataclassForTest(
+                has_inference_model=True,
+                inference_only=False,
+                key="test_model_2048",
+                model_id=4096,
+            ),
+            DataclassForTest(
+                has_inference_model=False,
+                inference_only=False,
+                key="test_model_123456789",
+                model_id=3333,
+            ),
+        ]
 
     @pytest.fixture
     def training_models_dict(

@@ -8,7 +8,6 @@ class InferenceModelsDict(UserDict[str, InferenceModel]):
     """Wrapper class for models to infer."""
 
 
-
 class TrainingModelsDict(UserDict[str, TrainingModel]):
     """Wrapper class to train model."""
 
@@ -20,7 +19,7 @@ class TrainingModelsDict(UserDict[str, TrainingModel]):
 
     @property
     def inference_models_dict(self) -> InferenceModelsDict:  # Define getter only
-        """doc string here"""
+        """Doc string here."""
         return self._inference_models_dict
 
     @override
