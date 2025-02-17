@@ -17,13 +17,36 @@ class DataUsersDict(UserDict[str, DataUser[Any]]):
     buffers.
     """
 
-    def get_data_collectors(self) -> DataCollectorsDict:
-        """Creates a dictionary of data collectors from all users.
+    @override
+    def __init__(self, *args: Any, **kwds: Any) -> None:
+        """Initialize a DataUsersDict with an empty data collectors dictionary.
 
-        Returns:
-            Dictionary mapping user names to their associated collectors.
+        Uses parent class initialization and creates an empty
+        DataCollectorsDict to manage associated collectors.
         """
-        return DataCollectorsDict({k: v._collector for k, v in self.items()})
+        self._data_collectors_dict = DataCollectorsDict()
+        super().__init__(*args, **kwds)
+
+    @property
+    def data_collectors_dict(self) -> DataCollectorsDict:
+        """Get the dictionary of data collectors associated with this users
+        dictionary."""
+        return self._data_collectors_dict
+
+    @override
+    def __setitem__(self, key: str, item: DataUser[Any]) -> None:
+        """Set a data user in the dictionary and create its associated
+        collector.
+
+        Updates both the main dictionary with the user and the collectors dictionary
+        with a new collector for that user.
+
+        Args:
+            key: Name to associate with the data user.
+            item: DataUser instance to add to the dictionary.
+        """
+        super().__setitem__(key, item)
+        self._data_collectors_dict[key] = DataCollector(item)
 
     @classmethod
     def from_data_buffers(
