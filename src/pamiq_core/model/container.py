@@ -1,4 +1,5 @@
 from collections import UserDict
+from typing import Any, override
 
 from .interface import InferenceModel, TrainingModel
 
@@ -12,26 +13,34 @@ class InferenceModelsDict(UserDict[str, InferenceModel]):
 class TrainingModelsDict(UserDict[str, TrainingModel]):
     """Wrapper class to train model."""
 
-    _inference_models_dict: InferenceModelsDict | None = None
+    @override
+    def __init__(self, *args: Any, **kwds: Any) -> None:
+        """Initialize."""
+        self._inference_models_dict = InferenceModelsDict()
+        super().__init__(*args, **kwds)
 
     @property
-    def inference_models_dict(self) -> InferenceModelsDict:
-        """Make InferenceModelsDict."""
-        if self._inference_models_dict is None:
-            self._inference_models_dict = self._create_inferences()
-        return self._inference_models_dict
+    def inference_models_dict(self) -> InferenceModelsDict:  # Define getter only
+        return self._inference_wrappers_dict
 
-    def _create_inferences(self) -> InferenceModelsDict:
-        """Select training models that has inference_model and isn't inference
-        only and return them as InferenceModelsDict.
+    @override
+    def __getitem__(self, key: str) -> TrainingModel:
+        """Select training model by a key.
 
-        Returns: InferenceModelsDict
+        If it is inference only, raise KeyError.
         """
-        return InferenceModelsDict(
-            {
-                model_name: training_model.inference_model
-                for model_name, training_model in self.items()
-                if training_model.has_inference_model
-                and not training_model.inference_only
-            }
-        )
+        model = self.data[key]
+        if model.inference_only:
+            raise KeyError(f"model '{key}' is inference only.")
+        return model
+
+    @override
+    def __setitem__(self, key: str, model: TrainingModel) -> None:
+        """Register a key and a training model to this user dict.
+
+        If the training model has inference model, set the key and it to
+        self._inference_models_dict.
+        """
+        super().__setitem__(key, model)
+        if model.has_inference_model:
+            self._inference_models_dict[key] = model.inference_model
