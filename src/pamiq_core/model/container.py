@@ -21,7 +21,7 @@ class TrainingModelsDict(UserDict[str, TrainingModel]):
 
     @property
     def inference_models_dict(self) -> InferenceModelsDict:  # Define getter only
-        return self._inference_wrappers_dict
+        return self._inference_models_dict
 
     @override
     def __getitem__(self, key: str) -> TrainingModel:
