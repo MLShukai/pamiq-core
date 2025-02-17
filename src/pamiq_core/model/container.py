@@ -7,7 +7,6 @@ from .interface import InferenceModel, TrainingModel
 class InferenceModelsDict(UserDict[str, InferenceModel]):
     """Wrapper class for models to infer."""
 
-    ...
 
 
 class TrainingModelsDict(UserDict[str, TrainingModel]):
@@ -21,6 +20,7 @@ class TrainingModelsDict(UserDict[str, TrainingModel]):
 
     @property
     def inference_models_dict(self) -> InferenceModelsDict:  # Define getter only
+        """doc string here"""
         return self._inference_models_dict
 
     @override
@@ -29,7 +29,7 @@ class TrainingModelsDict(UserDict[str, TrainingModel]):
 
         If it is inference only, raise KeyError.
         """
-        model = self.data[key]
+        model = super().__getitem__(key)
         if model.inference_only:
             raise KeyError(f"model '{key}' is inference only.")
         return model
