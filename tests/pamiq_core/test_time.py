@@ -1,9 +1,9 @@
 import time as original_time
 
 import pytest
+
 from pamiq_core import time as pamiq_time
 from pamiq_core.time import TimeController
-
 from tests.helpers import skip_if_platform_is_not_linux
 
 

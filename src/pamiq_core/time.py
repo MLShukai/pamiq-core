@@ -47,7 +47,6 @@ from collections.abc import Callable
 from functools import wraps
 from threading import RLock
 from typing import Concatenate, TypedDict
-from collections.abc import Callable
 
 
 def with_lock[**P, T](
