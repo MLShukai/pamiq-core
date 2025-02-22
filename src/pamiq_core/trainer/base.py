@@ -11,13 +11,30 @@ from pamiq_core.model import (
 
 
 class Trainer(ABC):
+    """Abstract base trainer class.
+
+    The `run` method is called repeatedly in the training thread.
+
+    Override the following methods:
+        - `on_model_wrappers_dict_attached`: To retrieve the models.
+        - `on_data_users_dict_attached`: To retrieve the data users.
+        - `setup`: To setup before training starts.
+        - `train`: To implement the training process.
+        - `is_trainable`: To determine whether or not the training can be executed.
+        - `sync_model`: To synchronize params of training model to inference model.
+        - `teardown`: To teardown after training.
+
+    Models and data buffers become available after the thread has started.
+    """
+
     _training_models_dict: TrainingModelsDict
     _data_users_dict: DataUsersDict
+    _synchronized_model_names: set[str]
 
     def __init__(self) -> None:
         """Initialize."""
         super().__init__()
-        self._synchronoized_model_names: set[str] = set()
+        self._synchronoized_model_names = set()
 
     @property
     def _inference_models_dict(self) -> InferenceModelsDict:
@@ -28,14 +45,12 @@ class Trainer(ABC):
         self, training_models_dict: TrainingModelsDict
     ) -> None:
         """Attaches TrainingModelsDict to this trainer."""
-        self._training_models_dict = TrainingModelsDict
+        self._training_models_dict = training_models_dict
         self.on_training_models_attached()
 
     def on_training_models_attached(self) -> None:
         """Callback method for when `model_wrappers_dict` is attached to the
         trainer.
-
-        Override this method to retrieve models.
 
         Use :meth:`get_training_model` to retrieve the model that will be trained.
         Use :meth:`get_frozen_model` to obtain the model used exclusively for performing inference during training.
@@ -46,6 +61,13 @@ class Trainer(ABC):
         """Attaches DataUsersDict dictionary."""
         self._data_users_dict = data_users_dict
         self.on_data_users_dict_attached()
+
+    def on_data_users_dict_attached(self) -> None:
+        """Callback method when `data_users_dict` is attached to the trainer.
+
+        Use :meth:`get_data_user` to obtain the data user class for dataset.
+        """
+        pass
 
     def get_training_model(self, name: str) -> TrainingModel:
         """Retrieves the training model.
@@ -88,13 +110,13 @@ class Trainer(ABC):
     def synchronize(self):
         """Synchronizes params of trained models to inference models."""
         for name in self._synchronized_model_names:
-            self._sync_model(
+            self.sync_model(
                 self._training_models_dict[name],
-                self._training_models_dict[name].inference_models,
+                self._training_models_dict[name].inference_model,
             )
 
     @abstractmethod
-    def _sync_model(
+    def sync_model(
         self, training_model: TrainingModel, inference_model: InferenceModel
     ) -> None:
         """Synchronizes params of trained model to inference model.
