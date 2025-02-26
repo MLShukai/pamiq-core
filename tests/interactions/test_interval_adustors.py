@@ -6,14 +6,14 @@ import statistics
 import pytest
 
 from pamiq_core.interactions.interval_adjustors import (
-    BaseIntervalAdjustor,
+    IntervalAdjustor,
     SleepIntervalAdjustor,
 )
 from tests.helpers import skip_if_platform_is_not_linux
 
 
 def compute_adjustor_spec(
-    adjustor: BaseIntervalAdjustor, num_trial: int
+    adjustor: IntervalAdjustor, num_trial: int
 ) -> tuple[float, float]:
     """Executes `adjust` for the number of times specified by `num_trial` and
     returns the mean and standard deviation of the elapsed time."""

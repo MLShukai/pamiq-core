@@ -4,10 +4,12 @@ from abc import ABC, abstractmethod
 from pamiq_core import time
 
 
-class BaseIntervalAdjustor(ABC):
-    """Adjusts the loop to run at a fixed interval."""
+class IntervalAdjustor(ABC):
+    """Adjusts the loop to run at a fixed interval.
 
-    """Initial reset time is set to negative infinity for mathematical reasons."""
+    Initial reset time is set to negative infinity for mathematical
+    reasons.
+    """
 
     _last_reset_time: float = -math.inf
 
@@ -33,7 +35,7 @@ class BaseIntervalAdjustor(ABC):
         return self._last_reset_time
 
     @abstractmethod
-    def _adjust(self) -> None:
+    def adjust_impl(self) -> None:
         """The actual implementation of the interval adjustor, which is wrapped
         by the public method `adjust`."""
         raise NotImplementedError
@@ -45,17 +47,17 @@ class BaseIntervalAdjustor(ABC):
         Returns:
             float: The elapsed time since the last call, ensuring the loop runs at the specified interval.
         """
-        self._adjust()
+        self.adjust_impl()
         delta_time = time.perf_counter() - self._last_reset_time
         self.reset()
         return delta_time
 
 
-class SleepIntervalAdjustor(BaseIntervalAdjustor):
+class SleepIntervalAdjustor(IntervalAdjustor):
     """Adjusts the interval using `time.sleep` to pause execution until the
     next interval begins."""
 
-    def _adjust(self) -> None:
+    def adjust_impl(self) -> None:
         if (
             remaining_time := (self._last_reset_time + self._time_to_wait)
             - time.perf_counter()
