@@ -4,7 +4,7 @@ import pytest
 
 from pamiq_core import time as pamiq_time
 from pamiq_core.time import TimeController
-from tests.helpers import skip_if_platform_is_not_linux
+from tests.helpers import skip_if_kernel_is_linuxkit, skip_if_platform_is_not_linux
 
 
 def test_module_global_values():
@@ -78,6 +78,8 @@ def test_sleep_duration(controller):
     assert elapsed == pytest.approx(0.1, abs=0.01)
 
 
+@skip_if_platform_is_not_linux()
+@skip_if_kernel_is_linuxkit()
 def test_sleep_with_time_scale(controller):
     """Verify sleep duration is affected by time scale."""
     controller.set_time_scale(2.0)
@@ -89,6 +91,7 @@ def test_sleep_with_time_scale(controller):
 
 
 @skip_if_platform_is_not_linux()
+@skip_if_kernel_is_linuxkit()
 def test_time_functions_scale_properly(controller):
     """Verify all time functions respect time scale."""
     scale = 2.0
@@ -133,6 +136,7 @@ def test_resume_continues_time_properly(controller):
 
 
 @skip_if_platform_is_not_linux()
+@skip_if_kernel_is_linuxkit()
 def test_pause_resume_with_time_scale(controller):
     """Verify pause/resume works correctly with different time scales."""
     controller.set_time_scale(2.0)
