@@ -79,7 +79,6 @@ class TestStateStore:
         store.register("mock_state_2", mock_state_2)
 
         # test for exceptional case
-        mocker.patch("pamiq_core.state_persistence.Path.exists", return_value=False)
         with pytest.raises(FileNotFoundError):
             store.load_state(tmp_path / "non_existent_folder")
 
