@@ -47,24 +47,10 @@ class TestStateStore:
 
         # Mock store.datetime.now so that tests do not depend on the current time
         fixed_test_time = datetime(2025, 2, 27, 12, 0, 0)
-
-        # Cannot directly mock `datetime.now` because it is a built-in method
-        # Instead, create a subclass of `datetime` and mock `now` method
-        class FakeDatetime(datetime):
-            @classmethod
-            def now(cls, tz: tzinfo | None = None):
-                return cls(
-                    year=fixed_test_time.year,
-                    month=fixed_test_time.month,
-                    day=fixed_test_time.day,
-                    hour=fixed_test_time.hour,
-                    minute=fixed_test_time.minute,
-                    second=fixed_test_time.second,
-                    microsecond=fixed_test_time.microsecond,
-                    tzinfo=fixed_test_time.tzinfo,
-                )
-
-        mocker.patch("pamiq_core.state_persistence.datetime", FakeDatetime)
+        
+        mock_dt = mocker.Mock(datetime)
+        mock_dt.now.return_value = fixed_test_time
+        mocker.patch("pamiq_core.state_persistence.datetime", mock_dt)
 
         state_path = store.save_state()
 
