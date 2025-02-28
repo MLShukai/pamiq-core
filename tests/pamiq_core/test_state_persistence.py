@@ -106,5 +106,3 @@ class TestStateStore:
         ]  # test: `load_state()`` is called for each registered state
 
 
-if __name__ == "__main__":
-    unittest.main()
