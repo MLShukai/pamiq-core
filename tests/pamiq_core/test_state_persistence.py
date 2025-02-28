@@ -54,7 +54,16 @@ class TestStateStore:
         class FakeDatetime(datetime):
             @classmethod
             def now(cls, tz: tzinfo | None = None):
-                return fixed_test_time
+                return cls(
+                    year=fixed_test_time.year,
+                    month=fixed_test_time.month,
+                    day=fixed_test_time.day,
+                    hour=fixed_test_time.hour,
+                    minute=fixed_test_time.minute,
+                    second=fixed_test_time.second,
+                    microsecond=fixed_test_time.microsecond,
+                    tzinfo=fixed_test_time.tzinfo,
+                )
 
         mocker.patch("pamiq_core.state_persistence.datetime", FakeDatetime)
 
