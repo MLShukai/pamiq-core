@@ -34,11 +34,8 @@ class TestStateStore:
 
     def test_save_state(self, tmp_path, mocker):
         # prepare mock objects
-        parent_mock = mocker.Mock()
         mock_state_1 = mocker.Mock(spec=PersistentStateMixin)
         mock_state_2 = mocker.Mock(spec=PersistentStateMixin)
-        parent_mock.attach_mock(mock_state_1, "mock_state_1")
-        parent_mock.attach_mock(mock_state_2, "mock_state_2")
 
         # configure StateStore object
         store = StateStore(states_dir=tmp_path)
