@@ -78,7 +78,8 @@ class TestStateStore:
             store.load_state(tmp_path / "non_existent_folder")
 
         # test for normal case
-        mocker.patch("pamiq_core.state_persistence.Path.exists", return_value=True)
+        (tmp_path / "mock_state_1").mkdir()
+        (tmp_path / "mock_state_2").mkdir()
         store.load_state(tmp_path)
         assert parent_mock.mock_calls == [
             mocker.call.mock_state_1.load_state(tmp_path / "mock_state_1"),
