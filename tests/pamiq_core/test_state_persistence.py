@@ -56,10 +56,8 @@ class TestStateStore:
 
         assert state_path.exists()  # test: folder is created
         assert state_path == Path(tmp_path / "2025-02-27_12-00-00,000000.state")
-        assert parent_mock.mock_calls == [
-            mocker.call.mock_state_1.save_state(state_path / "mock_state_1"),
-            mocker.call.mock_state_2.save_state(state_path / "mock_state_2"),
-        ]  # test: `save_state()` is called for each registered state
+        mock_state_1.save_state.assert_called_once_with(state_path / "mock_state_1")
+        mock_state_2.save_state.assert_called_once_with(state_path / "mock_state_2")
 
         # expect error in `Path.mkdir`:
         with pytest.raises(FileExistsError):
