@@ -86,9 +86,5 @@ class TestStateStore:
         #     mocker.call.mock_state_2.load_state(tmp_path / "mock_state_2"),
         # ]  # test: `load_state()`` is called for each registered state
 
-        assert mock_state_1.load_state.assert_called_once_with(
-            tmp_path / "mock_state_1"
-        )
-        assert mock_state_2.load_state.assert_called_once_with(
-            tmp_path / "mock_state_2"
-        )
+        mock_state_1.load_state.assert_called_once_with(tmp_path / "mock_state_1")
+        mock_state_2.load_state.assert_called_once_with(tmp_path / "mock_state_2")
