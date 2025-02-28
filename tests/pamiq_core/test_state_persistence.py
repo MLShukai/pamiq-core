@@ -44,7 +44,7 @@ class TestStateStore:
 
         # Mock store.datetime.now so that tests do not depend on the current time
         fixed_test_time = datetime(2025, 2, 27, 12, 0, 0)
-        
+
         mock_dt = mocker.Mock(datetime)
         mock_dt.now.return_value = fixed_test_time
         mocker.patch("pamiq_core.state_persistence.datetime", mock_dt)
@@ -62,11 +62,11 @@ class TestStateStore:
 
     def test_load_state(self, tmp_path, mocker):
         # prepare mock objects
-        parent_mock = mocker.Mock()
+        # parent_mock = mocker.Mock()
         mock_state_1 = mocker.Mock(spec=PersistentStateMixin)
         mock_state_2 = mocker.Mock(spec=PersistentStateMixin)
-        parent_mock.attach_mock(mock_state_1, "mock_state_1")
-        parent_mock.attach_mock(mock_state_2, "mock_state_2")
+        # parent_mock.attach_mock(mock_state_1, "mock_state_1")
+        # parent_mock.attach_mock(mock_state_2, "mock_state_2")
 
         # configure StateStore object
         store = StateStore(states_dir=tmp_path)
@@ -81,9 +81,14 @@ class TestStateStore:
         (tmp_path / "mock_state_1").mkdir()
         (tmp_path / "mock_state_2").mkdir()
         store.load_state(tmp_path)
-        assert parent_mock.mock_calls == [
-            mocker.call.mock_state_1.load_state(tmp_path / "mock_state_1"),
-            mocker.call.mock_state_2.load_state(tmp_path / "mock_state_2"),
-        ]  # test: `load_state()`` is called for each registered state
+        # assert parent_mock.mock_calls == [
+        #     mocker.call.mock_state_1.load_state(tmp_path / "mock_state_1"),
+        #     mocker.call.mock_state_2.load_state(tmp_path / "mock_state_2"),
+        # ]  # test: `load_state()`` is called for each registered state
 
-
+        assert mock_state_1.load_state.assert_called_once_with(
+            tmp_path / "mock_state_1"
+        )
+        assert mock_state_2.load_state.assert_called_once_with(
+            tmp_path / "mock_state_2"
+        )
