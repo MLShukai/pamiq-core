@@ -102,7 +102,7 @@ class TrainingModel(Generic[T], ABC):
         class has an inference model and is not a class that only infer.
 
         Example:
-            class TrainingTorchModel(TrainingModel):
+            class TrainingTorchModel(TrainingModel[InferenceTorchModel]):
                 @override
                 def _sync_model(self) -> None:
                     with torch.no_grad():
