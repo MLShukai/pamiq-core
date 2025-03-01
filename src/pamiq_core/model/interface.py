@@ -108,7 +108,7 @@ class TrainingModel(Generic[T], ABC):
         Example:
             class TrainingTorchModel(TrainingModel[InferenceTorchModel]):
                 @override
-                def sync_model(self) -> None:
+                def sync_model(self, inference_model: InferenceTorchModel) -> None:
                     with torch.no_grad():
                         for inference_param, training_param in zip(
                             inference_model.model.parameters(),
