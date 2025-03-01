@@ -86,3 +86,27 @@ class TrainingModel(ABC):
     def __call__(self, *args, **kwds) -> Any:
         """Calls `forward` method."""
         return self.forward(*args, **kwds)
+
+    def sync_model(self) -> None:
+        """Copies params of training model to inference model if this class has
+        an inference model and is not a class that only infer."""
+        if self.has_inference_model and (not self.inference_only):
+            self._sync_model()
+
+    @abstractmethod
+    def _sync_model(self) -> None:
+        """Copies params of training model to inference model if this class has
+        an inference model and is not a class that only infer.
+
+        Example:
+            class TrainingTorchModel(TrainingModel):
+                @override
+                def _sync_model(self) -> None:
+                    with torch.no_grad():
+                        for inferece_param, training_param in zip(
+                            self._inference_model.parameters(),
+                            self._training_model.parameters(),
+                        ):
+                            inferece_param.copy_(training_param)
+        """
+        pass
