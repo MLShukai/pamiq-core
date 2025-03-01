@@ -91,12 +91,19 @@ class TrainingModel(Generic[T], ABC):
         return self.forward(*args, **kwds)
 
     def sync(self) -> None:
-        if self.has_inference_model and (not self.inference_only):
+        """Copies params of training model to self._inference_model if
+        needed."""
+        if self._need_sync:
             self.sync_model(self.inference_model)
 
+    @property
+    def _need_sync(self) -> bool:
+        """Return whether It is necessary to synchronize training model and
+        inference model."""
+        return self.has_inference_model and (not self.inference_only)
+
     def sync_model(self, inference_model: T) -> None:
-        """Copies params of training model to self._inference_model if this
-        class has an inference model and is not a class that only infer.
+        """Copies params of training model to self._inference_model if needed.
 
         Example:
             class TrainingTorchModel(TrainingModel[InferenceTorchModel]):
