@@ -15,11 +15,11 @@ class DummyInferenceModel(InferenceModel):
         return sum(input)
 
 
-class DummyTrainingModel(TrainingModel):
+class DummyTrainingModel(TrainingModel[DummyInferenceModel]):
     _dummy_param: int = 9999
 
     @override
-    def _create_inference_model(self) -> InferenceModel:
+    def _create_inference_model(self) -> DummyInferenceModel:
         return DummyInferenceModel()
 
     @override

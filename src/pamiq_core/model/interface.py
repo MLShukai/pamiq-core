@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Generic, TypeVar
+
+# Define the type restricted to InferenceModel subclasses
+T = TypeVar("T", bound="InferenceModel")
 
 
 class InferenceModel(ABC):
@@ -32,7 +35,7 @@ class InferenceModel(ABC):
         return self.infer(*args, **kwds)
 
 
-class TrainingModel(ABC):
+class TrainingModel(Generic[T], ABC):
     """Base interface class to train model in TrainingThread.
 
     Needed for multi-thread training and inference in parallel.
@@ -42,7 +45,7 @@ class TrainingModel(ABC):
         """Initialize the TrainingModel.
 
         Args:
-            has_inference_model: Whether to have InferenceModel.
+            has_inference_model: Whether to have inference model.
             inference_only: Whether to do Inference only.
         """
         if (not has_inference_model) and (inference_only):
@@ -50,10 +53,10 @@ class TrainingModel(ABC):
         self.has_inference_model = has_inference_model
         self.inference_only = inference_only
 
-    _inference_model: InferenceModel | None = None
+    _inference_model: T | None = None
 
     @property
-    def inference_model(self) -> InferenceModel:
+    def inference_model(self) -> T:
         """Get inference model."""
         if not self.has_inference_model:
             raise RuntimeError
@@ -63,11 +66,11 @@ class TrainingModel(ABC):
         return self._inference_model
 
     @abstractmethod
-    def _create_inference_model(self) -> InferenceModel:
+    def _create_inference_model(self) -> T:
         """Create inference model.
 
         Returns:
-            InferenceModel: A model to infer.
+            T: A model to infer.
         """
         raise NotImplementedError
 
