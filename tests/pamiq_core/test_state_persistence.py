@@ -75,13 +75,7 @@ class TestStateStore:
             store.load_state(tmp_path / "non_existent_folder")
 
         # test for normal case
-        (tmp_path / "mock_state_1").mkdir()
-        (tmp_path / "mock_state_2").mkdir()
         store.load_state(tmp_path)
-        # assert parent_mock.mock_calls == [
-        #     mocker.call.mock_state_1.load_state(tmp_path / "mock_state_1"),
-        #     mocker.call.mock_state_2.load_state(tmp_path / "mock_state_2"),
-        # ]  # test: `load_state()`` is called for each registered state
 
         mock_state_1.load_state.assert_called_once_with(tmp_path / "mock_state_1")
         mock_state_2.load_state.assert_called_once_with(tmp_path / "mock_state_2")
