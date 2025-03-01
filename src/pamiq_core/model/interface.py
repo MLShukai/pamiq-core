@@ -90,26 +90,23 @@ class TrainingModel(Generic[T], ABC):
         """Calls `forward` method."""
         return self.forward(*args, **kwds)
 
-    def sync_model(self) -> None:
-        """Copies params of training model to inference model if this class has
-        an inference model and is not a class that only infer."""
+    def sync(self) -> None:
         if self.has_inference_model and (not self.inference_only):
-            self._sync_model()
+            self.sync_model(self.inference_model)
 
-    @abstractmethod
-    def _sync_model(self) -> None:
+    def sync_model(self, inference_model: T) -> None:
         """Copies params of training model to self._inference_model if this
         class has an inference model and is not a class that only infer.
 
         Example:
             class TrainingTorchModel(TrainingModel[InferenceTorchModel]):
                 @override
-                def _sync_model(self) -> None:
+                def sync_model(self) -> None:
                     with torch.no_grad():
                         for inference_param, training_param in zip(
-                            self.inference_model.model.parameters(),
+                            inference_model.model.parameters(),
                             self.model.parameters(),
                         ):
                             inference_param.copy_(training_param)
         """
-        pass
+        raise NotImplementedError

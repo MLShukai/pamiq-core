@@ -27,8 +27,8 @@ class DummyTrainingModel(TrainingModel[DummyInferenceModel]):
         return "".join(input)
 
     @override
-    def _sync_model(self) -> None:
-        self.inference_model._dummy_param = self._dummy_param
+    def sync_model(self, inference_model: DummyInferenceModel) -> None:
+        inference_model._dummy_param = self._dummy_param
 
 
 class TestInferenceModel:
@@ -84,8 +84,9 @@ class TestTrainingModel:
         inference_only: bool,
     ) -> None:
         if has_inference_model and (not inference_only):
-            dummy_training_model.sync_model()
+            dummy_training_model.sync()
+            dummy_inference_model = dummy_training_model._inference_model
+            assert dummy_inference_model is not None  # to pass pyright
             assert (
-                dummy_training_model._dummy_param
-                == dummy_training_model._inference_model._dummy_param
+                dummy_training_model._dummy_param == dummy_inference_model._dummy_param
             )
