@@ -95,18 +95,18 @@ class TrainingModel(ABC):
 
     @abstractmethod
     def _sync_model(self) -> None:
-        """Copies params of training model to inference model if this class has
-        an inference model and is not a class that only infer.
+        """Copies params of training model to self._inference_model if this
+        class has an inference model and is not a class that only infer.
 
         Example:
             class TrainingTorchModel(TrainingModel):
                 @override
                 def _sync_model(self) -> None:
                     with torch.no_grad():
-                        for inferece_param, training_param in zip(
-                            self._inference_model.parameters(),
-                            self._training_model.parameters(),
+                        for inference_param, training_param in zip(
+                            self.inference_model.model.parameters(),
+                            self.model.parameters(),
                         ):
-                            inferece_param.copy_(training_param)
+                            inference_param.copy_(training_param)
         """
         pass

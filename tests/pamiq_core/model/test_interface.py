@@ -8,12 +8,16 @@ from pamiq_core.model import InferenceModel, TrainingModel
 
 
 class DummyInferenceModel(InferenceModel):
+    _dummy_param: int = 1234
+
     @override
     def infer(self, input: list[int]) -> int:
         return sum(input)
 
 
 class DummyTrainingModel(TrainingModel):
+    _dummy_param: int = 9999
+
     @override
     def _create_inference_model(self) -> InferenceModel:
         return DummyInferenceModel()
@@ -21,6 +25,10 @@ class DummyTrainingModel(TrainingModel):
     @override
     def forward(self, input: list[str]) -> str:
         return "".join(input)
+
+    @override
+    def _sync_model(self) -> None:
+        self.inference_model._dummy_param = self._dummy_param
 
 
 class TestInferenceModel:
@@ -68,3 +76,16 @@ class TestTrainingModel:
         output = dummy_training_model(input)
         expected_output = "".join(input)
         assert output == expected_output
+
+    def test_sync_model(
+        self,
+        dummy_training_model: DummyTrainingModel,
+        has_inference_model: bool,
+        inference_only: bool,
+    ) -> None:
+        if has_inference_model and (not inference_only):
+            dummy_training_model.sync_model()
+            assert (
+                dummy_training_model._dummy_param
+                == dummy_training_model._inference_model._dummy_param
+            )
