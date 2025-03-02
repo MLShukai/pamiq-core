@@ -102,6 +102,9 @@ class TrainingModel[T: InferenceModel](ABC):
     def sync_impl(self, inference_model: T) -> None:
         """Copies params of training model to self._inference_model if needed.
 
+        Args:
+            T: InferenceModel to sync.
+
         Example:
             class TrainingTorchModel(TrainingModel[InferenceTorchModel]):
                 @override
