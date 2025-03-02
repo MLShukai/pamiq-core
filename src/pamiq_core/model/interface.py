@@ -38,17 +38,19 @@ class TrainingModel[T: InferenceModel](ABC):
     Needed for multi-thread training and inference in parallel.
     """
 
-    def __init__(self, has_inference_model: bool = True, inference_only: bool = False):
+    def __init__(
+        self, has_inference_model: bool = True, inference_thread_only: bool = False
+    ):
         """Initialize the TrainingModel.
 
         Args:
             has_inference_model: Whether to have inference model.
-            inference_only: Whether to do Inference only.
+            inference_thread_only: Whether it is an inference thread only.
         """
-        if (not has_inference_model) and (inference_only):
+        if (not has_inference_model) and (inference_thread_only):
             raise ValueError
         self.has_inference_model = has_inference_model
-        self.inference_only = inference_only
+        self.inference_thread_only = inference_thread_only
 
     _inference_model: T | None = None
 
@@ -97,7 +99,7 @@ class TrainingModel[T: InferenceModel](ABC):
     def _need_sync(self) -> bool:
         """Return whether It is necessary to synchronize training model and
         inference model."""
-        return self.has_inference_model and (not self.inference_only)
+        return self.has_inference_model and (not self.inference_thread_only)
 
     def sync_impl(self, inference_model: T) -> None:
         """Copies params of training model to self._inference_model if needed.
