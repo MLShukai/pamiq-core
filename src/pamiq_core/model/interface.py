@@ -32,7 +32,7 @@ class InferenceModel(ABC):
         return self.infer(*args, **kwds)
 
 
-class TrainingModel(ABC):
+class TrainingModel[T: InferenceModel](ABC):
     """Base interface class to train model in TrainingThread.
 
     Needed for multi-thread training and inference in parallel.
@@ -42,7 +42,7 @@ class TrainingModel(ABC):
         """Initialize the TrainingModel.
 
         Args:
-            has_inference_model: Whether to have InferenceModel.
+            has_inference_model: Whether to have inference model.
             inference_only: Whether to do Inference only.
         """
         if (not has_inference_model) and (inference_only):
@@ -50,10 +50,10 @@ class TrainingModel(ABC):
         self.has_inference_model = has_inference_model
         self.inference_only = inference_only
 
-    _inference_model: InferenceModel | None = None
+    _inference_model: T | None = None
 
     @property
-    def inference_model(self) -> InferenceModel:
+    def inference_model(self) -> T:
         """Get inference model."""
         if not self.has_inference_model:
             raise RuntimeError
@@ -63,11 +63,11 @@ class TrainingModel(ABC):
         return self._inference_model
 
     @abstractmethod
-    def _create_inference_model(self) -> InferenceModel:
+    def _create_inference_model(self) -> T:
         """Create inference model.
 
         Returns:
-            InferenceModel: A model to infer.
+            InferenceModel.
         """
         raise NotImplementedError
 
@@ -86,3 +86,23 @@ class TrainingModel(ABC):
     def __call__(self, *args, **kwds) -> Any:
         """Calls `forward` method."""
         return self.forward(*args, **kwds)
+
+    def sync(self) -> None:
+        """Synchronizes parameters of training model to self._inference_model
+        if needed."""
+        if self._need_sync:
+            self.sync_impl(self.inference_model)
+
+    @property
+    def _need_sync(self) -> bool:
+        """Return whether It is necessary to synchronize training model and
+        inference model."""
+        return self.has_inference_model and (not self.inference_only)
+
+    def sync_impl(self, inference_model: T) -> None:
+        """Copies params of training model to self._inference_model if needed.
+
+        Args:
+            InferenceModel to sync.
+        """
+        raise NotImplementedError
