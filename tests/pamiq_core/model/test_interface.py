@@ -41,21 +41,22 @@ class TestInferenceModel:
 
 
 @pytest.mark.parametrize("has_inference_model", [True, False])
-@pytest.mark.parametrize("inference_only", [True, False])
+@pytest.mark.parametrize("inference_thread_only", [True, False])
 class TestTrainingModel:
     @pytest.fixture
     def dummy_training_model(
-        self, has_inference_model: bool, inference_only: bool
+        self, has_inference_model: bool, inference_thread_only: bool
     ) -> TrainingModel:
-        if inference_only and not has_inference_model:
+        if inference_thread_only and not has_inference_model:
             with pytest.raises(ValueError):
                 DummyTrainingModel(
                     has_inference_model=has_inference_model,
-                    inference_only=inference_only,
+                    inference_thread_only=inference_thread_only,
                 )
             pytest.skip()
         return DummyTrainingModel(
-            has_inference_model=has_inference_model, inference_only=inference_only
+            has_inference_model=has_inference_model,
+            inference_thread_only=inference_thread_only,
         )
 
     def test_inference_model(
@@ -81,9 +82,9 @@ class TestTrainingModel:
         self,
         dummy_training_model: DummyTrainingModel,
         has_inference_model: bool,
-        inference_only: bool,
+        inference_thread_only: bool,
     ) -> None:
-        if has_inference_model and (not inference_only):
+        if has_inference_model and (not inference_thread_only):
             dummy_training_model.sync()
             dummy_inference_model = dummy_training_model.inference_model
             assert (

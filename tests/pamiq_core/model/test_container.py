@@ -25,10 +25,11 @@ class DummyInferenceModel(InferenceModel):
 
 class DummyTrainingModel(TrainingModel):
     def __init__(
-        self, model_id: int, has_inference_model: bool, inference_only: bool
+        self, model_id: int, has_inference_model: bool, inference_thread_only: bool
     ) -> None:
         super().__init__(
-            has_inference_model=has_inference_model, inference_only=inference_only
+            has_inference_model=has_inference_model,
+            inference_thread_only=inference_thread_only,
         )
         self.model_id = model_id
 
@@ -44,7 +45,7 @@ class DummyTrainingModel(TrainingModel):
 @dataclasses.dataclass
 class DataclassForTest:
     has_inference_model: bool
-    inference_only: bool
+    inference_thread_only: bool
     key: str
     model_id: int
 
@@ -55,19 +56,19 @@ class TestTrainingModelsDict:
         return [
             DataclassForTest(
                 has_inference_model=True,
-                inference_only=True,
+                inference_thread_only=True,
                 key="test_model_99999",
                 model_id=99999,
             ),
             DataclassForTest(
                 has_inference_model=True,
-                inference_only=False,
+                inference_thread_only=False,
                 key="test_model_2048",
                 model_id=4096,
             ),
             DataclassForTest(
                 has_inference_model=False,
-                inference_only=False,
+                inference_thread_only=False,
                 key="test_model_123456789",
                 model_id=3333,
             ),
@@ -82,7 +83,7 @@ class TestTrainingModelsDict:
             training_models_dict[dataclass.key] = DummyTrainingModel(
                 model_id=dataclass.model_id,
                 has_inference_model=dataclass.has_inference_model,
-                inference_only=dataclass.inference_only,
+                inference_thread_only=dataclass.inference_thread_only,
             )
         return training_models_dict
 
@@ -112,7 +113,7 @@ class TestTrainingModelsDict:
         dataclasses_for_test: list[DataclassForTest],
     ) -> None:
         for dataclass in dataclasses_for_test:
-            if dataclass.inference_only:
+            if dataclass.inference_thread_only:
                 with pytest.raises(KeyError):
                     training_models_dict[dataclass.key]
             else:

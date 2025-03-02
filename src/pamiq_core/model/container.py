@@ -26,11 +26,11 @@ class TrainingModelsDict(UserDict[str, TrainingModel]):
     def __getitem__(self, key: str) -> TrainingModel:
         """Select training model by a key.
 
-        If it is inference only, raise KeyError.
+        If it is inference thread only, raise KeyError.
         """
         model = super().__getitem__(key)
-        if model.inference_only:
-            raise KeyError(f"model '{key}' is inference only.")
+        if model.inference_thread_only:
+            raise KeyError(f"model '{key}' is inference thread only.")
         return model
 
     @override
