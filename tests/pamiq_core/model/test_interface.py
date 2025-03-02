@@ -27,7 +27,7 @@ class DummyTrainingModel(TrainingModel[DummyInferenceModel]):
         return "".join(input)
 
     @override
-    def sync_model(self, inference_model: DummyInferenceModel) -> None:
+    def sync_impl(self, inference_model: DummyInferenceModel) -> None:
         inference_model._dummy_param = self._dummy_param
 
 
@@ -77,7 +77,7 @@ class TestTrainingModel:
         expected_output = "".join(input)
         assert output == expected_output
 
-    def test_sync_model(
+    def test_sync(
         self,
         dummy_training_model: DummyTrainingModel,
         has_inference_model: bool,

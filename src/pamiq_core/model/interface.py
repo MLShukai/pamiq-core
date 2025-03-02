@@ -91,7 +91,7 @@ class TrainingModel[T: InferenceModel](ABC):
         """Synchronizes parameters of training model to self._inference_model
         if needed."""
         if self._need_sync:
-            self.sync_model(self.inference_model)
+            self.sync_impl(self.inference_model)
 
     @property
     def _need_sync(self) -> bool:
@@ -99,13 +99,13 @@ class TrainingModel[T: InferenceModel](ABC):
         inference model."""
         return self.has_inference_model and (not self.inference_only)
 
-    def sync_model(self, inference_model: T) -> None:
+    def sync_impl(self, inference_model: T) -> None:
         """Copies params of training model to self._inference_model if needed.
 
         Example:
             class TrainingTorchModel(TrainingModel[InferenceTorchModel]):
                 @override
-                def sync_model(self, inference_model: InferenceTorchModel) -> None:
+                def sync_impl(self, inference_model: InferenceTorchModel) -> None:
                     with torch.no_grad():
                         for inference_param, training_param in zip(
                             inference_model.model.parameters(),
