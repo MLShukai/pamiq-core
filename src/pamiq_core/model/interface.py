@@ -32,7 +32,7 @@ class InferenceModel(ABC):
         return self.infer(*args, **kwds)
 
 
-class TrainingModel[T: InferenceModel](, ABC):
+class TrainingModel[T: InferenceModel](ABC):
     """Base interface class to train model in TrainingThread.
 
     Needed for multi-thread training and inference in parallel.
@@ -88,8 +88,8 @@ class TrainingModel[T: InferenceModel](, ABC):
         return self.forward(*args, **kwds)
 
     def sync(self) -> None:
-        """Synchronizes parameters of training model to self._inference_model if
-        needed."""
+        """Synchronizes parameters of training model to self._inference_model
+        if needed."""
         if self._need_sync:
             self.sync_model(self.inference_model)
 
