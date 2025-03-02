@@ -45,7 +45,7 @@ class TrainingModel[T: InferenceModel](ABC):
 
         Args:
             has_inference_model: Whether to have inference model.
-            inference_thread_only: Whether to do Inference only.
+            inference_thread_only: Whether it is an inference thread only.
         """
         if (not has_inference_model) and (inference_thread_only):
             raise ValueError
