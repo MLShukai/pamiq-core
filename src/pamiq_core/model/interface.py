@@ -103,17 +103,6 @@ class TrainingModel[T: InferenceModel](ABC):
         """Copies params of training model to self._inference_model if needed.
 
         Args:
-            T: InferenceModel to sync.
-
-        Example:
-            class TrainingTorchModel(TrainingModel[InferenceTorchModel]):
-                @override
-                def sync_impl(self, inference_model: InferenceTorchModel) -> None:
-                    with torch.no_grad():
-                        for inference_param, training_param in zip(
-                            inference_model.model.parameters(),
-                            self.model.parameters(),
-                        ):
-                            inference_param.copy_(training_param)
+            InferenceModel to sync.
         """
         raise NotImplementedError
