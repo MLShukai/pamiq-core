@@ -1,8 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
-
-# Define the type restricted to InferenceModel subclasses
-T = TypeVar("T", bound="InferenceModel")
+from typing import Any
 
 
 class InferenceModel(ABC):
@@ -35,7 +32,7 @@ class InferenceModel(ABC):
         return self.infer(*args, **kwds)
 
 
-class TrainingModel(Generic[T], ABC):
+class TrainingModel[T: InferenceModel](, ABC):
     """Base interface class to train model in TrainingThread.
 
     Needed for multi-thread training and inference in parallel.
@@ -70,7 +67,7 @@ class TrainingModel(Generic[T], ABC):
         """Create inference model.
 
         Returns:
-            T: A model to infer.
+            InferenceModel.
         """
         raise NotImplementedError
 
@@ -91,7 +88,7 @@ class TrainingModel(Generic[T], ABC):
         return self.forward(*args, **kwds)
 
     def sync(self) -> None:
-        """Copies params of training model to self._inference_model if
+        """Synchronizes parameters of training model to self._inference_model if
         needed."""
         if self._need_sync:
             self.sync_model(self.inference_model)
