@@ -85,8 +85,7 @@ class TestTrainingModel:
     ) -> None:
         if has_inference_model and (not inference_only):
             dummy_training_model.sync()
-            dummy_inference_model = dummy_training_model._inference_model
-            assert dummy_inference_model is not None  # to pass pyright
+            dummy_inference_model = dummy_training_model.inference_model
             assert (
                 dummy_training_model._dummy_param == dummy_inference_model._dummy_param
             )
