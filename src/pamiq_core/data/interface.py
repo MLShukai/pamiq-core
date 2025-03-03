@@ -4,9 +4,8 @@ from pathlib import Path
 from threading import RLock
 from typing import override
 
-from pamiq_core.state_persistence import PersistentStateMixin
-
 from pamiq_core import time
+from pamiq_core.state_persistence import PersistentStateMixin
 
 from .buffer import BufferData, DataBuffer, StepData
 
