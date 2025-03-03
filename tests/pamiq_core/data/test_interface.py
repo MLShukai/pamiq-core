@@ -1,6 +1,9 @@
+from pathlib import Path
+
 import pytest
 
 from pamiq_core.data.interface import DataUser, TimestampingQueuesDict
+from pamiq_core.state_persistence import PersistentStateMixin
 
 from .helpers import MockDataBuffer
 
@@ -131,3 +134,31 @@ class TestDataUserAndCollector:
 
         assert len(data_user._timestamps) == self.MAX_SIZE
         assert len(data_user._buffer.data) == self.MAX_SIZE
+
+    def test_data_user_persistent_state_mixin_inheritance(self):
+        """Test if DataUser inherits from PersistentStateMixin."""
+        assert issubclass(DataUser, PersistentStateMixin)
+
+    def test_save_and_load_state(self, data_user: DataUser[MockDataBuffer], mocker):
+        """Test save_state and load_state methods of DataUser."""
+        # Mock the buffer's save_state and load_state methods
+        mock_buffer_save = mocker.spy(data_user._buffer, "save_state")
+        mock_buffer_load = mocker.spy(data_user._buffer, "load_state")
+
+        # Mock update method to verify it's called during save_state
+        mock_update = mocker.spy(data_user, "update")
+
+        # Call save_state
+        test_path = Path("/test/path")
+        data_user.save_state(test_path)
+
+        # Verify update was called
+        mock_update.assert_called_once()
+        # Verify buffer.save_state was called with the same path
+        mock_buffer_save.assert_called_once_with(test_path)
+
+        # Call load_state
+        data_user.load_state(test_path)
+
+        # Verify buffer.load_state was called with the same path
+        mock_buffer_load.assert_called_once_with(test_path)

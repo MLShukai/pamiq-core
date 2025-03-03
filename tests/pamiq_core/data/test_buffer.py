@@ -1,10 +1,17 @@
 import pytest
 
+from pamiq_core.data.buffer import DataBuffer
+from pamiq_core.state_persistence import PersistentStateMixin
+
 from .helpers import DataBufferImpl
 
 
 class TestDataBuffer:
     """Test cases for DataBuffer class."""
+
+    def test_persistent_state_mixin_subclass(self):
+        """Test DataBuffer is PersistentStateMixin subclass."""
+        assert issubclass(DataBuffer, PersistentStateMixin)
 
     def test_init(self):
         """Test DataBuffer initialization with valid parameters."""
