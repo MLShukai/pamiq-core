@@ -1,3 +1,4 @@
+import pickle
 from collections import deque
 from collections.abc import Iterable
 from pathlib import Path
@@ -139,7 +140,10 @@ class DataUser[T: DataBuffer](PersistentStateMixin):
             path: Directory path where the state should be saved
         """
         self.update()
-        self._buffer.save_state(path)
+        path.mkdir()
+        self._buffer.save_state(path / "buffer")
+        with open(path / "timestamps.pkl", "wb") as f:
+            pickle.dump(self._timestamps, f)
 
     @override
     def load_state(self, path: Path) -> None:
@@ -150,7 +154,9 @@ class DataUser[T: DataBuffer](PersistentStateMixin):
         Args:
             path: Directory path from where the state should be loaded
         """
-        self._buffer.load_state(path)
+        self._buffer.load_state(path / "buffer")
+        with open(path / "timestamps.pkl", "rb") as f:
+            self._timestamps = deque(pickle.load(f), maxlen=self._buffer.max_size)
 
 
 class DataCollector[T: DataBuffer]:

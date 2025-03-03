@@ -94,16 +94,20 @@ class TestDataUsersDictAndCollectorsDict:
         """Test if DataUsersDict inherits from PersistentStateMixin."""
         assert issubclass(DataUsersDict, PersistentStateMixin)
 
-    def test_data_users_dict_save_state(
+    def test_data_users_dict_save_and_loadstate(
         self, users_dict: DataUsersDict, mocker, tmp_path: Path
     ):
-        """Test save_state method of DataUsersDict."""
-        # Spy on path.mkdir and users' save_state methods
+        """Test save_state and load_State method of DataUsersDict."""
 
         # Create spy objects for each user's save_state method
         mock_save_states = {}
         for name, user in users_dict.items():
             mock_save_states[name] = mocker.spy(user, "save_state")
+
+        # Create spy objects for each user's load_state method
+        mock_load_states = {}
+        for name, user in users_dict.items():
+            mock_load_states[name] = mocker.spy(user, "load_state")
 
         # Call save_state
         test_path = tmp_path / "test"
@@ -116,15 +120,7 @@ class TestDataUsersDictAndCollectorsDict:
         for name, mock_save_state in mock_save_states.items():
             mock_save_state.assert_called_once_with(test_path / name)
 
-    def test_data_users_dict_load_state(self, users_dict: DataUsersDict, mocker):
-        """Test load_state method of DataUsersDict."""
-        # Create spy objects for each user's load_state method
-        mock_load_states = {}
-        for name, user in users_dict.items():
-            mock_load_states[name] = mocker.spy(user, "load_state")
-
         # Call load_state
-        test_path = Path("/test/path")
         users_dict.load_state(test_path)
 
         # Verify each user's load_state was called with correct path

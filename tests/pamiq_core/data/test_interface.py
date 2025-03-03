@@ -139,7 +139,9 @@ class TestDataUserAndCollector:
         """Test if DataUser inherits from PersistentStateMixin."""
         assert issubclass(DataUser, PersistentStateMixin)
 
-    def test_save_and_load_state(self, data_user: DataUser[MockDataBuffer], mocker):
+    def test_save_and_load_state(
+        self, data_user: DataUser[MockDataBuffer], mocker, tmp_path: Path
+    ):
         """Test save_state and load_state methods of DataUser."""
         # Mock the buffer's save_state and load_state methods
         mock_buffer_save = mocker.spy(data_user._buffer, "save_state")
@@ -149,16 +151,25 @@ class TestDataUserAndCollector:
         mock_update = mocker.spy(data_user, "update")
 
         # Call save_state
-        test_path = Path("/test/path")
+        test_path = tmp_path / "data"
         data_user.save_state(test_path)
 
+        # Verify mkdir
+        assert test_path.is_dir()
         # Verify update was called
         mock_update.assert_called_once()
         # Verify buffer.save_state was called with the same path
-        mock_buffer_save.assert_called_once_with(test_path)
+        mock_buffer_save.assert_called_once_with(test_path / "buffer")
+        # Verify save timestamps
+        assert (test_path / "timestamps.pkl").is_file()
 
         # Call load_state
+        prev_timestamps = data_user._timestamps
         data_user.load_state(test_path)
 
         # Verify buffer.load_state was called with the same path
-        mock_buffer_load.assert_called_once_with(test_path)
+        mock_buffer_load.assert_called_once_with(test_path / "buffer")
+
+        # Verify loading timestamps
+        assert data_user._timestamps is not prev_timestamps
+        assert data_user._timestamps == prev_timestamps
