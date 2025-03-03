@@ -1,6 +1,7 @@
 from collections import deque
 from collections.abc import Iterable
 from threading import RLock
+from typing import Any
 
 from pamiq_core import time
 
@@ -23,8 +24,10 @@ class TimestampingQueuesDict:
             queue_names: Names of the queues to be created.
             max_len: Maximum length of each queue.
         """
-        self._queues = {k: deque(maxlen=max_len) for k in queue_names}
-        self._timestamps = deque(maxlen=max_len)
+        self._queues: dict[str, deque[Any]] = {
+            k: deque(maxlen=max_len) for k in queue_names
+        }
+        self._timestamps: deque[float] = deque(maxlen=max_len)
 
     def append(self, data: StepData) -> None:
         """Append new data to all queues with current timestamp.
@@ -75,7 +78,7 @@ class DataUser[T: DataBuffer]:
             buffer: Data buffer instance to store collected data.
         """
         self._buffer = buffer
-        self._timestamps = deque(maxlen=buffer.max_size)
+        self._timestamps: deque[float] = deque(maxlen=buffer.max_size)
         # DataCollector instance is only accessed from DataUser and Container classes
         self._collector = DataCollector(self)
 
@@ -95,7 +98,7 @@ class DataUser[T: DataBuffer]:
         Moves all collected data from the collector to the buffer and
         records their timestamps.
         """
-        queues = self._collector._move_data()
+        queues = self._collector._move_data()  # pyright: ignore[reportPrivateUsage]
         for _ in range(len(queues)):
             data, t = queues.popleft()
             self._buffer.add(data)

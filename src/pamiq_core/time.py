@@ -49,19 +49,6 @@ from threading import RLock
 from typing import Concatenate, TypedDict
 
 
-def with_lock[**P, T](
-    method: Callable[Concatenate[TimeController, P], T],
-) -> Callable[Concatenate[TimeController, P], T]:
-    @wraps(method)
-    def _impl(
-        self: TimeController, *method_args: P.args, **method_kwargs: P.kwargs
-    ) -> T:
-        with self._lock:
-            return method(self, *method_args, **method_kwargs)
-
-    return _impl
-
-
 class TimeController:
     def __init__(self) -> None:
         self._lock = RLock()
@@ -74,6 +61,19 @@ class TimeController:
 
         self._time_scale = 1.0
         self._is_paused = False
+
+    @staticmethod
+    def with_lock[**P, T](
+        method: Callable[Concatenate[TimeController, P], T],
+    ) -> Callable[Concatenate[TimeController, P], T]:
+        @wraps(method)
+        def _impl(
+            self: TimeController, *method_args: P.args, **method_kwargs: P.kwargs
+        ) -> T:
+            with self._lock:
+                return method(self, *method_args, **method_kwargs)
+
+        return _impl
 
     @with_lock
     def is_paused(self) -> bool:

@@ -38,7 +38,7 @@ class StateStore:
         self.states_dir = Path(states_dir)
         self.states_dir.mkdir(exist_ok=True)
         self.state_name_format = state_name_format
-        self._registered_states = {}
+        self._registered_states: dict[str, PersistentStateMixin] = {}
 
     def register(self, name: str, state: PersistentStateMixin) -> None:
         """Register a persistable object with a unique name.

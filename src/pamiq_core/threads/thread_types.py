@@ -9,7 +9,7 @@ class ThreadTypes(Enum):
     TRAINING = auto()
 
     @property
-    def name(self) -> str:
+    def thread_name(self) -> str:
         """Returns the name of thread type."""
 
         return _THREAD_NAMES[self]
