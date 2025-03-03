@@ -70,6 +70,8 @@ pythonVersion = "3.12"
 exclude = [
   "**/node_modules",
   "**/__pycache__",
+  "**/.venv",
+  "tests/"
 ]
 strict = ["./src/"]
 reportMissingTypeStubs = false
