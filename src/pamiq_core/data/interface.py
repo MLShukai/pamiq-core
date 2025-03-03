@@ -1,4 +1,3 @@
-import time
 from collections import deque
 from collections.abc import Iterable
 from pathlib import Path
@@ -6,6 +5,8 @@ from threading import RLock
 from typing import override
 
 from pamiq_core.state_persistence import PersistentStateMixin
+
+from pamiq_core import time
 
 from .buffer import BufferData, DataBuffer, StepData
 
@@ -114,6 +115,8 @@ class DataUser[T: DataBuffer](PersistentStateMixin):
 
     def count_data_added_since(self, timestamp: float) -> int:
         """Count the number of data points added after the specified timestamp.
+
+        NOTE: Use `pamiq_core.time` to retrieve `timestamp`.
 
         Args:
             timestamp: Reference timestamp to count from.

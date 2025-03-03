@@ -29,7 +29,7 @@ class TestTimestampingQueuesDict:
 
     def test_append(self, queues_dict: TimestampingQueuesDict, mocker):
         """Test append method."""
-        mock_time = mocker.patch("time.time")
+        mock_time = mocker.patch("pamiq_core.time.time")
         mock_time.return_value = 123.456
 
         queues_dict.append(self.SAMPLE_DATA)
@@ -41,7 +41,7 @@ class TestTimestampingQueuesDict:
 
     def test_popleft(self, queues_dict: TimestampingQueuesDict, mocker):
         """Test popleft method."""
-        mock_time = mocker.patch("time.time")
+        mock_time = mocker.patch("pamiq_core.time.time")
         mock_time.return_value = 123.456
 
         queues_dict.append(self.SAMPLE_DATA)
@@ -97,7 +97,7 @@ class TestDataUserAndCollector:
         self, data_user: DataUser[MockDataBuffer], mocker
     ):
         """Test basic data collection and update process."""
-        mock_time = mocker.patch("time.time")
+        mock_time = mocker.patch("pamiq_core.time.time")
         mock_time.return_value = 100.0
 
         data_user._collector.collect(self.SAMPLE_DATA)
@@ -110,7 +110,7 @@ class TestDataUserAndCollector:
 
     def test_timestamp_counting(self, data_user: DataUser[MockDataBuffer], mocker):
         """Test counting of data points added since a timestamp."""
-        mock_time = mocker.patch("time.time")
+        mock_time = mocker.patch("pamiq_core.time.time")
 
         timestamps = [100.0, 101.0, 102.0, 103.0]
         for t in timestamps:
@@ -125,7 +125,7 @@ class TestDataUserAndCollector:
 
     def test_max_size_constraint(self, data_user: DataUser[MockDataBuffer], mocker):
         """Test maximum size constraint is respected."""
-        mock_time = mocker.patch("time.time")
+        mock_time = mocker.patch("pamiq_core.time.time")
 
         for i in range(self.MAX_SIZE + 2):
             mock_time.return_value = 100.0 + i
