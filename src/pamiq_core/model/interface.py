@@ -9,7 +9,7 @@ class InferenceModel(ABC):
     """
 
     @abstractmethod
-    def infer(self, *args, **kwds) -> Any:
+    def infer(self, *args: Any, **kwds: Any) -> Any:
         """Perform inference using a model.
 
         Args:
@@ -20,7 +20,7 @@ class InferenceModel(ABC):
         """
         raise NotImplementedError
 
-    def __call__(self, *args, **kwds) -> Any:
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
         """Perform inference using a model.
 
         Args:
@@ -74,7 +74,7 @@ class TrainingModel[T: InferenceModel](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def forward(self, *args, **kwds) -> Any:
+    def forward(self, *args: Any, **kwds: Any) -> Any:
         """Forward path of model.
 
         Args:
@@ -85,7 +85,7 @@ class TrainingModel[T: InferenceModel](ABC):
         """
         raise NotImplementedError
 
-    def __call__(self, *args, **kwds) -> Any:
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
         """Calls `forward` method."""
         return self.forward(*args, **kwds)
 

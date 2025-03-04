@@ -2,6 +2,6 @@ from pamiq_core.threads import ThreadTypes
 
 
 def test_thread_types() -> None:
-    assert ThreadTypes.CONTROL.name == "control"
-    assert ThreadTypes.INFERENCE.name == "inference"
-    assert ThreadTypes.TRAINING.name == "training"
+    assert ThreadTypes.CONTROL.thread_name == "control"
+    assert ThreadTypes.INFERENCE.thread_name == "inference"
+    assert ThreadTypes.TRAINING.thread_name == "training"
