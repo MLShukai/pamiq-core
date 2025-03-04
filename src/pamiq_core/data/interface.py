@@ -1,9 +1,12 @@
+import pickle
 from collections import deque
 from collections.abc import Iterable
+from pathlib import Path
 from threading import RLock
-from typing import Any
+from typing import Any, override
 
 from pamiq_core import time
+from pamiq_core.state_persistence import PersistentStateMixin
 
 from .buffer import BufferData, DataBuffer, StepData
 
@@ -62,7 +65,7 @@ class TimestampingQueuesDict:
         return len(self._timestamps)
 
 
-class DataUser[T: DataBuffer]:
+class DataUser[T: DataBuffer](PersistentStateMixin):
     """A class that manages data buffering and timestamps for collected data.
 
     This class acts as a user of data buffers, handling the collection,
@@ -127,6 +130,35 @@ class DataUser[T: DataBuffer]:
             if t < timestamp:
                 return i
         return len(self._timestamps)
+
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save the state of this DataUser to the specified path.
+
+        This method first updates the buffer with any pending collected data,
+        then delegates the state saving to the underlying buffer.
+
+        Args:
+            path: Directory path where the state should be saved
+        """
+        self.update()
+        path.mkdir()
+        self._buffer.save_state(path / "buffer")
+        with open(path / "timestamps.pkl", "wb") as f:
+            pickle.dump(self._timestamps, f)
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load the state of this DataUser from the specified path.
+
+        This method delegates the state loading to the underlying buffer.
+
+        Args:
+            path: Directory path from where the state should be loaded
+        """
+        self._buffer.load_state(path / "buffer")
+        with open(path / "timestamps.pkl", "rb") as f:
+            self._timestamps = deque(pickle.load(f), maxlen=self._buffer.max_size)
 
 
 class DataCollector[T: DataBuffer]:
