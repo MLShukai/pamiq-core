@@ -8,7 +8,7 @@ class InferenceModelsDict(UserDict[str, InferenceModel]):
     """Wrapper class for models to infer."""
 
 
-class TrainingModelsDict(UserDict[str, TrainingModel]):
+class TrainingModelsDict(UserDict[str, TrainingModel[Any]]):
     """Wrapper class to train model."""
 
     @override
@@ -23,7 +23,7 @@ class TrainingModelsDict(UserDict[str, TrainingModel]):
         return self._inference_models_dict
 
     @override
-    def __getitem__(self, key: str) -> TrainingModel:
+    def __getitem__(self, key: str) -> TrainingModel[Any]:
         """Select training model by a key.
 
         If it is inference thread only, raise KeyError.
@@ -34,7 +34,7 @@ class TrainingModelsDict(UserDict[str, TrainingModel]):
         return model
 
     @override
-    def __setitem__(self, key: str, model: TrainingModel) -> None:
+    def __setitem__(self, key: str, model: TrainingModel[Any]) -> None:
         """Register a key and a training model to this user dict.
 
         If the training model has inference model, set the key and it to

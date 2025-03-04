@@ -1,4 +1,3 @@
-from . import interface
 from .container import InferenceModelsDict, TrainingModelsDict
 from .interface import InferenceModel, TrainingModel
 

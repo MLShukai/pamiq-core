@@ -61,7 +61,7 @@ class DataUsersDict(UserDict[str, DataUser[Any]]):
         Returns:
             New DataUsersDict instance with users created from buffers.
         """
-        data = {}
+        data: dict[str, DataBuffer] = {}
         if dict is not None:
             data.update(dict)
         if len(kwds) > 0:
