@@ -12,6 +12,9 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
 
     This buffer keeps track of collected data and, when full, randomly
     replaces existing elements based on a configurable probability.
+
+    See this page to learn more properties:
+        https://zenn.dev/gesonanko/scraps/b581e75bfd9f3e
     """
 
     def __init__(
