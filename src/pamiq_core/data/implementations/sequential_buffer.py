@@ -1,5 +1,7 @@
+import pickle
 from collections import deque
 from collections.abc import Iterable
+from pathlib import Path
 from typing import override
 
 from ..buffer import DataBuffer, StepData
@@ -52,3 +54,32 @@ class SequentialBuffer[T](DataBuffer[T]):
             Each list preserves the original insertion order.
         """
         return {name: list(queue) for name, queue in self._queues_dict.items()}
+
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save the buffer state to the specified path.
+
+        Creates a directory at the given path and saves each data queue as a
+        separate pickle file.
+
+        Args:
+            path: Directory path where to save the buffer state
+        """
+        path.mkdir()
+        for name, queue in self._queues_dict.items():
+            with open(path / f"{name}.pkl", "wb") as f:
+                pickle.dump(queue, f)
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load the buffer state from the specified path.
+
+        Loads data queues from pickle files in the given directory.
+
+        Args:
+            path: Directory path from where to load the buffer state
+        """
+        for name in self.collecting_data_names:
+            with open(path / f"{name}.pkl", "rb") as f:
+                queue = deque(pickle.load(f), maxlen=self.max_size)
+                self._queues_dict[name] = queue

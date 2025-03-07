@@ -1,8 +1,8 @@
-from collections import deque
+from pathlib import Path
 
 import pytest
 
-from pamiq_core.data.buffer import BufferData, StepData
+from pamiq_core.data.buffer import StepData
 from pamiq_core.data.implementations.sequential_buffer import SequentialBuffer
 
 
@@ -87,3 +87,30 @@ class TestSequentialBuffer:
         new_data = buffer.get_data()
         assert new_data["state"] == [[1.0]]
         assert len(new_data["state"]) == 1
+
+    def test_save_and_load_state(self, buffer: SequentialBuffer, tmp_path: Path):
+        """Test saving and loading the buffer state."""
+        # Add some data to the buffer
+        buffer.add({"state": [1.0, 0.0], "action": 1, "reward": 0.5})
+        buffer.add({"state": [0.0, 1.0], "action": 0, "reward": -0.5})
+
+        # Save state
+        save_path = tmp_path / "test_buffer"
+        buffer.save_state(save_path)
+
+        # Verify files were created
+        for name in buffer.collecting_data_names:
+            assert (save_path / f"{name}.pkl").is_file()
+
+        # Create a new buffer and load state
+        new_buffer = SequentialBuffer(buffer.collecting_data_names, buffer.max_size)
+        new_buffer.load_state(save_path)
+
+        # Check that loaded data matches original
+        original_data = buffer.get_data()
+        loaded_data = new_buffer.get_data()
+
+        assert loaded_data == original_data
+
+        for name in buffer.collecting_data_names:
+            assert loaded_data[name] == original_data[name]
