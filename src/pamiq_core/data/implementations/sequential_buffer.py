@@ -1,11 +1,11 @@
 from collections import deque
 from collections.abc import Iterable
-from typing import Any, override
+from typing import override
 
 from ..buffer import DataBuffer, StepData
 
 
-class SequentialBuffer(DataBuffer):
+class SequentialBuffer[T](DataBuffer[T]):
     """Implementation of DataBuffer that maintains data in sequential order.
 
     This buffer stores collected data points in ordered queues,
@@ -23,12 +23,12 @@ class SequentialBuffer(DataBuffer):
         """
         super().__init__(collecting_data_names, max_size)
 
-        self._queues_dict: dict[str, deque[Any]] = {
+        self._queues_dict: dict[str, deque[T]] = {
             name: deque(maxlen=max_size) for name in collecting_data_names
         }
 
     @override
-    def add(self, step_data: StepData) -> None:
+    def add(self, step_data: StepData[T]) -> None:
         """Add a new data sample to the buffer.
 
         Args:
@@ -44,7 +44,7 @@ class SequentialBuffer(DataBuffer):
             self._queues_dict[name].append(step_data[name])
 
     @override
-    def get_data(self) -> dict[str, list[Any]]:
+    def get_data(self) -> dict[str, list[T]]:
         """Retrieve all stored data from the buffer.
 
         Returns:
