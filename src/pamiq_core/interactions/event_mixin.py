@@ -1,8 +1,8 @@
 class InteractionEventMixin:
-    """Doc string here..."""
+    """Define event functions for interactions."""
 
     def setup(self) -> None:
-        """Doc string here..."""
+        """It is called first when an Interaction is performed."""
 
     def teardown(self) -> None:
-        """Doc string here..."""
+        """It is called last when performing an Interaction."""
