@@ -53,7 +53,10 @@ class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
 
     @classmethod
     def from_data_buffers(
-        cls, dict: Mapping[str, DataBuffer] | None = None, /, **kwds: DataBuffer
+        cls,
+        dict: Mapping[str, DataBuffer[Any]] | None = None,
+        /,
+        **kwds: DataBuffer[Any],
     ) -> Self:
         """Creates a DataUsersDict from a mapping of data buffers.
 
@@ -64,7 +67,7 @@ class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
         Returns:
             New DataUsersDict instance with users created from buffers.
         """
-        data: dict[str, DataBuffer] = {}
+        data: dict[str, DataBuffer[Any]] = {}
         if dict is not None:
             data.update(dict)
         if len(kwds) > 0:
