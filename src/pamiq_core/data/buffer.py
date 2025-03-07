@@ -1,14 +1,13 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any
 
 from pamiq_core.state_persistence import PersistentStateMixin
 
-type StepData = Mapping[str, Any]
-type BufferData = Mapping[str, Sequence[Any]]
+type StepData[T] = Mapping[str, T]
+type BufferData[T] = Mapping[str, Sequence[T]]
 
 
-class DataBuffer(ABC, PersistentStateMixin):
+class DataBuffer[T](ABC, PersistentStateMixin):
     """Interface for managing experience data collected during system
     execution.
 
@@ -45,7 +44,7 @@ class DataBuffer(ABC, PersistentStateMixin):
         return self._max_size
 
     @abstractmethod
-    def add(self, step_data: StepData) -> None:
+    def add(self, step_data: StepData[T]) -> None:
         """Adds a new data sample to the buffer.
 
         Args:
@@ -55,7 +54,7 @@ class DataBuffer(ABC, PersistentStateMixin):
         ...
 
     @abstractmethod
-    def get_data(self) -> BufferData:
+    def get_data(self) -> BufferData[T]:
         """Retrieves all stored data from the buffer.
 
         Returns:
