@@ -8,6 +8,8 @@ services:
       - uv_cache:/root/.cache/uv
       - pip_cache:/root/.cache/pip
       - pre-commit_cache:/root/.cache/pre-commit
+    environment:
+      - PYRIGHT_PYTHON_FORCE_VERSION=latest
     tty: true
     stdin_open: true
     command: /bin/bash
