@@ -34,7 +34,7 @@ class Trainer(ABC):
     def __init__(self) -> None:
         """Initialize."""
         super().__init__()
-        self._synchronoized_model_names = set()
+        self._synchronoized_model_names: set[str] = set()
 
     @property
     def _inference_models_dict(self) -> InferenceModelsDict:
@@ -69,7 +69,7 @@ class Trainer(ABC):
         """
         pass
 
-    def get_training_model(self, name: str) -> TrainingModel:
+    def get_training_model(self, name: str) -> TrainingModel[Any]:
         """Retrieves the training model.
 
         If the specified model includes an inference model, it is
@@ -110,22 +110,7 @@ class Trainer(ABC):
     def synchronize(self):
         """Synchronizes params of trained models to inference models."""
         for name in self._synchronized_model_names:
-            self.sync_model(
-                self._training_models_dict[name],
-                self._training_models_dict[name].inference_model,
-            )
-
-    @abstractmethod
-    def sync_model(
-        self, training_model: TrainingModel, inference_model: InferenceModel
-    ) -> None:
-        """Synchronizes params of trained model to inference model.
-
-        Args:
-            training_model: Trained model.
-            inference_model: Inference model.
-        """
-        pass
+            self._training_models_dict[name].sync()
 
     def teardown(self) -> None:
         """Teardown procedure after training."""
