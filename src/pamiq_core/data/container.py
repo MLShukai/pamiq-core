@@ -2,13 +2,16 @@ from __future__ import annotations
 
 from collections import UserDict
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any, Self, override
+
+from pamiq_core.state_persistence import PersistentStateMixin
 
 from .buffer import DataBuffer
 from .interface import DataCollector, DataUser
 
 
-class DataUsersDict(UserDict[str, DataUser[Any]]):
+class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
     """A dictionary mapping names to data users with helper methods for
     collector management.
 
@@ -50,23 +53,53 @@ class DataUsersDict(UserDict[str, DataUser[Any]]):
 
     @classmethod
     def from_data_buffers(
-        cls, dict: Mapping[str, DataBuffer] | None = None, /, **kwds: DataBuffer
+        cls,
+        buffer_map: Mapping[str, DataBuffer[Any]] | None = None,
+        /,
+        **kwds: DataBuffer[Any],
     ) -> Self:
         """Creates a DataUsersDict from a mapping of data buffers.
 
         Args:
-            dict: Optional mapping of names to data buffers.
+            buffer_map: Optional mapping of names to data buffers.
             **kwds: Additional name-buffer pairs as keyword arguments.
 
         Returns:
             New DataUsersDict instance with users created from buffers.
         """
-        data = {}
-        if dict is not None:
-            data.update(dict)
+        data: dict[str, DataBuffer[Any]] = {}
+        if buffer_map is not None:
+            data.update(buffer_map)
         if len(kwds) > 0:
             data.update(kwds)
         return cls({k: DataUser(buf) for k, buf in data.items()})
+
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save state of all contained DataUser objects to the given path.
+
+        Creates a directory at the specified path and saves each DataUser's state
+        in a subdirectory named after its key in this dictionary.
+
+        Args:
+            path: Directory path where the states should be saved
+        """
+        path.mkdir()
+        for name, user in self.items():
+            user.save_state(path / name)
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load state for all contained DataUser objects from the given path.
+
+        Loads each DataUser's state from a subdirectory named after its key
+        in this dictionary.
+
+        Args:
+            path: Directory path from where the states should be loaded
+        """
+        for name, user in self.items():
+            user.load_state(path / name)
 
 
 class DataCollectorsDict(UserDict[str, DataCollector[Any]]):

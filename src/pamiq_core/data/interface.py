@@ -1,12 +1,17 @@
-import time
+import pickle
 from collections import deque
 from collections.abc import Iterable
+from pathlib import Path
 from threading import RLock
+from typing import override
+
+from pamiq_core import time
+from pamiq_core.state_persistence import PersistentStateMixin
 
 from .buffer import BufferData, DataBuffer, StepData
 
 
-class TimestampingQueuesDict:
+class TimestampingQueuesDict[T]:
     """A dictionary of queues that stores data with timestamps.
 
     This class maintains multiple queues for different data streams,
@@ -22,10 +27,12 @@ class TimestampingQueuesDict:
             queue_names: Names of the queues to be created.
             max_len: Maximum length of each queue.
         """
-        self._queues = {k: deque(maxlen=max_len) for k in queue_names}
-        self._timestamps = deque(maxlen=max_len)
+        self._queues: dict[str, deque[T]] = {
+            k: deque(maxlen=max_len) for k in queue_names
+        }
+        self._timestamps: deque[float] = deque(maxlen=max_len)
 
-    def append(self, data: StepData) -> None:
+    def append(self, data: StepData[T]) -> None:
         """Append new data to all queues with current timestamp.
 
         Args:
@@ -35,7 +42,7 @@ class TimestampingQueuesDict:
             q.append(data[k])
         self._timestamps.append(time.time())
 
-    def popleft(self) -> tuple[StepData, float]:
+    def popleft(self) -> tuple[StepData[T], float]:
         """Remove and return the leftmost elements from all queues with
         timestamp.
 
@@ -58,7 +65,7 @@ class TimestampingQueuesDict:
         return len(self._timestamps)
 
 
-class DataUser[T: DataBuffer]:
+class DataUser[T](PersistentStateMixin):
     """A class that manages data buffering and timestamps for collected data.
 
     This class acts as a user of data buffers, handling the collection,
@@ -67,18 +74,18 @@ class DataUser[T: DataBuffer]:
     collection.
     """
 
-    def __init__(self, buffer: T) -> None:
+    def __init__(self, buffer: DataBuffer[T]) -> None:
         """Initialize DataUser with a specified buffer.
 
         Args:
             buffer: Data buffer instance to store collected data.
         """
         self._buffer = buffer
-        self._timestamps = deque(maxlen=buffer.max_size)
+        self._timestamps: deque[float] = deque(maxlen=buffer.max_size)
         # DataCollector instance is only accessed from DataUser and Container classes
         self._collector = DataCollector(self)
 
-    def create_empty_queues(self) -> TimestampingQueuesDict:
+    def create_empty_queues(self) -> TimestampingQueuesDict[T]:
         """Create empty timestamping queues for data collection.
 
         Returns:
@@ -94,13 +101,13 @@ class DataUser[T: DataBuffer]:
         Moves all collected data from the collector to the buffer and
         records their timestamps.
         """
-        queues = self._collector._move_data()
+        queues = self._collector._move_data()  # pyright: ignore[reportPrivateUsage]
         for _ in range(len(queues)):
             data, t = queues.popleft()
             self._buffer.add(data)
             self._timestamps.append(t)
 
-    def get_data(self) -> BufferData:
+    def get_data(self) -> BufferData[T]:
         """Retrieve data from the buffer.
 
         Returns:
@@ -110,6 +117,8 @@ class DataUser[T: DataBuffer]:
 
     def count_data_added_since(self, timestamp: float) -> int:
         """Count the number of data points added after the specified timestamp.
+
+        NOTE: Use `pamiq_core.time` to retrieve `timestamp`.
 
         Args:
             timestamp: Reference timestamp to count from.
@@ -122,8 +131,37 @@ class DataUser[T: DataBuffer]:
                 return i
         return len(self._timestamps)
 
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save the state of this DataUser to the specified path.
 
-class DataCollector[T: DataBuffer]:
+        This method first updates the buffer with any pending collected data,
+        then delegates the state saving to the underlying buffer.
+
+        Args:
+            path: Directory path where the state should be saved
+        """
+        self.update()
+        path.mkdir()
+        self._buffer.save_state(path / "buffer")
+        with open(path / "timestamps.pkl", "wb") as f:
+            pickle.dump(self._timestamps, f)
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load the state of this DataUser from the specified path.
+
+        This method delegates the state loading to the underlying buffer.
+
+        Args:
+            path: Directory path from where the state should be loaded
+        """
+        self._buffer.load_state(path / "buffer")
+        with open(path / "timestamps.pkl", "rb") as f:
+            self._timestamps = deque(pickle.load(f), maxlen=self._buffer.max_size)
+
+
+class DataCollector[T]:
     """A thread-safe collector for buffered data.
 
     This class provides concurrent data collection capabilities with
@@ -141,7 +179,7 @@ class DataCollector[T: DataBuffer]:
         self._queues_dict = user.create_empty_queues()
         self._lock = RLock()
 
-    def collect(self, step_data: StepData) -> None:
+    def collect(self, step_data: StepData[T]) -> None:
         """Collect step data in a thread-safe manner.
 
         Args:
@@ -150,7 +188,7 @@ class DataCollector[T: DataBuffer]:
         with self._lock:
             self._queues_dict.append(step_data)
 
-    def _move_data(self) -> TimestampingQueuesDict:
+    def _move_data(self) -> TimestampingQueuesDict[T]:
         """Move collected data to a new queue and reset the collector.
 
         This method is intended to be called only by the associated DataUser.
