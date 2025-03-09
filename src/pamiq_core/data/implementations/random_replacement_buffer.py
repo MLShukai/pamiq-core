@@ -127,7 +127,7 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
         size: int | None = None
         for name in self.collecting_data_names:
             with open(path / f"{name}.pkl", "rb") as f:
-                obj = list(pickle.load(f))
+                obj = list(pickle.load(f))[: self.max_size]
             if size is None:
                 size = len(obj)
             if size != len(obj):

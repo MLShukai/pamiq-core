@@ -198,3 +198,31 @@ class TestRandomReplacementBuffer:
             ValueError, match="Inconsistent list lengths in loaded data"
         ):
             new_buffer.load_state(save_path)
+
+    def test_save_and_load_state_max_size(
+        self, buffer: RandomReplacementBuffer[Any], tmp_path: Path
+    ):
+        """Test saving and loading the buffer state."""
+        # Add some data to the buffer
+        buffer.add({"state": [1.0, 0.0], "action": 1, "reward": 0.5})
+        buffer.add({"state": [0.0, 1.0], "action": 0, "reward": -0.5})
+
+        # Save state
+        save_path = tmp_path / "test_buffer"
+        buffer.save_state(save_path)
+
+        # Verify files were created
+        for name in buffer.collecting_data_names:
+            assert (save_path / f"{name}.pkl").exists()
+
+        # Create a new buffer and load state
+        new_buffer = RandomReplacementBuffer(buffer.collecting_data_names, max_size=1)
+        new_buffer.load_state(save_path)
+
+        # Check that loaded data matches original
+        original_data = buffer.get_data()
+        loaded_data = new_buffer.get_data()
+
+        for key in buffer.collecting_data_names:
+            assert loaded_data[key] == original_data[key][:1]
+        assert new_buffer._current_size == 1
