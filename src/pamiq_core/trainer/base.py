@@ -16,12 +16,11 @@ class Trainer(ABC):
     The `run` method is called repeatedly in the training thread.
 
     Override the following methods:
-        - `on_model_wrappers_dict_attached`: To retrieve the models.
-        - `on_data_users_dict_attached`: To retrieve the data users.
+        - `on_training_models_attached`: Callback method for when `model_wrappers_dict` is attached to the trainer.
+        - `on_data_users_dict_attached`: Callback method when `data_users_dict` is attached to the trainer.
+        - `is_trainable`: Return whether the training can be executed.
         - `setup`: To setup before training starts.
-        - `train`: To implement the training process.
-        - `is_trainable`: To determine whether or not the training can be executed.
-        - `sync_model`: To synchronize params of training model to inference model.
+        - `train`: The training process.
         - `teardown`: To teardown after training.
 
     Models and data buffers become available after the thread has started.
@@ -29,12 +28,12 @@ class Trainer(ABC):
 
     _training_models_dict: TrainingModelsDict
     _data_users_dict: DataUsersDict
-    _synchronized_model_names: set[str]
+    _retrieved_model_names: set[str]
 
     def __init__(self) -> None:
         """Initialize."""
         super().__init__()
-        self._synchronoized_model_names: set[str] = set()
+        self._synchronoized_model_names = set()
 
     @property
     def _inference_models_dict(self) -> InferenceModelsDict:
@@ -76,7 +75,7 @@ class Trainer(ABC):
         automatically synchronized after training.
         """
         model = self._training_models_dict[name]
-        self._synchronized_model_names.add(name)
+        self._retrieved_model_names.add(name)
         return model
 
     def get_data_user(self, name: str) -> DataUser[Any]:
@@ -107,9 +106,9 @@ class Trainer(ABC):
         After this method, :meth:`synchronize` to be called.
         """
 
-    def synchronize(self):
+    def sync_models(self):
         """Synchronizes params of trained models to inference models."""
-        for name in self._synchronized_model_names:
+        for name in self._retrieved_model_names:
             self._training_models_dict[name].sync()
 
     def teardown(self) -> None:
@@ -120,5 +119,5 @@ class Trainer(ABC):
         """Runs the training process."""
         self.setup()
         self.train()
-        self.synchronize()
+        self.sync_models()
         self.teardown()
