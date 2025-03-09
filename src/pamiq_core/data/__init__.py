@@ -1,6 +1,6 @@
 from .buffer import BufferData, DataBuffer, StepData
 from .container import DataCollectorsDict, DataUsersDict
-from .implementations import SequentialBuffer
+from .implementations import RandomReplacementBuffer, SequentialBuffer
 from .interface import DataCollector, DataUser
 
 __all__ = [
@@ -12,4 +12,5 @@ __all__ = [
     "DataCollectorsDict",
     "DataUsersDict",
     "SequentialBuffer",
+    "RandomReplacementBuffer",
 ]
