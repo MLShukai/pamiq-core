@@ -3,6 +3,7 @@ from typing import Any
 
 import pytest
 
+from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import (
     InferenceModel,
     InferenceModelsDict,
@@ -10,7 +11,7 @@ from pamiq_core.model import (
     TrainingModelsDict,
 )
 
-from ._dummys import DummyInferenceModel, DummyTrainer, DummyTrainingModel
+from ._dummy_impls import DummyInferenceModel, DummyTrainer, DummyTrainingModel
 
 
 class TestTrainer:
@@ -32,6 +33,10 @@ class TestTrainer:
                 ),
             }
         )
+
+    @pytest.fixture
+    def data_user_dict(self) -> DataUsersDict:
+        return DataUsersDict()
 
     @pytest.fixture
     def trainer(self, training_models_dict: TrainingModelsDict) -> DummyTrainer:

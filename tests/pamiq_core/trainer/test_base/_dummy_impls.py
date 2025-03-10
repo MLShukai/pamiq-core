@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, override
 
-from pamiq_core.data import DataUser, DataUsersDict
+from pamiq_core.data import BufferData, DataBuffer, DataUser, DataUsersDict, StepData
 from pamiq_core.model import (
     InferenceModel,
     InferenceModelsDict,
