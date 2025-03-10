@@ -11,7 +11,12 @@ from pamiq_core.model import (
     TrainingModelsDict,
 )
 
-from ._dummy_impls import DummyInferenceModel, DummyTrainer, DummyTrainingModel
+from ._dummy_impls import (
+    DummyDataBuffer,
+    DummyInferenceModel,
+    DummyTrainer,
+    DummyTrainingModel,
+)
 
 
 class TestTrainer:
@@ -35,8 +40,13 @@ class TestTrainer:
         )
 
     @pytest.fixture
-    def data_user_dict(self) -> DataUsersDict:
-        return DataUsersDict()
+    def data_users_dict(self) -> DataUsersDict:
+        return DataUsersDict.from_data_buffers(
+            {
+                "dummy_visual": DataUser(DummyDataBuffer(["dummy_image"], 100)),
+                "dummy_auditory": DataUser(DummyDataBuffer(["dummy_audio"], 100)),
+            }
+        )
 
     @pytest.fixture
     def trainer(self, training_models_dict: TrainingModelsDict) -> DummyTrainer:
