@@ -33,7 +33,7 @@ class Trainer(ABC):
     def __init__(self) -> None:
         """Initialize."""
         super().__init__()
-        self._synchronoized_model_names = set()
+        self._retrieved_model_names = set()
 
     @property
     def _inference_models_dict(self) -> InferenceModelsDict:
