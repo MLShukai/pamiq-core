@@ -2,11 +2,13 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
+from pamiq_core.state_persistence import PersistentStateMixin
+
 type StepData = Mapping[str, Any]
 type BufferData = Mapping[str, Sequence[Any]]
 
 
-class DataBuffer(ABC):
+class DataBuffer(ABC, PersistentStateMixin):
     """Interface for managing experience data collected during system
     execution.
 

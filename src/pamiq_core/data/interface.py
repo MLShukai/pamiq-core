@@ -1,8 +1,12 @@
+import pickle
 from collections import deque
 from collections.abc import Iterable
+from pathlib import Path
 from threading import RLock
+from typing import Any, override
 
 from pamiq_core import time
+from pamiq_core.state_persistence import PersistentStateMixin
 
 from .buffer import BufferData, DataBuffer, StepData
 
@@ -23,8 +27,10 @@ class TimestampingQueuesDict:
             queue_names: Names of the queues to be created.
             max_len: Maximum length of each queue.
         """
-        self._queues = {k: deque(maxlen=max_len) for k in queue_names}
-        self._timestamps = deque(maxlen=max_len)
+        self._queues: dict[str, deque[Any]] = {
+            k: deque(maxlen=max_len) for k in queue_names
+        }
+        self._timestamps: deque[float] = deque(maxlen=max_len)
 
     def append(self, data: StepData) -> None:
         """Append new data to all queues with current timestamp.
@@ -59,7 +65,7 @@ class TimestampingQueuesDict:
         return len(self._timestamps)
 
 
-class DataUser[T: DataBuffer]:
+class DataUser[T: DataBuffer](PersistentStateMixin):
     """A class that manages data buffering and timestamps for collected data.
 
     This class acts as a user of data buffers, handling the collection,
@@ -75,7 +81,7 @@ class DataUser[T: DataBuffer]:
             buffer: Data buffer instance to store collected data.
         """
         self._buffer = buffer
-        self._timestamps = deque(maxlen=buffer.max_size)
+        self._timestamps: deque[float] = deque(maxlen=buffer.max_size)
         # DataCollector instance is only accessed from DataUser and Container classes
         self._collector = DataCollector(self)
 
@@ -95,7 +101,7 @@ class DataUser[T: DataBuffer]:
         Moves all collected data from the collector to the buffer and
         records their timestamps.
         """
-        queues = self._collector._move_data()
+        queues = self._collector._move_data()  # pyright: ignore[reportPrivateUsage]
         for _ in range(len(queues)):
             data, t = queues.popleft()
             self._buffer.add(data)
@@ -124,6 +130,35 @@ class DataUser[T: DataBuffer]:
             if t < timestamp:
                 return i
         return len(self._timestamps)
+
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save the state of this DataUser to the specified path.
+
+        This method first updates the buffer with any pending collected data,
+        then delegates the state saving to the underlying buffer.
+
+        Args:
+            path: Directory path where the state should be saved
+        """
+        self.update()
+        path.mkdir()
+        self._buffer.save_state(path / "buffer")
+        with open(path / "timestamps.pkl", "wb") as f:
+            pickle.dump(self._timestamps, f)
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load the state of this DataUser from the specified path.
+
+        This method delegates the state loading to the underlying buffer.
+
+        Args:
+            path: Directory path from where the state should be loaded
+        """
+        self._buffer.load_state(path / "buffer")
+        with open(path / "timestamps.pkl", "rb") as f:
+            self._timestamps = deque(pickle.load(f), maxlen=self._buffer.max_size)
 
 
 class DataCollector[T: DataBuffer]:
