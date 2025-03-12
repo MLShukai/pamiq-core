@@ -1,5 +1,6 @@
 import math
 from abc import ABC, abstractmethod
+from typing import override
 
 from pamiq_core import time
 
@@ -57,6 +58,7 @@ class SleepIntervalAdjustor(IntervalAdjustor):
     """Adjusts the interval using `time.sleep` to pause execution until the
     next interval begins."""
 
+    @override
     def adjust_impl(self) -> None:
         if (
             remaining_time := (self._last_reset_time + self._time_to_wait)
