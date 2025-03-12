@@ -5,7 +5,7 @@ import statistics
 
 import pytest
 
-from pamiq_core.interactions.interval_adjustors import (
+from pamiq_core.interaction.interval_adjustors import (
     IntervalAdjustor,
     SleepIntervalAdjustor,
 )
