@@ -11,6 +11,6 @@ class TestEnvironment:
         assert issubclass(Environment, InteractionEventMixin)
         assert issubclass(Environment, PersistentStateMixin)
 
-    def test_observe_and_affect_are_abstract_methods(self):
+    def test_abstract_methods(self):
         """Test abstract methods of Environment."""
         assert Environment.__abstractmethods__ == frozenset({"observe", "affect"})
