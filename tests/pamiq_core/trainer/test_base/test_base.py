@@ -50,13 +50,14 @@ class TestTrainer:
 
     @pytest.fixture
     def trainer(self, training_models_dict: TrainingModelsDict) -> DummyTrainer:
-        return DummyTrainer()
+        trainer = DummyTrainer()
+        trainer.attach_training_models_dict(training_models_dict=training_models_dict)
+        return trainer
 
     def test_attach_training_models_dict(
         self, trainer: DummyTrainer, training_models_dict: TrainingModelsDict
     ) -> None:
-        trainer.attach_training_models_dict(training_models_dict=training_models_dict)
-        # check if dict is attached correctly
         assert trainer._training_models_dict is training_models_dict
-        # check if method on_training_models_attached works correctly
+
+    def test_on_training_models_attached(self, trainer: DummyTrainer) -> None:
         assert trainer.training_models_attached
