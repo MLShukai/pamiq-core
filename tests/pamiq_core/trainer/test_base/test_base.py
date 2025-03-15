@@ -5,6 +5,7 @@ from pytest_mock import MockerFixture
 
 from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import InferenceModel, TrainingModel, TrainingModelsDict
+from pamiq_core.state_persistence import PersistentStateMixin
 from pamiq_core.trainer import Trainer
 
 
@@ -25,6 +26,9 @@ class DummyTrainer(Trainer):
 
 
 class TestTrainer:
+    def test_trainer_subclasses(self):
+        assert issubclass(Trainer, PersistentStateMixin)
+
     @pytest.fixture
     def mock_model(self, mocker: MockerFixture) -> TrainingModel:
         model = mocker.Mock(TrainingModel)

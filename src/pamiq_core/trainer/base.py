@@ -3,13 +3,13 @@ from typing import Any
 
 from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import (
-    InferenceModelsDict,
     TrainingModel,
     TrainingModelsDict,
 )
+from pamiq_core.state_persistence import PersistentStateMixin
 
 
-class Trainer(ABC):
+class Trainer(ABC, PersistentStateMixin):
     """Abstract base trainer class.
 
     The `run` method is called repeatedly in the training thread.
