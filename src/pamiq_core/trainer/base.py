@@ -33,7 +33,6 @@ class Trainer(ABC):
         super().__init__()
         self._retrieved_model_names: set[str] = set()
 
-
     def attach_training_models_dict(
         self, training_models_dict: TrainingModelsDict
     ) -> None:

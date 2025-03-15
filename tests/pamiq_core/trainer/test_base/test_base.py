@@ -1,114 +1,111 @@
-from abc import ABC, abstractmethod
-from typing import Any
+from typing import override
 
 import pytest
+from pytest_mock import MockerFixture
 
 from pamiq_core.data import DataUser, DataUsersDict
-from pamiq_core.model import (
-    TrainingModel,
-    TrainingModelsDict,
-)
+from pamiq_core.model import InferenceModel, TrainingModel, TrainingModelsDict
+from pamiq_core.trainer import Trainer
 
-from ._dummy_impls import (
-    DummyDataBuffer,
-    DummyInferenceModel,
-    DummyTrainer,
-    DummyTrainingModel,
-)
+
+class DummyTrainer(Trainer):
+    @override
+    def on_data_users_dict_attached(self):
+        super().on_data_users_dict_attached()
+        self.user = self.get_data_user("data")
+
+    @override
+    def on_training_models_attached(self):
+        super().on_training_models_attached()
+        self.model = self.get_training_model("model")
+
+    @override
+    def train(self) -> None:
+        pass
 
 
 class TestTrainer:
-    def test_abstractmethod(self):
-        assert Trainer.__abstractmethods__ == frozenset({"train"})
     @pytest.fixture
-    def training_models_dict(self) -> TrainingModelsDict:
-        return TrainingModelsDict(
+    def mock_model(self, mocker: MockerFixture) -> TrainingModel:
+        model = mocker.Mock(TrainingModel)
+        model.inference_model = mocker.Mock(InferenceModel)
+        model.has_inference_model = True
+        model.inference_thread_only = False
+        return model
+
+    @pytest.fixture
+    def mock_user(self, mocker: MockerFixture) -> DataUser:
+        return mocker.Mock(DataUser)
+
+    @pytest.fixture
+    def training_models_dict(self, mock_model) -> TrainingModelsDict:
+        return TrainingModelsDict({"model": mock_model})
+
+    @pytest.fixture
+    def data_users_dict(self, mock_user) -> DataUsersDict:
+        return DataUsersDict(
             {
-                "model_A": DummyTrainingModel(
-                    has_inference_model=True,
-                    inference_thread_only=True,
-                ),
-                "model_B": DummyTrainingModel(
-                    has_inference_model=True,
-                    inference_thread_only=False,
-                ),
-                "model_C": DummyTrainingModel(
-                    has_inference_model=False,
-                    inference_thread_only=False,
-                ),
+                "data": mock_user,
             }
         )
 
     @pytest.fixture
-    def data_users_dict(self) -> DataUsersDict:
-        return DataUsersDict.from_data_buffers(
-            {
-                "dummy_visual": DummyDataBuffer(["dummy_image"], 100),
-                "dummy_auditory": DummyDataBuffer(["dummy_audio"], 100),
-            }
-        )
+    def trainer(self) -> DummyTrainer:
+        return DummyTrainer()
 
     @pytest.fixture
-    def trainer(
-        self, training_models_dict: TrainingModelsDict, data_users_dict: DataUsersDict
+    def trainer_attached(
+        self,
+        trainer: DummyTrainer,
+        training_models_dict: TrainingModelsDict,
+        data_users_dict: DataUsersDict,
     ) -> DummyTrainer:
-        trainer = DummyTrainer()
         trainer.attach_training_models_dict(training_models_dict=training_models_dict)
         trainer.attach_data_users_dict(data_users_dict=data_users_dict)
         return trainer
 
     def test_attach_training_models_dict(
-        self, trainer: DummyTrainer, training_models_dict: TrainingModelsDict
+        self,
+        trainer: DummyTrainer,
+        training_models_dict: TrainingModelsDict,
+        mock_model,
     ) -> None:
-        assert trainer._training_models_dict is training_models_dict
+        trainer.attach_training_models_dict(training_models_dict)
+        assert trainer.model == mock_model
 
     def test_attach_data_users_dict(
-        self, trainer: DummyTrainer, data_users_dict: DataUsersDict
+        self, trainer: DummyTrainer, data_users_dict: DataUsersDict, mock_user
     ) -> None:
-        assert trainer._data_users_dict is data_users_dict
-
+        trainer.attach_data_users_dict(data_users_dict)
+        assert trainer.user == mock_user
 
     def test_get_training_model(
-        self, trainer: DummyTrainer, training_models_dict: TrainingModelsDict
+        self, trainer_attached: DummyTrainer, mock_model
     ) -> None:
-        # It is not need to test about model_A, since model_A is inference thread only.
-        assert (
-            trainer.get_training_model(name="model_B")
-            is training_models_dict["model_B"]
-        )
-        assert (
-            trainer.get_training_model(name="model_C")
-            is training_models_dict["model_C"]
-        )
-        # Check if the names of the retrieved models are correctly kept
-        assert trainer._retrieved_model_names == {"model_B", "model_C"}
+        assert trainer_attached.get_training_model("model") == mock_model
 
-    def test_get_data_user(
-        self, trainer: DummyTrainer, data_users_dict: DataUsersDict
-    ) -> None:
-        assert (
-            trainer.get_data_user(name="dummy_visual")
-            is data_users_dict["dummy_visual"]
-        )
-        assert (
-            trainer.get_data_user(name="dummy_auditory")
-            is data_users_dict["dummy_auditory"]
-        )
+    def test_get_data_user(self, trainer_attached: DummyTrainer, mock_user) -> None:
+        assert trainer_attached.get_data_user("data") == mock_user
 
-    def test_train(self, trainer: DummyTrainer) -> None:
-        trainer.train()
+    def test_is_trainable(self, trainer_attached: DummyTrainer) -> None:
+        assert trainer_attached.is_trainable() is True
 
-    def test_sync_models(
-        self, trainer: DummyTrainer, data_users_dict: DataUsersDict
-    ) -> None:
-        # model_A is inference thread only and model_C don't have a inference_model.
-        # So sync is performed with only model_B.
-        inference_model = trainer.get_training_model("model_B").inference_model
-        trainer.sync_models()
-        assert (
-            trainer.get_training_model("model_B")._dummy_param
-            == inference_model._dummy_param
-        )
+    def test_train(self, trainer_attached: DummyTrainer) -> None:
+        trainer_attached.train()
 
-    def test_run(self, trainer: DummyTrainer) -> None:
-        trainer.run()
+    def test_sync_models(self, trainer_attached: DummyTrainer, mock_model) -> None:
+        trainer_attached.sync_models()
+        mock_model.sync.assert_called_once_with()
+
+    def test_run(self, trainer_attached: DummyTrainer, mocker: MockerFixture) -> None:
+        mock_setup = mocker.spy(trainer_attached, "setup")
+        mock_train = mocker.spy(trainer_attached, "train")
+        mock_sync_models = mocker.spy(trainer_attached, "sync_models")
+        mock_teardown = mocker.spy(trainer_attached, "teardown")
+
+        trainer_attached.run()
+
+        mock_setup.assert_called_once_with()
+        mock_train.assert_called_once_with()
+        mock_sync_models.assert_called_once_with()
+        mock_teardown.assert_called_once_with()
