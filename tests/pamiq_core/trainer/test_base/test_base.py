@@ -43,15 +43,18 @@ class TestTrainer:
     def data_users_dict(self) -> DataUsersDict:
         return DataUsersDict.from_data_buffers(
             {
-                "dummy_visual": DataUser(DummyDataBuffer(["dummy_image"], 100)),
-                "dummy_auditory": DataUser(DummyDataBuffer(["dummy_audio"], 100)),
+                "dummy_visual": DummyDataBuffer(["dummy_image"], 100),
+                "dummy_auditory": DummyDataBuffer(["dummy_audio"], 100),
             }
         )
 
     @pytest.fixture
-    def trainer(self, training_models_dict: TrainingModelsDict) -> DummyTrainer:
+    def trainer(
+        self, training_models_dict: TrainingModelsDict, data_users_dict: DataUsersDict
+    ) -> DummyTrainer:
         trainer = DummyTrainer()
         trainer.attach_training_models_dict(training_models_dict=training_models_dict)
+        trainer.attach_data_users_dict(data_users_dict=data_users_dict)
         return trainer
 
     def test_attach_training_models_dict(
