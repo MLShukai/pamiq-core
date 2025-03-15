@@ -5,8 +5,6 @@ import pytest
 
 from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import (
-    InferenceModel,
-    InferenceModelsDict,
     TrainingModel,
     TrainingModelsDict,
 )
@@ -72,3 +70,27 @@ class TestTrainer:
 
     def test_on_data_users_dict_attached(self, trainer: DummyTrainer) -> None:
         assert trainer.data_users_dict_attached
+
+    def test_inference_models_dict(
+        self, trainer: DummyTrainer, training_models_dict: TrainingModelsDict
+    ) -> None:
+        assert (
+            trainer.inference_models_dict is training_models_dict.inference_models_dict
+        )
+
+    def test_get_training_model(
+        self, trainer: DummyTrainer, training_models_dict: TrainingModelsDict
+    ) -> None:
+        # Getting model_A, it must raise error since model_A is inference thread only.
+        with pytest.raises(KeyError):
+            trainer.get_training_model("model_A")
+        assert (
+            trainer.get_training_model(name="model_B")
+            is training_models_dict["model_B"]
+        )
+        assert (
+            trainer.get_training_model(name="model_C")
+            is training_models_dict["model_C"]
+        )
+        # Check if the names of the retrieved models are correctly kept
+        assert trainer._retrieved_model_names == {"model_B", "model_C"}

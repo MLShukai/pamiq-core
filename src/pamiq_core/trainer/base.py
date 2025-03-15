@@ -3,7 +3,6 @@ from typing import Any
 
 from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import (
-    InferenceModel,
     InferenceModelsDict,
     TrainingModel,
     TrainingModelsDict,
@@ -36,7 +35,7 @@ class Trainer(ABC):
         self._retrieved_model_names = set()
 
     @property
-    def _inference_models_dict(self) -> InferenceModelsDict:
+    def inference_models_dict(self) -> InferenceModelsDict:
         """Get inference models from _training_models_dict."""
         return self._training_models_dict.inference_models_dict
 
