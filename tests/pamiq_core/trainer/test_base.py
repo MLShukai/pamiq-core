@@ -28,8 +28,10 @@ class TrainerImpl(Trainer):
 class TestTrainer:
     def test_trainer_subclasses(self):
         assert issubclass(Trainer, PersistentStateMixin)
+
     def test_abstract_methods(self):
         assert Trainer.__abstractmethods__ == frozenset({"train"})
+
     @pytest.fixture
     def mock_model(self, mocker: MockerFixture) -> TrainingModel:
         model = mocker.Mock(TrainingModel)
@@ -55,23 +57,23 @@ class TestTrainer:
         )
 
     @pytest.fixture
-    def trainer(self) -> DummyTrainer:
-        return DummyTrainer()
+    def trainer(self) -> TrainerImpl:
+        return TrainerImpl()
 
     @pytest.fixture
     def trainer_attached(
         self,
-        trainer: DummyTrainer,
+        trainer: TrainerImpl,
         training_models_dict: TrainingModelsDict,
         data_users_dict: DataUsersDict,
-    ) -> DummyTrainer:
+    ) -> TrainerImpl:
         trainer.attach_training_models_dict(training_models_dict=training_models_dict)
         trainer.attach_data_users_dict(data_users_dict=data_users_dict)
         return trainer
 
     def test_attach_training_models_dict(
         self,
-        trainer: DummyTrainer,
+        trainer: TrainerImpl,
         training_models_dict: TrainingModelsDict,
         mock_model,
     ) -> None:
@@ -79,28 +81,27 @@ class TestTrainer:
         assert trainer.model == mock_model
 
     def test_attach_data_users_dict(
-        self, trainer: DummyTrainer, data_users_dict: DataUsersDict, mock_user
+        self, trainer: TrainerImpl, data_users_dict: DataUsersDict, mock_user
     ) -> None:
         trainer.attach_data_users_dict(data_users_dict)
         assert trainer.user == mock_user
 
     def test_get_training_model(
-        self, trainer_attached: DummyTrainer, mock_model
+        self, trainer_attached: TrainerImpl, mock_model
     ) -> None:
         assert trainer_attached.get_training_model("model") == mock_model
 
-    def test_get_data_user(self, trainer_attached: DummyTrainer, mock_user) -> None:
+    def test_get_data_user(self, trainer_attached: TrainerImpl, mock_user) -> None:
         assert trainer_attached.get_data_user("data") == mock_user
 
-    def test_is_trainable(self, trainer_attached: DummyTrainer) -> None:
+    def test_is_trainable(self, trainer_attached: TrainerImpl) -> None:
         assert trainer_attached.is_trainable() is True
 
-
-    def test_sync_models(self, trainer_attached: DummyTrainer, mock_model) -> None:
+    def test_sync_models(self, trainer_attached: TrainerImpl, mock_model) -> None:
         trainer_attached.sync_models()
         mock_model.sync.assert_called_once_with()
 
-    def test_run(self, trainer_attached: DummyTrainer, mocker: MockerFixture) -> None:
+    def test_run(self, trainer_attached: TrainerImpl, mocker: MockerFixture) -> None:
         mock_setup = mocker.spy(trainer_attached, "setup")
         mock_train = mocker.spy(trainer_attached, "train")
         mock_sync_models = mocker.spy(trainer_attached, "sync_models")
