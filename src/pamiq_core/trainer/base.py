@@ -15,7 +15,7 @@ class Trainer(ABC, PersistentStateMixin):
     The `run` method is called repeatedly in the training thread.
 
     Override the following methods:
-        - `on_training_models_attached`: Callback method for when `model_wrappers_dict` is attached to the trainer.
+        - `on_training_models_attached`: Callback method for when `training_models_dict` is attached to the trainer.
         - `on_data_users_dict_attached`: Callback method when `data_users_dict` is attached to the trainer.
         - `is_trainable`: Return whether the training can be executed.
         - `setup`: To setup before training starts.

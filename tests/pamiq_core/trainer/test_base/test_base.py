@@ -9,7 +9,7 @@ from pamiq_core.state_persistence import PersistentStateMixin
 from pamiq_core.trainer import Trainer
 
 
-class DummyTrainer(Trainer):
+class TrainerImpl(Trainer):
     @override
     def on_data_users_dict_attached(self):
         super().on_data_users_dict_attached()
@@ -28,7 +28,8 @@ class DummyTrainer(Trainer):
 class TestTrainer:
     def test_trainer_subclasses(self):
         assert issubclass(Trainer, PersistentStateMixin)
-
+    def test_abstract_methods(self):
+        assert Trainer.__abstractmethods__ == frozenset({"train"})
     @pytest.fixture
     def mock_model(self, mocker: MockerFixture) -> TrainingModel:
         model = mocker.Mock(TrainingModel)
@@ -94,8 +95,6 @@ class TestTrainer:
     def test_is_trainable(self, trainer_attached: DummyTrainer) -> None:
         assert trainer_attached.is_trainable() is True
 
-    def test_train(self, trainer_attached: DummyTrainer) -> None:
-        trainer_attached.train()
 
     def test_sync_models(self, trainer_attached: DummyTrainer, mock_model) -> None:
         trainer_attached.sync_models()
