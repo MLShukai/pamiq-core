@@ -60,16 +60,10 @@ class TestTrainer:
     ) -> None:
         assert trainer._training_models_dict is training_models_dict
 
-    def test_on_training_models_attached(self, trainer: DummyTrainer) -> None:
-        assert trainer.training_models_attached
-
     def test_attach_data_users_dict(
         self, trainer: DummyTrainer, data_users_dict: DataUsersDict
     ) -> None:
         assert trainer._data_users_dict is data_users_dict
-
-    def test_on_data_users_dict_attached(self, trainer: DummyTrainer) -> None:
-        assert trainer.data_users_dict_attached
 
     def test_inference_models_dict(
         self, trainer: DummyTrainer, training_models_dict: TrainingModelsDict
@@ -105,6 +99,9 @@ class TestTrainer:
             is data_users_dict["dummy_auditory"]
         )
 
+    def test_train(self, trainer: DummyTrainer) -> None:
+        trainer.train()
+
     def test_sync_models(
         self, trainer: DummyTrainer, data_users_dict: DataUsersDict
     ) -> None:
@@ -116,3 +113,6 @@ class TestTrainer:
             trainer.get_training_model("model_B")._dummy_param
             == inference_model._dummy_param
         )
+
+    def test_run(self, trainer: DummyTrainer) -> None:
+        trainer.run()

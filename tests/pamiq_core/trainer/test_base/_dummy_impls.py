@@ -27,8 +27,8 @@ class DummyTrainingModel(TrainingModel[DummyInferenceModel]):
         return DummyInferenceModel()
 
     @override
-    def forward(self, input: list[str]) -> str:
-        return "".join(input)
+    def forward(self, input: list[int]) -> int:
+        return sum(input)
 
     @override
     def sync_impl(self, inference_model: DummyInferenceModel) -> None:
@@ -36,23 +36,15 @@ class DummyTrainingModel(TrainingModel[DummyInferenceModel]):
 
 
 class DummyTrainer(Trainer):
-    training_models_attached: bool = False
-    data_users_dict_attached: bool = False
-
-    @override
-    def on_training_models_attached(self) -> None:
-        self.training_models_attached = True
-
-    @override
-    def on_data_users_dict_attached(self) -> None:
-        self.data_users_dict_attached = True
-
     @override
     def train(self) -> None:
-        dataset = self.data_user.get_dataset()
-        data = dataset[0][0]
-        self.model1(data)
-        self.model2(data)
+        dummy_visual_data = self.get_data_user("dummy_visual").get_data()
+        batch_image = dummy_visual_data["dummy_image"]
+        dummy_visual_data = self.get_data_user("dummy_auditory").get_data()
+        batch_audio = dummy_visual_data["dummy_audio"]
+        # model_A is assumed as inference thread only. Not training.
+        self.get_training_model("model_B")(batch_image)
+        self.get_training_model("model_C")(batch_audio)
 
 
 class DummyDataBuffer(DataBuffer):
@@ -64,15 +56,12 @@ class DummyDataBuffer(DataBuffer):
 
     def __init__(self, collecting_data_names: list[str], max_size: int) -> None:
         super().__init__(collecting_data_names, max_size)
-        self.data: list[StepData] = []
 
     @override
     def add(self, step_data: StepData) -> None:
-        if len(self.data) < self.max_size:
-            self.data.append(step_data)
+        pass
 
     @override
     def get_data(self) -> BufferData:
-        return {
-            name: [d[name] for d in self.data] for name in self._collecting_data_names
-        }
+        dataset_name = next(iter(self._collecting_data_names))
+        return {dataset_name: [98765, 43210]}
