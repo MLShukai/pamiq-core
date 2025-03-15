@@ -108,11 +108,11 @@ class TestTrainer:
     def test_sync_models(
         self, trainer: DummyTrainer, data_users_dict: DataUsersDict
     ) -> None:
-        trainer.sync_models()
         # model_A is inference thread only and model_C don't have a inference_model.
         # So sync is performed with only model_B.
-        trainer.get_training_model(
-            "model_B"
-        )._dummy_param == trainer.get_training_model(
-            "model_B"
-        ).inference_model._dummy_param
+        inference_model = trainer.get_training_model("model_B").inference_model
+        trainer.sync_models()
+        assert (
+            trainer.get_training_model("model_B")._dummy_param
+            == inference_model._dummy_param
+        )
