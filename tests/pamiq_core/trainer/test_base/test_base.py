@@ -64,3 +64,11 @@ class TestTrainer:
 
     def test_on_training_models_attached(self, trainer: DummyTrainer) -> None:
         assert trainer.training_models_attached
+
+    def test_attach_data_users_dict(
+        self, trainer: DummyTrainer, data_users_dict: DataUsersDict
+    ) -> None:
+        assert trainer._data_users_dict is data_users_dict
+
+    def test_on_data_users_dict_attached(self, trainer: DummyTrainer) -> None:
+        assert trainer.data_users_dict_attached
