@@ -27,17 +27,12 @@ class Trainer(ABC):
 
     _training_models_dict: TrainingModelsDict
     _data_users_dict: DataUsersDict
-    _retrieved_model_names: set[str]
 
     def __init__(self) -> None:
         """Initialize."""
         super().__init__()
-        self._retrieved_model_names = set()
+        self._retrieved_model_names: set[str] = set()
 
-    @property
-    def inference_models_dict(self) -> InferenceModelsDict:
-        """Get inference models from _training_models_dict."""
-        return self._training_models_dict.inference_models_dict
 
     def attach_training_models_dict(
         self, training_models_dict: TrainingModelsDict
@@ -51,7 +46,6 @@ class Trainer(ABC):
         trainer.
 
         Use :meth:`get_training_model` to retrieve the model that will be trained.
-        Use :meth:`get_frozen_model` to obtain the model used exclusively for performing inference during training.
         """
         pass
 
@@ -102,7 +96,7 @@ class Trainer(ABC):
         Please build the models, optimizers, dataset, and other components in this method.
         This method is called repeatedly.
 
-        After this method, :meth:`synchronize` to be called.
+        After this method, :meth:`sync_models` to be called.
         """
 
     def sync_models(self):

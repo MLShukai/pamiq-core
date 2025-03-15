@@ -18,6 +18,8 @@ from ._dummy_impls import (
 
 
 class TestTrainer:
+    def test_abstractmethod(self):
+        assert Trainer.__abstractmethods__ == frozenset({"train"})
     @pytest.fixture
     def training_models_dict(self) -> TrainingModelsDict:
         return TrainingModelsDict(
@@ -65,12 +67,6 @@ class TestTrainer:
     ) -> None:
         assert trainer._data_users_dict is data_users_dict
 
-    def test_inference_models_dict(
-        self, trainer: DummyTrainer, training_models_dict: TrainingModelsDict
-    ) -> None:
-        assert (
-            trainer.inference_models_dict is training_models_dict.inference_models_dict
-        )
 
     def test_get_training_model(
         self, trainer: DummyTrainer, training_models_dict: TrainingModelsDict
