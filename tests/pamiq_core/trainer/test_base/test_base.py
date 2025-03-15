@@ -81,9 +81,7 @@ class TestTrainer:
     def test_get_training_model(
         self, trainer: DummyTrainer, training_models_dict: TrainingModelsDict
     ) -> None:
-        # Getting model_A, it must raise error since model_A is inference thread only.
-        with pytest.raises(KeyError):
-            trainer.get_training_model("model_A")
+        # It is not need to test about model_A, since model_A is inference thread only.
         assert (
             trainer.get_training_model(name="model_B")
             is training_models_dict["model_B"]
@@ -94,3 +92,27 @@ class TestTrainer:
         )
         # Check if the names of the retrieved models are correctly kept
         assert trainer._retrieved_model_names == {"model_B", "model_C"}
+
+    def test_get_data_user(
+        self, trainer: DummyTrainer, data_users_dict: DataUsersDict
+    ) -> None:
+        assert (
+            trainer.get_data_user(name="dummy_visual")
+            is data_users_dict["dummy_visual"]
+        )
+        assert (
+            trainer.get_data_user(name="dummy_auditory")
+            is data_users_dict["dummy_auditory"]
+        )
+
+    def test_sync_models(
+        self, trainer: DummyTrainer, data_users_dict: DataUsersDict
+    ) -> None:
+        trainer.sync_models()
+        # model_A is inference thread only and model_C don't have a inference_model.
+        # So sync is performed with only model_B.
+        trainer.get_training_model(
+            "model_B"
+        )._dummy_param == trainer.get_training_model(
+            "model_B"
+        ).inference_model._dummy_param
