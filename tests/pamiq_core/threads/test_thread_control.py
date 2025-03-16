@@ -227,8 +227,6 @@ class TestControllerCommandHandler:
             while handler.manage_loop():
                 counter += 1
                 time.sleep(0.001)
-                # NOTE: Even when the above `time.sleep(0.001)` is omitted, the test will pass.
-                # (In sugiyama34's environment as of 2025-03-15)
 
         thread_controller = ThreadController()
         read_only_controller = ReadOnlyController(thread_controller)
