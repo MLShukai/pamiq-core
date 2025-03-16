@@ -36,7 +36,7 @@ class TestThreadController:
         thread_controller = ThreadController()
         thread_controller.shutdown()
 
-        with pytest.raises(RuntimeError):
+        with pytest.raises(RuntimeError, match="ThreadController must be activated before pause()."):
             thread_controller.pause()
 
     def test_shutdown_and_related_predicate_methods(self):
