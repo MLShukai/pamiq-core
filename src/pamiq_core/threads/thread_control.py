@@ -108,9 +108,8 @@ class ControllerCommandHandler:
         the thread is paused.
 
         Behavior of this function:
-        * If the thread is active and resume: the function will return immediately.
-        * If the thread is active and paused: the function will block until the thread is resumed or shutdown.
-        * If the thread is shutdown: the function will return immediately.
+        * If the thread is resume: the function will return immediately.
+        * If the thread is paused: the function will block until the thread is resumed or shutdown.
         """
         while not self._controller.wait_for_resume(1.0):
             pass
