@@ -20,34 +20,11 @@ class TestTrainersDict:
         assert issubclass(TrainersDict, PersistentStateMixin)
 
     @pytest.fixture
-    def mock_model(self, mocker: MockerFixture) -> TrainingModel:
-        model = mocker.Mock(TrainingModel)
-        model.inference_model = mocker.Mock(InferenceModel)
-        model.has_inference_model = True
-        model.inference_thread_only = False
-        return model
-
-    @pytest.fixture
-    def mock_user(self, mocker: MockerFixture) -> DataUser:
-        return mocker.Mock(DataUser)
-
-    @pytest.fixture
-    def training_models_dict(self, mock_model) -> TrainingModelsDict:
-        return TrainingModelsDict({"model": mock_model})
-
-    @pytest.fixture
-    def data_users_dict(self, mock_user) -> DataUsersDict:
-        return DataUsersDict({"data": mock_user})
-
-    @pytest.fixture
-    def trainer(
-        self,
-        training_models_dict: TrainingModelsDict,
-        data_users_dict: DataUsersDict,
-    ) -> Trainer:
+    def trainer(self, mocker: MockerFixture) -> Trainer:
         trainer = DummyTrainer()
-        trainer.attach_training_models_dict(training_models_dict=training_models_dict)
-        trainer.attach_data_users_dict(data_users_dict=data_users_dict)
+        trainer.attach_training_models_dict(
+            training_models_dict=mocker.Mock(TrainingModelsDict)
+        )
         return trainer
 
     @pytest.fixture
