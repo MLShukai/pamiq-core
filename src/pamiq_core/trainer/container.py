@@ -1,12 +1,8 @@
-from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import Any
 
-from pamiq_core.data import DataUser, DataUsersDict
-from pamiq_core.model import (
-    TrainingModel,
-    TrainingModelsDict,
-)
+from pamiq_core.data import DataUsersDict
+from pamiq_core.model import TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
 from pamiq_core.trainer import Trainer
 
@@ -38,15 +34,21 @@ class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin):
     def attach_training_models_dict(
         self, training_models_dict: TrainingModelsDict
     ) -> None:
-        """Add the training_models_dict to all trainers.
+        """Attach the training_models_dict to all trainers.
 
         Args:
             training_models_dict: TrainingModelsDict to be added to each trainer.
         """
+        for trainer in self.values():
+            trainer.attach_training_models_dict(
+                training_models_dict=training_models_dict
+            )
 
     def attach_data_users_dict(self, data_users_dict: DataUsersDict) -> None:
-        """Add the data_users_dict to all trainers.
+        """Attach the data_users_dict to all trainers.
 
         Args:
             data_users_dict: DataUsersDict to be added to each trainer.
         """
+        for trainer in self.values():
+            trainer.attach_data_users_dict(data_users_dict=data_users_dict)
