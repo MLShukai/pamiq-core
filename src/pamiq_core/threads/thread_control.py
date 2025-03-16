@@ -28,7 +28,7 @@ class ThreadController:
         """Pause the thread, by clearing the resume event.
 
         Raises:
-            RuntimeError: If the thread is shutdown.
+            RuntimeError: If the threads are shutdown.
         """
         if self.is_shutdown():
             raise RuntimeError("ThreadController must be activated before pause().")
