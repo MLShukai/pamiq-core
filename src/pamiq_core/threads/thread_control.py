@@ -94,7 +94,7 @@ class ReadOnlyController:
 
 class ControllerCommandHandler:
     """A class, handles commands for thread management, facilitating
-    communication and control between the main thread and background threads.
+    communication and control between the control thread and other threads.
 
     Args:
         controller: The ReadOnlyController object to be read.
