@@ -182,7 +182,7 @@ class TestControllerCommandHandler:
         thread_controller.resume()
         start = time.perf_counter()
         assert handler.manage_loop() is True
-        assert time.perf_counter() - start < 0.1
+        assert time.perf_counter() - start < 1e-3
 
     def test_manage_loop_pause_to_resume(self):
         thread_controller = ThreadController()
