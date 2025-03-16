@@ -2,8 +2,8 @@ import threading
 
 
 class ThreadController:
-    """The controller class for sending commands from the main thread to
-    background threads.
+    """The controller class for sending commands from the control thread to
+    other threads.
 
     NOTE: **Only one thread can control this object.**
     """
