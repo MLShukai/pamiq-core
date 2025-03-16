@@ -205,7 +205,7 @@ class TestControllerCommandHandler:
         thread_controller.shutdown()
         start = time.perf_counter()
         assert handler.manage_loop() is False
-        assert time.perf_counter() - start < 0.1
+        assert time.perf_counter() - start < 1e-3
 
     def test_manage_loop_pause_to_shutdown(self):
         thread_controller = ThreadController()
