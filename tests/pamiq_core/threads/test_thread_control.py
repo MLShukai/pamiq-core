@@ -115,7 +115,7 @@ class TestThreadController:
 
 
 class TestReadOnlyController:
-    def test_read_only_controller(self):
+    def test_exposed_methods(self):
         thread_controller = ThreadController()
         read_only_controller = ReadOnlyController(thread_controller)
 
