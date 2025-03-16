@@ -92,7 +92,7 @@ class TestThreadController:
         thread_controller.resume()
         start = time.perf_counter()
         assert thread_controller.wait_for_resume(timeout=0.1) is True
-        assert time.perf_counter() - start < 0.1
+        assert time.perf_counter() - start < 1e-3
 
     def test_wait_for_resume_when_already_paused(self):
         thread_controller = ThreadController()
