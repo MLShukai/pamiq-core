@@ -41,9 +41,7 @@ class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin):
             training_models_dict: TrainingModelsDict to be added to each trainer.
         """
         for trainer in self.values():
-            trainer.attach_training_models_dict(
-                training_models_dict
-            )
+            trainer.attach_training_models_dict(training_models_dict)
 
     def attach_data_users_dict(self, data_users_dict: DataUsersDict) -> None:
         """Attach the data_users_dict to all trainers.

@@ -90,9 +90,7 @@ class TestTrainersDict:
         data_users_dict = mocker.Mock(DataUsersDict)
         trainers_dict.attach_data_users_dict(data_users_dict)
         for trainer in trainers.values():
-            trainer.attach_data_users_dict.assert_called_once_with(
-                data_users_dict
-            )
+            trainer.attach_data_users_dict.assert_called_once_with(data_users_dict)
 
     def test_save_state(
         self, trainers_dict: TrainersDict, trainers: dict[str, Trainer]
