@@ -15,12 +15,10 @@ class TestTrainersDict:
         assert issubclass(TrainersDict, PersistentStateMixin)
 
     @pytest.fixture
-    def trainer(self, mocker: MockerFixture) -> Trainer:
-        trainer = DummyTrainer()
-        trainer.attach_training_models_dict(
-            training_models_dict=mocker.Mock(TrainingModelsDict)
-        )
-        return trainer
+    def mock_trainer(self, mocker: MockerFixture) -> Trainer:
+        mock = mocker.Mock(Trainer)
+        mock.is_trainable.return_value = True
+        return mock
 
     @pytest.fixture
     def trainers_dict(self, trainer: Trainer) -> TrainersDict:
