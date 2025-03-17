@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from pamiq_core.data.buffer import StepData
-from pamiq_core.data.implementations.sequential_buffer import SequentialBuffer
+from pamiq_core.data.impls.sequential_buffer import SequentialBuffer
 
 
 class TestSequentialBuffer:
