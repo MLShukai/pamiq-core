@@ -98,7 +98,8 @@ class TestTrainersDict:
         self, trainers_dict: TrainersDict, trainers: dict[str, Trainer]
     ) -> None:
         path = Path("test/")
-        trainers_dict.save_state(path=path)
+        trainers_dict.save_state(path)
+        assert path.is_dir()
         for trainer in trainers.values():
             trainer.save_state.assert_called_once_with(path=path)
 
