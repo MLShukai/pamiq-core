@@ -93,17 +93,18 @@ class TestTrainersDict:
             trainer.attach_data_users_dict.assert_called_once_with(data_users_dict)
 
     def test_save_state(
-        self, trainers_dict: TrainersDict, trainers: dict[str, Trainer]
+        self, trainers_dict: TrainersDict, trainers: dict[str, Trainer], tmp_path: Path
     ) -> None:
-        path = Path("test/")
+        path = tmp_path / "test/"
         trainers_dict.save_state(path)
-        for trainer in trainers.values():
-            trainer.save_state.assert_called_once_with(path)
+        assert path.is_dir()
+        for name, trainer in trainers.items():
+            trainer.save_state.assert_called_once_with(path / name)
 
     def test_load_state(
-        self, trainers_dict: TrainersDict, trainers: dict[str, Trainer]
+        self, trainers_dict: TrainersDict, trainers: dict[str, Trainer], tmp_path: Path
     ) -> None:
-        path = Path("test/")
+        path = tmp_path / "test/"
         trainers_dict.load_state(path)
-        for trainer in trainers.values():
-            trainer.load_state.assert_called_once_with(path)
+        for name, trainer in trainers.items():
+            trainer.load_state.assert_called_once_with(path / name)
