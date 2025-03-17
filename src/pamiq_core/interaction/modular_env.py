@@ -44,7 +44,7 @@ class Actuator[T](ABC, InteractionEventMixin, PersistentStateMixin):
         ...
 
 
-class ModularEnv[ObsType, ActType](Environment[ObsType, ActType]):
+class ModularEnvironment[ObsType, ActType](Environment[ObsType, ActType]):
     """Environment implementation that uses a Sensor and Actuator.
 
     This class provides a modular approach to environment implementation

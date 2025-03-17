@@ -5,7 +5,7 @@ import pytest
 
 from pamiq_core.interaction.environment import Environment
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
-from pamiq_core.interaction.modular_env import Actuator, ModularEnv, Sensor
+from pamiq_core.interaction.modular_env import Actuator, ModularEnvironment, Sensor
 from pamiq_core.state_persistence import PersistentStateMixin
 
 
@@ -37,8 +37,8 @@ class TestActuator:
         assert Actuator.__abstractmethods__ == frozenset({"operate"})
 
 
-class TestModularEnv:
-    """Test suite for ModularEnv class."""
+class TestModularEnvironment:
+    """Test suite for ModularEnvironment class."""
 
     @pytest.fixture
     def mock_sensor(self, mocker):
@@ -54,15 +54,15 @@ class TestModularEnv:
 
     @pytest.fixture
     def env(self, mock_sensor, mock_actuator):
-        """Fixture providing a ModularEnv with mock components."""
-        return ModularEnv(mock_sensor, mock_actuator)
+        """Fixture providing a ModularEnvironment with mock components."""
+        return ModularEnvironment(mock_sensor, mock_actuator)
 
     def test_inheritance(self):
-        """Test that ModularEnv inherits from Environment."""
-        assert issubclass(ModularEnv, Environment)
+        """Test that ModularEnvironment inherits from Environment."""
+        assert issubclass(ModularEnvironment, Environment)
 
-    def test_init(self, env: ModularEnv, mock_sensor, mock_actuator):
-        """Test ModularEnv initialization."""
+    def test_init(self, env: ModularEnvironment, mock_sensor, mock_actuator):
+        """Test ModularEnvironment initialization."""
         assert env.sensor == mock_sensor
         assert env.actuator == mock_actuator
 
