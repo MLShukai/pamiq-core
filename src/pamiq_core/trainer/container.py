@@ -55,11 +55,12 @@ class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin):
     @override
     def save_state(self, path: Path) -> None:
         """Save states of each trainer to the path."""
-        for trainer in self.values():
-            trainer.save_state(path)
+        path.mkdir()
+        for name, trainer in self.items():
+            trainer.save_state(path / name)
 
     @override
     def load_state(self, path: Path) -> None:
         """Load states of each trainer from the path."""
-        for trainer in self.values():
-            trainer.load_state(path)
+        for name, trainer in self.items():
+            trainer.load_state(path / name)
