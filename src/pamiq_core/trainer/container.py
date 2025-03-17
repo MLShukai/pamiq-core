@@ -25,7 +25,7 @@ class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin):
         """
         trainers = self.get_trainers_list()
         for i in range(len(trainers)):
-            self._current_index = (self._current_index + i) % len(self)
+            self._current_index = (self._current_index + 1) % len(self)
             trainer = trainers[self._current_index]
             if trainer.is_trainable():
                 return trainer

@@ -9,11 +9,6 @@ from pamiq_core.state_persistence import PersistentStateMixin
 from pamiq_core.trainer import Trainer, TrainersDict
 
 
-class DummyTrainer(Trainer):
-    @override
-    def train(self) -> None:
-        pass
-
 
 class TestTrainersDict:
     def test_trainers_dict_subclasses(self):
@@ -44,11 +39,10 @@ class TestTrainersDict:
     def test_attach_training_models_dict(
         self, mocker: MockerFixture, trainers_dict: TrainersDict
     ) -> None:
-        new_training_models_dict = mocker.Mock(TrainingModelsDict)
-        trainers_dict.attach_training_models_dict(new_training_models_dict)
-        assert (
-            trainers_dict["trainer"]._training_models_dict is new_training_models_dict
-        )
+        training_models_dict = mocker.Mock(TrainingModelsDict)
+        trainers_dict.attach_training_models_dict(training_models_dict)
+        for mock_trainer in [...]:
+            mock_trainer.attach_training_models_dict.assert_called_once_with(training_models_dict)
 
     def test_attach_data_users_dict(
         self, mocker: MockerFixture, trainers_dict: TrainersDict
