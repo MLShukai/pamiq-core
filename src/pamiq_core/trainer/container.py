@@ -1,5 +1,6 @@
 from collections import OrderedDict
-from typing import Any
+from pathlib import Path
+from typing import Any, override
 
 from pamiq_core.data import DataUsersDict
 from pamiq_core.model import TrainingModelsDict
@@ -52,3 +53,15 @@ class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin):
         """
         for trainer in self.values():
             trainer.attach_data_users_dict(data_users_dict=data_users_dict)
+
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save states of each trainer to the path."""
+        for trainer in self.values():
+            trainer.save_state(path=path)
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load states of each trainer from the path."""
+        for trainer in self.values():
+            trainer.load_state(path=path)
