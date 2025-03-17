@@ -1,4 +1,4 @@
-from pamiq_core.interaction.environment import Environment
+from pamiq_core.interaction.env import Environment
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
 from pamiq_core.state_persistence import PersistentStateMixin
 
