@@ -104,7 +104,7 @@ class TestTrainersDict:
             trainer.save_state.assert_called_once_with(path=path)
 
     def test_load_state(
-        self, trainers_dict: TrainersDict, trainers: dict[str, Trainer]
+        self, trainers_dict: TrainersDict, trainers: dict[str, Trainer], tmp_path: Path
     ) -> None:
         path = Path("test/")
         trainers_dict.load_state(path=path)
