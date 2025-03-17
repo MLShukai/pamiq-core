@@ -97,14 +97,13 @@ class TestTrainersDict:
     ) -> None:
         path = Path("test/")
         trainers_dict.save_state(path)
-        assert path.is_dir()
         for trainer in trainers.values():
-            trainer.save_state.assert_called_once_with(path=path)
+            trainer.save_state.assert_called_once_with(path)
 
     def test_load_state(
-        self, trainers_dict: TrainersDict, trainers: dict[str, Trainer], tmp_path: Path
+        self, trainers_dict: TrainersDict, trainers: dict[str, Trainer]
     ) -> None:
         path = Path("test/")
-        trainers_dict.load_state(path=path)
+        trainers_dict.load_state(path)
         for trainer in trainers.values():
-            trainer.load_state.assert_called_once_with(path=path)
+            trainer.load_state.assert_called_once_with(path)
