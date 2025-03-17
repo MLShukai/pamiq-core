@@ -78,7 +78,7 @@ class TestTrainersDict:
         trainers_dict.attach_training_models_dict(training_models_dict)
         for trainer in trainers.values():
             trainer.attach_training_models_dict.assert_called_once_with(
-                training_models_dict=training_models_dict
+                training_models_dict
             )
 
     def test_attach_data_users_dict(
@@ -91,7 +91,7 @@ class TestTrainersDict:
         trainers_dict.attach_data_users_dict(data_users_dict)
         for trainer in trainers.values():
             trainer.attach_data_users_dict.assert_called_once_with(
-                data_users_dict=data_users_dict
+                data_users_dict
             )
 
     def test_save_state(

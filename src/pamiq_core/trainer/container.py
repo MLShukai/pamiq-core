@@ -42,7 +42,7 @@ class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin):
         """
         for trainer in self.values():
             trainer.attach_training_models_dict(
-                training_models_dict=training_models_dict
+                training_models_dict
             )
 
     def attach_data_users_dict(self, data_users_dict: DataUsersDict) -> None:
@@ -52,16 +52,16 @@ class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin):
             data_users_dict: DataUsersDict to be added to each trainer.
         """
         for trainer in self.values():
-            trainer.attach_data_users_dict(data_users_dict=data_users_dict)
+            trainer.attach_data_users_dict(data_users_dict)
 
     @override
     def save_state(self, path: Path) -> None:
         """Save states of each trainer to the path."""
         for trainer in self.values():
-            trainer.save_state(path=path)
+            trainer.save_state(path)
 
     @override
     def load_state(self, path: Path) -> None:
         """Load states of each trainer from the path."""
         for trainer in self.values():
-            trainer.load_state(path=path)
+            trainer.load_state(path)
