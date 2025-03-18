@@ -4,7 +4,7 @@ from typing import override
 
 from pamiq_core.state_persistence import PersistentStateMixin
 
-from .environment import Environment
+from .env import Environment
 from .event_mixin import InteractionEventMixin
 
 

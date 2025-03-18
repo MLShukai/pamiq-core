@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from pamiq_core.data.implementations.random_replacement_buffer import (
+from pamiq_core.data.impls.random_replacement_buffer import (
     RandomReplacementBuffer,
 )
 
