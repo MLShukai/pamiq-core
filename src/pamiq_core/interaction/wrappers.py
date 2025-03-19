@@ -81,18 +81,18 @@ class EnvironmentWrapper[ObsType, WrappedObsType, ActType, WrappedActType](
 
     def __init__(
         self,
-        wrapping_env: Environment[ObsType, ActType],
+        env: Environment[ObsType, ActType],
         obs_wrapper: Wrapper[ObsType, WrappedObsType],
         act_wrapper: Wrapper[WrappedActType, ActType],
     ) -> None:
         """Initialize with an environment and wrappers.
 
         Args:
-            wrapping_env: The environment to wrap.
+            env: The environment to wrap.
             obs_wrapper: Wrapper for transforming observations from the environment.
             act_wrapper: Wrapper for transforming actions before passing to the environment.
         """
-        self.env = wrapping_env
+        self.env = env
         self._obs_wrapper = obs_wrapper
         self._act_wrapper = act_wrapper
 
