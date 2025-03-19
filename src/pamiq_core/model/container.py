@@ -5,28 +5,47 @@ from .interface import InferenceModel, TrainingModel
 
 
 class InferenceModelsDict(UserDict[str, InferenceModel]):
-    """Wrapper class for models to infer."""
+    """Dictionary mapping keys to inference models."""
 
 
 class TrainingModelsDict(UserDict[str, TrainingModel[Any]]):
-    """Wrapper class to train model."""
+    """Dictionary mapping keys to training models.
+
+    This class stores training models and manages their associated
+    inference models. It ensures that inference thread only models
+    cannot be accessed directly through this dictionary.
+    """
 
     @override
     def __init__(self, *args: Any, **kwds: Any) -> None:
-        """Initialize."""
+        """Initialize a new TrainingModelsDict.
+
+        Creates an empty InferenceModelsDict to store associated inference models.
+
+        Args:
+            *args: Positional arguments passed to UserDict constructor.
+            **kwds: Keyword arguments passed to UserDict constructor.
+        """
         self._inference_models_dict = InferenceModelsDict()
         super().__init__(*args, **kwds)
 
     @property
-    def inference_models_dict(self) -> InferenceModelsDict:  # Define getter only
-        """Getter of self._inference_models_dict."""
+    def inference_models_dict(self) -> InferenceModelsDict:
+        """Provides read-only access to the inference models dictionary."""
         return self._inference_models_dict
 
     @override
     def __getitem__(self, key: str) -> TrainingModel[Any]:
-        """Select training model by a key.
+        """Retrieve a training model by key.
 
-        If it is inference thread only, raise KeyError.
+        Args:
+            key: The identifier of the training model to retrieve.
+
+        Returns:
+            The requested training model.
+
+        Raises:
+            KeyError: If the model is inference thread only or the key doesn't exist.
         """
         model = super().__getitem__(key)
         if model.inference_thread_only:
@@ -35,10 +54,14 @@ class TrainingModelsDict(UserDict[str, TrainingModel[Any]]):
 
     @override
     def __setitem__(self, key: str, model: TrainingModel[Any]) -> None:
-        """Register a key and a training model to this user dict.
+        """Add or update a training model in the dictionary.
 
-        If the training model has inference model, set the key and it to
-        self._inference_models_dict.
+        If the training model has an associated inference model, that model
+        is also stored in the inference_models_dict with the same key.
+
+        Args:
+            key: The identifier for the model.
+            model: The training model to store.
         """
         super().__setitem__(key, model)
         if model.has_inference_model:
