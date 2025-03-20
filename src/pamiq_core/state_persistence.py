@@ -1,5 +1,7 @@
+import pickle
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePath
+from typing import Any
 
 
 class PersistentStateMixin:
@@ -82,3 +84,37 @@ class StateStore:
             raise FileNotFoundError(f"State path: '{state_path}' not found!")
         for name, state in self._registered_states.items():
             state.load_state(state_path / name)
+
+
+def save_pickle(obj: Any, path: PurePath | str) -> None:
+    """Saves an object to a file using pickle serialization.
+
+    Args:
+        obj: Any Python object to be serialized.
+        path: Path or string pointing to the target file location.
+
+    Raises:
+        OSError: If there is an error writing to the specified path.
+        pickle.PickleError: If the object cannot be pickled.
+    """
+    with open(path, "wb") as f:
+        pickle.dump(obj, f)
+
+
+def load_pickle(path: PurePath | str) -> Any:
+    """Loads an object from a pickle file.
+
+    Args:
+        path: Path or string pointing to the pickle file.
+
+    Returns:
+        The unpickled Python object.
+
+    Raises:
+        FileNotFoundError: If the specified file does not exist.
+        OSError: If there is an error reading from the specified path.
+        pickle.PickleError: If the file contains invalid pickle data.
+        ModuleNotFoundError: If a module required for unpickling is not available.
+    """
+    with open(path, "rb") as f:
+        return pickle.load(f)
