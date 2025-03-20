@@ -1,6 +1,6 @@
 import pickle
 from datetime import datetime
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import Any
 
 
@@ -86,7 +86,7 @@ class StateStore:
             state.load_state(state_path / name)
 
 
-def save_pickle(obj: Any, path: PurePath | str) -> None:
+def save_pickle(obj: Any, path: Path | str) -> None:
     """Saves an object to a file using pickle serialization.
 
     Args:
@@ -101,7 +101,7 @@ def save_pickle(obj: Any, path: PurePath | str) -> None:
         pickle.dump(obj, f)
 
 
-def load_pickle(path: PurePath | str) -> Any:
+def load_pickle(path: Path | str) -> Any:
     """Loads an object from a pickle file.
 
     Args:
