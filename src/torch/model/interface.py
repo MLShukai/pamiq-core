@@ -38,7 +38,7 @@ def get_device[T](
     return default_device
 
 
-def default_infer(module: nn.Module, *args: Any, **kwds: Any) -> Any:
+def default_infer_procedure(module: nn.Module, *args: Any, **kwds: Any) -> Any:
     """Default inference forward flow.
 
     Tensors in `args` and `kwds` are sent to the computing device. If
@@ -113,7 +113,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         inference_thread_only: bool = False,
         default_device: torch.device | str | None = None,
         dtype: torch.dtype | None = None,
-        inference_procedure: InferenceProcedureCallable = default_infer,
+        inference_procedure: InferenceProcedureCallable = default_infer_procedure,
         parameter_file: str | Path | None = None,
     ):
         """Initialize.
