@@ -163,7 +163,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         """
 
         eval_of_raw_model = getattr(
-            self._raw_model, "eval", None
+            self._raw_model, "eval"
         )  # To pass python-no-eval check.
         eval_of_raw_model()
 
