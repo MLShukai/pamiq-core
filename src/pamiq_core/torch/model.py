@@ -1,8 +1,8 @@
 import copy
+from pathlib import Path
 from threading import RLock
 from typing import Any, Protocol, override
 
-import Path
 import torch
 import torch.nn as nn
 
