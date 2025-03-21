@@ -44,7 +44,7 @@ def default_infer_procedure(inference_model: nn.Module, *args: Any, **kwds: Any)
     """
     device = get_device(inference_model, CPU_DEVICE)
     new_args: list[Any] = []
-    new_kwds: dict[str, torch.Tensor] = {}
+    new_kwds: dict[Any, Any] = {}
     for i in args:
         if isinstance(i, torch.Tensor):
             i = i.to(device)
