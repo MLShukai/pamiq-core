@@ -3,9 +3,9 @@ from threading import RLock
 from typing import Any, Protocol, override
 
 import Path
-
 import torch
 import torch.nn as nn
+
 from pamiq_core.model import InferenceModel, TrainingModel
 
 CPU_DEVICE = torch.device("cpu")

@@ -1,4 +1,4 @@
-from .interface import TorchInferenceModel, TorchTrainingModel
+from .model import TorchInferenceModel, TorchTrainingModel
 
 __all__ = [
     "TorchInferenceModel",
