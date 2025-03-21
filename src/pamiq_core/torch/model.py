@@ -1,5 +1,4 @@
 import copy
-from pathlib import Path
 from threading import RLock
 from typing import Any, Protocol, override
 
@@ -15,9 +14,7 @@ class InferenceProcedureCallable(Protocol):
     """Typing for `inference_procedure` argument of TorchTrainingModel because
     `typing.Callable` can not typing `*args` and `**kwds`."""
 
-    def __call__(
-        self, inference_model: "TorchInferenceModel[Any]", *args: Any, **kwds: Any
-    ) -> Any: ...
+    def __call__(self, inference_model: nn.Module, *args: Any, **kwds: Any) -> Any: ...
 
 
 def get_device[T](
@@ -38,15 +35,16 @@ def get_device[T](
     return default_device
 
 
-def default_infer_procedure(module: nn.Module, *args: Any, **kwds: Any) -> Any:
+def default_infer_procedure(inference_model: nn.Module, *args: Any, **kwds: Any) -> Any:
     """Default inference forward flow.
 
     Tensors in `args` and `kwds` are sent to the computing device. If
     you override this method, be careful to send the input tensor to the
     computing device.
     """
-    device = get_device(module, CPU_DEVICE)
-    new_args, new_kwds = [], {}
+    device = get_device(inference_model, CPU_DEVICE)
+    new_args: list[Any] = []
+    new_kwds: dict[str, torch.Tensor] = {}
     for i in args:
         if isinstance(i, torch.Tensor):
             i = i.to(device)
@@ -57,7 +55,7 @@ def default_infer_procedure(module: nn.Module, *args: Any, **kwds: Any) -> Any:
             v = v.to(device)
         new_kwds[k] = v
 
-    return module(*new_args, **new_kwds)
+    return inference_model(*new_args, **new_kwds)
 
 
 class TorchInferenceModel[T: nn.Module](InferenceModel):
@@ -72,31 +70,32 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
             model: A torch model for inference.
             inference_procedure: An inference procedure as Callable.
         """
-        self._raw_model = model
+        self.raw_model = model
         self._inference_procedure = inference_procedure
         self._lock = RLock()
 
     @property
-    def _raw_model(self) -> T:
+    def raw_model(self) -> T:
         """Returns the internal dnn model.
 
         Do not access this property in the inference thread. This
         property is used to switch the model between training and
         inference model."
         """
-        return self._raw_model
+        return self.raw_model
 
-    @_raw_model.setter
-    def _raw_model(self, m: T) -> None:
+    @raw_model.setter
+    def raw_model(self, m: T) -> None:
         """Sets the model in a thread-safe manner."""
         with self._lock:
-            self._raw_model = m
+            self.raw_model = m
 
     @torch.inference_mode()
+    @override
     def infer(self, *args: Any, **kwds: Any) -> Any:
         """Performs the inference in a thread-safe manner."""
         with self._lock:
-            return self._inference_procedure(self._raw_model, *args, **kwds)
+            return self._inference_procedure(self.raw_model, *args, **kwds)
 
 
 class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
@@ -114,7 +113,6 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         default_device: torch.device | str | None = None,
         dtype: torch.dtype | None = None,
         inference_procedure: InferenceProcedureCallable = default_infer_procedure,
-        parameter_file: str | Path | None = None,
     ):
         """Initialize.
 
@@ -125,12 +123,11 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             default_device: A device if any device not found.
             dtype: Data type of the model.
             inference_procedure: An inference procedure as Callable.
-            parameter_file:
         """
         super().__init__(has_inference_model, inference_thread_only)
         if dtype is not None:
             model = model.type(dtype)
-        self._raw_model = model
+        self.raw_model = model
         if (
             default_device is None
         ):  # prevents from moving the model to cpu unintentionally.
@@ -138,21 +135,19 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         self._default_device = torch.device(default_device)
         self._inference_procedure = inference_procedure
 
-        self._raw_model.to(self._default_device)
-        if self.parameter_file is not None:
-            ...  # パラメータ読み込み
+        self.raw_model.to(self._default_device)
 
     @override
-    def create_inference(self) -> TorchInferenceModel[T]:
+    def _create_inference_model(self) -> TorchInferenceModel[T]:
         """Create inference model.
 
         Returns:
             TorchInferenceModel.
         """
-        model = self._raw_model
+        model = self.raw_model
         if not self.inference_thread_only:  # the model does not need to be copied to training thread If it is used only in the inference thread.
             model = copy.deepcopy(model)
-        return TorchInferenceModel(model)
+        return TorchInferenceModel(model, self._inference_procedure)
 
     @override
     def sync_impl(self, inference_model: TorchInferenceModel[T]) -> None:
@@ -163,30 +158,30 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         """
 
         eval_of_raw_model = getattr(
-            self._raw_model, "eval"
+            self.raw_model, "eval"
         )  # To pass python-no-eval check.
         eval_of_raw_model()
 
         # Hold the grads.
         grads: list[torch.Tensor | None] = []
-        for p in self._raw_model.parameters():
+        for p in self.raw_model.parameters():
             grads.append(p.grad)
             p.grad = None
 
         # Swap the training model and the inference model.
-        self._raw_model, inference_model._raw_model = (
-            inference_model._raw_model,
-            self._raw_model,
+        self.raw_model, inference_model.raw_model = (
+            inference_model.raw_model,
+            self.raw_model,
         )
-        self._raw_model.load_state_dict(self.inference_model._raw_model.state_dict())
+        self.raw_model.load_state_dict(self.inference_model.raw_model.state_dict())
 
         # Assign the model grads.
-        for i, p in enumerate(self._raw_model.parameters()):
+        for i, p in enumerate(self.raw_model.parameters()):
             p.grad = grads[i]
 
-        self._raw_model.train()
+        self.raw_model.train()
 
     @override
     def forward(self, *args: Any, **kwds: Any) -> Any:
         """forward."""
-        return self._raw_model(*args, **kwds)
+        return self.raw_model(*args, **kwds)
