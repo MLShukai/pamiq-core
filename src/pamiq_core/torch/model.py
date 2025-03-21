@@ -155,7 +155,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         return TorchInferenceModel(model)
 
     @override
-    def sync_impl(self, inference_model: TorchInferenceModel[T]):
+    def sync_impl(self, inference_model: TorchInferenceModel[T]) -> None:
         """Copies params of training model to self._inference_model.
 
         Args:
