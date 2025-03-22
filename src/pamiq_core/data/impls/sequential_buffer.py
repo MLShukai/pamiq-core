@@ -29,6 +29,8 @@ class SequentialBuffer[T](DataBuffer[T]):
             name: deque(maxlen=max_size) for name in collecting_data_names
         }
 
+        self._current_size = 0
+
     @override
     def add(self, step_data: StepData[T]) -> None:
         """Add a new data sample to the buffer.
@@ -45,6 +47,9 @@ class SequentialBuffer[T](DataBuffer[T]):
                 raise KeyError(f"Required data '{name}' not found in step_data")
             self._queues_dict[name].append(step_data[name])
 
+        if self._current_size < self.max_size:
+            self._current_size += 1
+
     @override
     def get_data(self) -> dict[str, list[T]]:
         """Retrieve all stored data from the buffer.
@@ -54,6 +59,15 @@ class SequentialBuffer[T](DataBuffer[T]):
             Each list preserves the original insertion order.
         """
         return {name: list(queue) for name, queue in self._queues_dict.items()}
+
+    @override
+    def __len__(self) -> int:
+        """Returns the current number of samples in the buffer.
+
+        Returns:
+            int: The number of samples currently stored in the buffer.
+        """
+        return self._current_size
 
     @override
     def save_state(self, path: Path) -> None:

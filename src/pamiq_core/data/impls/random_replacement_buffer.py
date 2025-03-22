@@ -97,6 +97,15 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
         return {name: data.copy() for name, data in self._lists_dict.items()}
 
     @override
+    def __len__(self) -> int:
+        """Returns the current number of samples in the buffer.
+
+        Returns:
+            int: The number of samples currently stored in the buffer.
+        """
+        return self._current_size
+
+    @override
     def save_state(self, path: Path) -> None:
         """Save the buffer state to the specified path.
 
