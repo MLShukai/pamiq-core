@@ -6,7 +6,10 @@ from pytest_mock import MockerFixture
 from pamiq_core.interaction.agent import Agent
 from pamiq_core.interaction.env import Environment
 from pamiq_core.interaction.interactions import FixedIntervalInteraction, Interaction
-from pamiq_core.interaction.interval_adjustors import IntervalAdjustor
+from pamiq_core.interaction.interval_adjustors import (
+    IntervalAdjustor,
+    SleepIntervalAdjustor,
+)
 
 
 class TestInteraction:
@@ -147,3 +150,11 @@ class TestFixedIntervalInteraction:
     def test_interaction_inheritance(self):
         """Test that FixedIntervalInteraction inherits from Interaction."""
         assert issubclass(FixedIntervalInteraction, Interaction)
+
+    def test_with_sleep_adjustor(self, mock_agent, mock_environment):
+        """Test that creating FixedIntervalInteraction instance with
+        SleepIntervalAdjustor."""
+        interaction = FixedIntervalInteraction.with_sleep_adjustor(
+            mock_agent, mock_environment, 1.0
+        )
+        assert isinstance(interaction._adjustor, SleepIntervalAdjustor)
