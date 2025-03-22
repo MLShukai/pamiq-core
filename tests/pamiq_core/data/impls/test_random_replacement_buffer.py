@@ -226,3 +226,13 @@ class TestRandomReplacementBuffer:
         for key in buffer.collecting_data_names:
             assert loaded_data[key] == original_data[key][:1]
         assert new_buffer._current_size == 1
+
+    def test_len(self, buffer: RandomReplacementBuffer[Any]):
+        """Test the __len__ method returns the correct buffer size."""
+        assert len(buffer) == 0
+
+        buffer.add({"state": [1.0, 0.0], "action": 1, "reward": 0.5})
+        assert len(buffer) == 1
+
+        buffer.add({"state": [0.0, 1.0], "action": 0, "reward": -0.5})
+        assert len(buffer) == 2

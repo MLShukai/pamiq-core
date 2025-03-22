@@ -114,3 +114,13 @@ class TestSequentialBuffer:
 
         for name in buffer.collecting_data_names:
             assert loaded_data[name] == original_data[name]
+
+    def test_len(self, buffer: SequentialBuffer):
+        """Test the __len__ method returns the correct buffer size."""
+        assert len(buffer) == 0
+
+        buffer.add({"state": [1.0, 0.0], "action": 1, "reward": 0.5})
+        assert len(buffer) == 1
+
+        buffer.add({"state": [0.0, 1.0], "action": 0, "reward": -0.5})
+        assert len(buffer) == 2
