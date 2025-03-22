@@ -6,6 +6,7 @@ from pamiq_core.state_persistence import PersistentStateMixin
 from .agent import Agent
 from .env import Environment
 from .event_mixin import InteractionEventMixin
+from .interval_adjustors import IntervalAdjustor
 
 
 class Interaction[ObsType, ActType](InteractionEventMixin, PersistentStateMixin):
@@ -87,3 +88,42 @@ class Interaction[ObsType, ActType](InteractionEventMixin, PersistentStateMixin)
         """
         self.agent.load_state(path / "agent")
         self.environment.load_state(path / "environment")
+
+
+class FixedIntervalInteraction[ObsType, ActType](Interaction[ObsType, ActType]):
+    """Interaction class that executes steps at fixed time intervals.
+
+    This class extends the base Interaction to maintain a consistent
+    timing between steps using an IntervalAdjustor. It ensures the
+    agent-environment interaction loop runs at a specified frequency
+    regardless of how long individual steps take to compute.
+    """
+
+    @override
+    def __init__(
+        self,
+        agent: Agent[ObsType, ActType],
+        environment: Environment[ObsType, ActType],
+        adjustor: IntervalAdjustor,
+    ) -> None:
+        """Initialize the fixed interval interaction.
+
+        Args:
+            agent: The agent that makes decisions based on observations.
+            environment: The environment that provides observations and receives actions.
+            adjustor: The interval adjustor that maintains consistent timing between steps.
+        """
+        super().__init__(agent, environment)
+        self._adjustor = adjustor
+
+    @override
+    def setup(self) -> None:
+        """Initialize the interaction and reset the interval adjustor."""
+        super().setup()
+        self._adjustor.reset()
+
+    @override
+    def step(self) -> None:
+        """Execute one step of the interaction and adjust timing."""
+        super().step()
+        self._adjustor.adjust()
