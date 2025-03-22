@@ -127,7 +127,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         super().__init__(has_inference_model, inference_thread_only)
         if dtype is not None:
             model = model.type(dtype)
-        self.raw_model = model
+        self.model = model
         if (
             default_device is None
         ):  # prevents from moving the model to cpu unintentionally.
@@ -135,7 +135,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         self._default_device = torch.device(default_device)
         self._inference_procedure = inference_procedure
 
-        self.raw_model.to(self._default_device)
+        self.model.to(self._default_device)
 
     @override
     def _create_inference_model(self) -> TorchInferenceModel[T]:
@@ -144,7 +144,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         Returns:
             TorchInferenceModel.
         """
-        model = self.raw_model
+        model = self.model
         if not self.inference_thread_only:  # the model does not need to be copied to training thread If it is used only in the inference thread.
             model = copy.deepcopy(model)
         return TorchInferenceModel(model, self._inference_procedure)
@@ -157,31 +157,29 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             inference_model: InferenceModel to sync.
         """
 
-        eval_of_raw_model = getattr(
-            self.raw_model, "eval"
-        )  # To pass python-no-eval check.
+        eval_of_raw_model = getattr(self.model, "eval")  # To pass python-no-eval check.
         eval_of_raw_model()
 
         # Hold the grads.
         grads: list[torch.Tensor | None] = []
-        for p in self.raw_model.parameters():
+        for p in self.model.parameters():
             grads.append(p.grad)
             p.grad = None
 
         # Swap the training model and the inference model.
-        self.raw_model, inference_model.raw_model = (
+        self.model, inference_model.raw_model = (
             inference_model.raw_model,
-            self.raw_model,
+            self.model,
         )
-        self.raw_model.load_state_dict(self.inference_model.raw_model.state_dict())
+        self.model.load_state_dict(self.inference_model.raw_model.state_dict())
 
         # Assign the model grads.
-        for i, p in enumerate(self.raw_model.parameters()):
+        for i, p in enumerate(self.model.parameters()):
             p.grad = grads[i]
 
-        self.raw_model.train()
+        self.model.train()
 
     @override
     def forward(self, *args: Any, **kwds: Any) -> Any:
         """forward."""
-        return self.raw_model(*args, **kwds)
+        return self.model(*args, **kwds)
