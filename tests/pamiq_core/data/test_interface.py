@@ -173,3 +173,11 @@ class TestDataUserAndCollector:
         # Verify loading timestamps
         assert data_user._timestamps is not prev_timestamps
         assert data_user._timestamps == prev_timestamps
+
+    def test_data_user_len(self, data_user: DataUser[MockDataBuffer]):
+        """Test that __len__ method of DataUser returns the length of the
+        buffer."""
+        assert len(data_user) == 0
+
+        data_user._buffer.data.append({"state": [1.0], "action": 1, "reward": 0.5})
+        assert len(data_user) == 1
