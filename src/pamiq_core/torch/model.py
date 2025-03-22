@@ -127,7 +127,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         super().__init__(has_inference_model, inference_thread_only)
         if dtype is not None:
             model = model.type(dtype)
-        self.model = model
+        self.model: T = model
         if (
             default_device is None
         ):  # prevents from moving the model to cpu unintentionally.
@@ -167,11 +167,11 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             p.grad = None
 
         # Swap the training model and the inference model.
-        self.model, inference_model.raw_model = (
-            inference_model.raw_model,
+        self.model, inference_model._raw_model = (
+            inference_model._raw_model,
             self.model,
         )
-        self.model.load_state_dict(self.inference_model.raw_model.state_dict())
+        self.model.load_state_dict(self.inference_model._raw_model.state_dict())
 
         # Assign the model grads.
         for i, p in enumerate(self.model.parameters()):
