@@ -70,32 +70,32 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
             model: A torch model for inference.
             inference_procedure: An inference procedure as Callable.
         """
-        self.raw_model = model
+        self._model = model
         self._inference_procedure = inference_procedure
         self._lock = RLock()
 
     @property
-    def raw_model(self) -> T:
+    def _raw_model(self) -> T:
         """Returns the internal dnn model.
 
         Do not access this property in the inference thread. This
         property is used to switch the model between training and
         inference model."
         """
-        return self.raw_model
+        return self._model
 
-    @raw_model.setter
-    def raw_model(self, m: T) -> None:
+    @_raw_model.setter
+    def _raw_model(self, m: T) -> None:
         """Sets the model in a thread-safe manner."""
         with self._lock:
-            self.raw_model = m
+            self._model = m
 
     @torch.inference_mode()
     @override
     def infer(self, *args: Any, **kwds: Any) -> Any:
         """Performs the inference in a thread-safe manner."""
         with self._lock:
-            return self._inference_procedure(self.raw_model, *args, **kwds)
+            return self._inference_procedure(self._raw_model, *args, **kwds)
 
 
 class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
