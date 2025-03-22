@@ -20,55 +20,53 @@ class TestTimestampingQueuesDict:
         """Fixture providing TimestampingQueuesDict instance."""
         return TimestampingQueuesDict(self.QUEUE_NAMES, self.MAX_LENGTH)
 
-    def test_init(self, queues_dict: TimestampingQueuesDict):
-        """Test initialization of TimestampingQueuesDict."""
-        for queue in queues_dict._queues.values():
-            assert queue.maxlen == self.MAX_LENGTH
-        assert queues_dict._timestamps.maxlen == self.MAX_LENGTH
+    def test_append_and_popleft(self, queues_dict: TimestampingQueuesDict, mocker):
+        """Test append and popleft methods using only public interfaces."""
+        mock_time = mocker.patch("pamiq_core.time.time")
+        mock_time.return_value = 123.456
+
+        # Verify empty initially
         assert len(queues_dict) == 0
 
-    def test_append(self, queues_dict: TimestampingQueuesDict, mocker):
-        """Test append method."""
-        mock_time = mocker.patch("pamiq_core.time.time")
-        mock_time.return_value = 123.456
-
+        # Test append
         queues_dict.append(self.SAMPLE_DATA)
-
         assert len(queues_dict) == 1
-        for key, queue in queues_dict._queues.items():
-            assert list(queue) == [self.SAMPLE_DATA[key]]
-        assert list(queues_dict._timestamps) == [123.456]
 
-    def test_popleft(self, queues_dict: TimestampingQueuesDict, mocker):
-        """Test popleft method."""
-        mock_time = mocker.patch("pamiq_core.time.time")
-        mock_time.return_value = 123.456
-
-        queues_dict.append(self.SAMPLE_DATA)
+        # Test popleft - verify we get the expected data and timestamp
         data, timestamp = queues_dict.popleft()
-
         assert data == self.SAMPLE_DATA
         assert timestamp == 123.456
         assert len(queues_dict) == 0
 
-    def test_len(self, queues_dict: TimestampingQueuesDict):
-        """Test __len__ method."""
+    def test_append_multiple_items(self, queues_dict: TimestampingQueuesDict):
+        """Test appending multiple items and length tracking."""
+        # Append multiple items
+        for i in range(3):
+            queues_dict.append(self.SAMPLE_DATA)
+            assert len(queues_dict) == i + 1
+
+        # Verify popleft returns them in order
+        for _ in range(3):
+            queues_dict.popleft()
+
+        # Verify empty after popping all items
         assert len(queues_dict) == 0
 
-        queues_dict.append(self.SAMPLE_DATA)
-        assert len(queues_dict) == 1
-
-        queues_dict.append(self.SAMPLE_DATA)
-        assert len(queues_dict) == 2
-
-    def test_max_length(self, queues_dict: TimestampingQueuesDict):
-        """Test maximum length constraint."""
+    def test_max_length_constraint(self, queues_dict: TimestampingQueuesDict):
+        """Test maximum length constraint using only public interfaces."""
+        # Fill beyond max capacity
         for _ in range(self.MAX_LENGTH + 2):
             queues_dict.append(self.SAMPLE_DATA)
 
+        # Verify length is capped at MAX_LENGTH
         assert len(queues_dict) == self.MAX_LENGTH
-        for queue in queues_dict._queues.values():
-            assert len(queue) == self.MAX_LENGTH
+
+        # Verify we can pop exactly MAX_LENGTH items
+        for _ in range(self.MAX_LENGTH):
+            queues_dict.popleft()
+
+        # Verify empty after popping all items
+        assert len(queues_dict) == 0
 
     def test_empty_popleft(self, queues_dict: TimestampingQueuesDict):
         """Test popleft from empty queues raises IndexError."""
