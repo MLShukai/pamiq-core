@@ -39,7 +39,7 @@ class IntervalAdjustor(ABC):
     def adjust_impl(self) -> None:
         """The actual implementation of the interval adjustor, which is wrapped
         by the public method `adjust`."""
-        raise NotImplementedError
+        ...
 
     def adjust(self) -> float:
         """Waits until the interval has elapsed since the last `adjust` or
