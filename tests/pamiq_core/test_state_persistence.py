@@ -115,7 +115,7 @@ class TestPickleFunctions:
         assert temp_file.is_file()
 
         # Load and verify data
-        loaded_data = load_pickle(temp_file)
+        loaded_data = load_pickle(str(temp_file))
         assert loaded_data == sample_data
 
     def test_load_pickle_invalid_path(self, tmp_path):
