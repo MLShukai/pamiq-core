@@ -1,4 +1,9 @@
+import logging
 import threading
+from concurrent.futures import Future, ThreadPoolExecutor
+
+from pamiq_core.threads.thread_types import ThreadTypes
+from pamiq_core.utils import get_class_module_path
 
 
 class ThreadController:
@@ -131,3 +136,56 @@ class ControllerCommandHandler:
         """
         self.stop_if_pause()
         return self._controller.is_active()
+
+
+class ThreadStatus:
+    def __init__(self):
+        self._paused_event = threading.Event()
+
+    def pause(self):
+        self._paused_event.set()
+
+    def resume(self):
+        self._paused_event.clear()
+
+    def is_pause(self):
+        return self._paused_event.is_set()
+
+    def is_resume(self):
+        return not self.is_pause()
+
+    def wait_for_pause(self, timeout: float):
+        return self._paused_event.wait(timeout)
+
+
+class ReadOnlyThreadStatus:
+    def __init__(self, status: ThreadStatus):
+        self.is_pause = status.is_pause
+        self.is_resume = status.is_resume
+        self.wait_for_pause = status.wait_for_pause
+
+
+class ThreadStatusesHandler:
+    def __init__(self, statuses: dict[ThreadTypes, ReadOnlyThreadStatus]):
+        self._statuses = statuses
+        self._logger = logging.getLogger(get_class_module_path(self.__class__))
+
+    def wait_for_all_threads_pause(self, timeout: float):
+        if len(self._statuses) == 0:
+            # Need to retuen first to avoid ValueError in ThreadPoolExecutor
+            # (max_workers must be greater than 0)
+            return True
+
+        tasks: dict[ThreadTypes, Future[bool]] = {}
+        with ThreadPoolExecutor(max_workers=len(self._statuses)) as executor:
+            for thread_type, stat in self._statuses.items():
+                tasks[thread_type] = executor.submit(stat.wait_for_pause, timeout)
+
+        success = True
+        for thread_type, tsk in tasks.items():
+            if not (result := tsk.result()):
+                self._logger.error(
+                    f"Timeout waiting for '{thread_type.thread_name}' thread to pause after {timeout} seconds."
+                )
+            success &= result
+        return success

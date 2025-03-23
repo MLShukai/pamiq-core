@@ -6,7 +6,11 @@ import pytest
 from pamiq_core.threads import (
     ControllerCommandHandler,
     ReadOnlyController,
+    ReadOnlyThreadStatus,
     ThreadController,
+    ThreadStatus,
+    ThreadStatusesHandler,
+    ThreadTypes,
 )
 
 
@@ -257,3 +261,203 @@ class TestControllerCommandHandler:
         time.sleep(0.01)
         thread.join()  # ensure the thread has finished
         assert counter == prev_count  # check that the loop has exited immediately
+
+
+class TestThreadStatus:
+    @pytest.fixture()
+    def thread_status(self):
+        """Fixture for thread status."""
+        return ThreadStatus()
+
+    def test_initial_state(self, thread_status: ThreadStatus):
+        """Test initial state of thread status."""
+        assert thread_status.is_pause() is False
+        assert thread_status.is_resume() is True
+
+    def test_pause_and_related_predicate_methods(self, thread_status: ThreadStatus):
+        """Test pause and related predicate methods."""
+        thread_status.pause()
+
+        assert thread_status.is_pause() is True
+        assert thread_status.is_resume() is False
+
+    def test_resume_and_related_predicate_methods(self, thread_status: ThreadStatus):
+        """Test resume and related predicate methods."""
+        thread_status.resume()
+
+        assert thread_status.is_pause() is False
+        assert thread_status.is_resume() is True
+
+    def test_wait_for_pause_when_already_paused(self, thread_status: ThreadStatus):
+        """Test wait_for_pause when the status is already paused."""
+        # immediately return True if already paused
+        thread_status.pause()
+        start = time.perf_counter()
+        assert thread_status.wait_for_pause(0.1) is True
+        assert time.perf_counter() - start < 1e-3
+
+    def test_wait_for_pause_when_already_resumed(self, thread_status: ThreadStatus):
+        """Test wait_for_pause when the status is already resumed."""
+        # wait timeout and return False if resumed
+        thread_status.resume()
+        start = time.perf_counter()
+        assert thread_status.wait_for_pause(0.1) is False
+        assert 0.1 <= time.perf_counter() - start < 0.2
+
+    def test_wait_for_pause_when_paused_after_waiting(
+        self, thread_status: ThreadStatus
+    ):
+        """Test wait_for_pause when the status is resumed at first, and paused
+        after waiting."""
+        # immediately return True if paused after waiting
+        thread_status.resume()
+        threading.Timer(0.1, thread_status.pause).start()
+        start = time.perf_counter()
+        assert thread_status.wait_for_pause(0.5) is True
+        assert 0.1 <= time.perf_counter() - start < 0.2
+
+
+class TestReadOnlyThreadStatus:
+    def test_exposed_methods(self):
+        """Test of exposure of functions from ThreadStatus."""
+        thread_status = ThreadStatus()
+        read_only_thread_status = ReadOnlyThreadStatus(thread_status)
+        assert read_only_thread_status.is_pause == thread_status.is_pause
+        assert read_only_thread_status.is_resume == thread_status.is_resume
+        assert read_only_thread_status.wait_for_pause == thread_status.wait_for_pause
+
+
+class TestThreadStatusesHandler:
+    @pytest.fixture()
+    def inference_thread_status(self):
+        """Fixture for thread status, used for inference."""
+        return ThreadStatus()
+
+    @pytest.fixture()
+    def read_only_inference_thread_status(self, inference_thread_status):
+        """Fixture for read-only thread status, used for inference."""
+        return ReadOnlyThreadStatus(inference_thread_status)
+
+    @pytest.fixture()
+    def training_thread_status(self):
+        """Fixture for thread status, used for training."""
+        return ThreadStatus()
+
+    @pytest.fixture()
+    def read_only_training_thread_status(self, training_thread_status):
+        """Fixture for read-only thread status, used for training."""
+        return ReadOnlyThreadStatus(training_thread_status)
+
+    @pytest.fixture()
+    def thread_status_handler(
+        self, read_only_inference_thread_status, read_only_training_thread_status
+    ):
+        """Fixture for thread status handler."""
+        return ThreadStatusesHandler(
+            {
+                ThreadTypes.INFERENCE: read_only_inference_thread_status,
+                ThreadTypes.TRAINING: read_only_training_thread_status,
+            }
+        )
+
+    def test_wait_for_all_threads_pause_when_empty_status(self):
+        """Test wait_for_all_threads_pause when statuses is empty."""
+        # immediately return True if statuses is empty
+        thread_status_handler = ThreadStatusesHandler(statuses={})
+        start = time.perf_counter()
+        assert thread_status_handler.wait_for_all_threads_pause(0.1) is True
+        assert time.perf_counter() - start < 1e-3
+
+    def test_wait_for_all_threads_pause_all_when_all_threads_paused(
+        self, inference_thread_status, training_thread_status, thread_status_handler
+    ):
+        """Test wait_for_all_threads_pause when all threads are paused."""
+        # immediately return True if all threads are paused
+        inference_thread_status.pause()
+        training_thread_status.pause()
+
+        start = time.perf_counter()
+        assert thread_status_handler.wait_for_all_threads_pause(0.1) is True
+        assert time.perf_counter() - start < 2e-3  # test not passed if 1e-3
+
+    @pytest.mark.parametrize(
+        "is_inference_resumed, is_training_resumed",
+        [
+            (True, False),
+            (False, True),
+            (True, True),
+        ],
+    )
+    def test_wait_for_all_threads_pause_when_some_threads_resumed(
+        self,
+        caplog,
+        is_inference_resumed,
+        is_training_resumed,
+        inference_thread_status,
+        training_thread_status,
+        thread_status_handler,
+    ):
+        """Test wait_for_all_threads_pause when some threads are resumed."""
+        # wait timeout and return False if some threads are resumed
+        inference_thread_status.pause()
+        training_thread_status.pause()
+
+        if is_inference_resumed:
+            inference_thread_status.resume()
+        if is_training_resumed:
+            training_thread_status.resume()
+
+        start = time.perf_counter()
+        assert thread_status_handler.wait_for_all_threads_pause(0.1) is False
+        assert 0.1 <= time.perf_counter() - start < 0.2
+
+        # check log messages
+        def _check_log_message(thread_type: ThreadTypes):
+            expected_log_message = f"Timeout waiting for '{thread_type.thread_name}' thread to pause after 0.1 seconds."
+
+            error_level_log_messages = [
+                record.message
+                for record in caplog.records
+                if record.levelname == "ERROR"
+            ]
+            assert any(
+                expected_log_message in message for message in error_level_log_messages
+            )
+
+        if is_inference_resumed:
+            _check_log_message(ThreadTypes.INFERENCE)
+        if is_training_resumed:
+            _check_log_message(ThreadTypes.TRAINING)
+
+    @pytest.mark.parametrize(
+        "is_inference_resumed, is_training_resumed",
+        [
+            (True, False),
+            (False, True),
+            (True, True),
+        ],
+    )
+    def test_wait_for_all_threads_pause_all_when_paused_after_waiting(
+        self,
+        is_inference_resumed,
+        is_training_resumed,
+        inference_thread_status,
+        training_thread_status,
+        thread_status_handler,
+    ):
+        """Test wait_for_all_threads_pause when all threads are paused after
+        waiting."""
+        # immediately return True if all threads are paused after waiting
+        inference_thread_status.pause()
+        training_thread_status.pause()
+
+        if is_inference_resumed:
+            inference_thread_status.resume()
+            threading.Timer(0.1, inference_thread_status.pause).start()
+        if is_training_resumed:
+            training_thread_status.resume()
+            threading.Timer(0.1, training_thread_status.pause).start()
+
+        start = time.perf_counter()
+        assert thread_status_handler.wait_for_all_threads_pause(0.5) is True
+        assert 0.1 <= time.perf_counter() - start < 0.2
