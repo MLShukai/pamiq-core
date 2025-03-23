@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from pathlib import Path
+from typing import Any, override
 
+from pamiq_core import time
 from pamiq_core.data import DataUser, DataUsersDict
-from pamiq_core.model import (
-    TrainingModel,
-    TrainingModelsDict,
-)
+from pamiq_core.model import TrainingModel, TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
 
 
@@ -28,10 +27,26 @@ class Trainer(ABC, PersistentStateMixin):
     _training_models_dict: TrainingModelsDict
     _data_users_dict: DataUsersDict
 
-    def __init__(self) -> None:
-        """Initialize."""
+    def __init__(
+        self,
+        training_condition_data_user: str | None = None,
+        min_buffer_size: int = 0,
+        min_new_data_count: int = 0,
+    ) -> None:
+        """Initialize a trainer.
+
+        Args:
+            training_condition_data_user: Name of the data user to check for trainability.
+                If None, trainer is always trainable.
+            min_buffer_size: Minimum total data points required in the buffer.
+            min_new_data_count: Minimum number of new data points required since last training.
+        """
         super().__init__()
         self._retrieved_model_names: set[str] = set()
+        self._training_condition_data_user = training_condition_data_user
+        self._min_buffer_size = min_buffer_size
+        self._min_new_data_count = min_new_data_count
+        self._previous_training_time = float("-inf")
 
     def attach_training_models_dict(
         self, training_models_dict: TrainingModelsDict
@@ -41,7 +56,7 @@ class Trainer(ABC, PersistentStateMixin):
         self.on_training_models_attached()
 
     def on_training_models_attached(self) -> None:
-        """Callback method for when `model_wrappers_dict` is attached to the
+        """Callback method for when `training_models_dict` is attached to the
         trainer.
 
         Use :meth:`get_training_model` to retrieve the model that will be trained.
@@ -77,12 +92,29 @@ class Trainer(ABC, PersistentStateMixin):
     def is_trainable(self) -> bool:
         """Determines if the training can be executed.
 
-        This method checks if the training process is currently
-        feasible. If it returns `False`, the training procedure is
-        skipped. Subclasses should override this method to implement
-        custom logic for determining trainability status.
+        Checks if training can proceed based on data availability when
+        a training condition data user is specified.
+
+        Returns:
+            True if training can be executed, False otherwise.
         """
-        return True
+        # If no data user is specified for condition checking, always trainable
+        if self._training_condition_data_user is None:
+            return True
+
+        data_user = self.get_data_user(self._training_condition_data_user)
+        data_user.update()
+
+        trainable = (
+            len(data_user) >= self._min_buffer_size
+            and data_user.count_data_added_since(self._previous_training_time)
+            >= self._min_new_data_count
+        )
+
+        if trainable:
+            self._previous_training_time = time.time()
+
+        return trainable
 
     def setup(self) -> None:
         """Setup procedure before training starts."""
@@ -98,7 +130,7 @@ class Trainer(ABC, PersistentStateMixin):
         After this method, :meth:`sync_models` to be called.
         """
 
-    def sync_models(self):
+    def sync_models(self) -> None:
         """Synchronizes params of trained models to inference models."""
         for name in self._retrieved_model_names:
             self._training_models_dict[name].sync()
@@ -108,8 +140,34 @@ class Trainer(ABC, PersistentStateMixin):
         pass
 
     def run(self) -> None:
-        """Runs the training process."""
+        """Runs the training process if the trainer is trainable."""
+        if not self.is_trainable():
+            return
+
         self.setup()
         self.train()
         self.sync_models()
         self.teardown()
+
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save the trainer state to the specified path.
+
+        Args:
+            path: Directory path where to save the trainer state.
+        """
+        path.mkdir()
+        (path / "previous_training_time").write_text(
+            str(self._previous_training_time), encoding="utf-8"
+        )
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load the trainer state from the specified path.
+
+        Args:
+            path: Directory path from where to load the trainer state.
+        """
+        self._previous_training_time = float(
+            (path / "previous_training_time").read_text("utf-8")
+        )
