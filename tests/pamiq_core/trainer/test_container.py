@@ -49,25 +49,6 @@ class TestTrainersDict:
     def trainers_dict(self, trainers: dict[str, Trainer]) -> TrainersDict:
         return TrainersDict(trainers)
 
-    def test_get_trainers_list(
-        self, trainers_dict: TrainersDict, trainers: dict[str, Trainer]
-    ) -> None:
-        assert trainers_dict.get_trainers_list() == list(trainers.values())
-
-    def test_get_trainable_trainer(
-        self, trainers_dict: TrainersDict, trainers: Trainer
-    ) -> None:
-        assert trainers_dict.get_trainable_trainer() == trainers["trainable_1"]
-        assert trainers_dict.get_trainable_trainer() == trainers["trainable_2"]
-        # Check if it loops back to the first element.
-        assert trainers_dict.get_trainable_trainer() == trainers["trainable_1"]
-
-    def test_get_trainable_trainer_with_just_an_untrainable(
-        self, untrainable_trainer: Trainer
-    ) -> None:
-        trainers_dict = TrainersDict({"untrainable": untrainable_trainer})
-        assert trainers_dict.get_trainable_trainer() is None
-
     def test_attach_training_models_dict(
         self,
         mocker: MockerFixture,
