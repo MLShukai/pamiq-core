@@ -1,10 +1,14 @@
-import shutil
-from datetime import datetime, tzinfo
+from datetime import datetime
 from pathlib import Path
 
 import pytest
 
-from pamiq_core.state_persistence import PersistentStateMixin, StateStore
+from pamiq_core.state_persistence import (
+    PersistentStateMixin,
+    StateStore,
+    load_pickle,
+    save_pickle,
+)
 
 
 class TestStateStore:
@@ -79,3 +83,42 @@ class TestStateStore:
 
         mock_state_1.load_state.assert_called_once_with(tmp_path / "mock_state_1")
         mock_state_2.load_state.assert_called_once_with(tmp_path / "mock_state_2")
+
+
+class TestPickleFunctions:
+    @pytest.fixture
+    def temp_file(self, tmp_path):
+        """Fixture to provide a temporary file path."""
+        return tmp_path / "test.pkl"
+
+    @pytest.fixture
+    def sample_data(self):
+        """Fixture to provide sample data for testing."""
+        return {"name": "test", "values": [1, 2, 3], "nested": {"a": 1, "b": 2}}
+
+    def test_save_and_load_pickle(self, temp_file, sample_data):
+        """Test saving and loading an object with pickle."""
+        save_pickle(sample_data, temp_file)
+
+        # Verify file exists
+        assert temp_file.is_file()
+
+        # Load and verify data
+        loaded_data = load_pickle(temp_file)
+        assert loaded_data == sample_data
+
+    def test_save_pickle_with_string_path(self, temp_file, sample_data):
+        """Test saving pickle using a string path."""
+        save_pickle(sample_data, str(temp_file))
+
+        # Verify file exists
+        assert temp_file.is_file()
+
+        # Load and verify data
+        loaded_data = load_pickle(str(temp_file))
+        assert loaded_data == sample_data
+
+    def test_load_pickle_invalid_path(self, tmp_path):
+        """Test loading from non-existent path raises FileNotFoundError."""
+        with pytest.raises(FileNotFoundError):
+            load_pickle(tmp_path / "non_existent_file.pkl")
