@@ -155,6 +155,21 @@ class TestEnvironmentWrapper:
         obs_load_spy.assert_called_once_with(load_path / "obs_wrapper")
         act_load_spy.assert_called_once_with(load_path / "act_wrapper")
 
+    def test_with_function_wrappers(self, mock_env):
+        """Test creating EnvironmentWrapper with direct function wrappers."""
+        # Create wrapper with functions directly
+        env_wrapper = EnvironmentWrapper(
+            mock_env, lambda x: f"func_wrapped_{x}", lambda x: f"func_unwrapped_{x}"
+        )
+
+        # Test observation wrapping
+        result = env_wrapper.observe()
+        assert result == "func_wrapped_raw_observation"
+
+        # Test action wrapping
+        env_wrapper.affect("direct_action")
+        mock_env.affect.assert_called_with("func_unwrapped_direct_action")
+
 
 class TestSensorWrapper:
     """Test suite for the SensorWrapper class."""
@@ -229,6 +244,15 @@ class TestSensorWrapper:
 
         mock_sensor.load_state.assert_called_once_with(load_path / "sensor")
         wrapper_load_spy.assert_called_once_with(load_path / "wrapper")
+
+    def test_with_function_wrapper(self, mock_sensor):
+        """Test creating SensorWrapper with a direct function wrapper."""
+        # Create wrapper with function directly
+        sensor_wrapper = SensorWrapper(mock_sensor, lambda x: f"func_processed_{x}")
+
+        # Test reading
+        result = sensor_wrapper.read()
+        assert result == "func_processed_raw_sensor_data"
 
 
 class TestActuatorWrapper:
@@ -306,3 +330,14 @@ class TestActuatorWrapper:
 
         mock_actuator.load_state.assert_called_once_with(load_path / "actuator")
         wrapper_load_spy.assert_called_once_with(load_path / "wrapper")
+
+    def test_with_function_wrapper(self, mock_actuator):
+        """Test creating ActuatorWrapper with a direct function wrapper."""
+        # Create wrapper with function directly
+        actuator_wrapper = ActuatorWrapper(
+            mock_actuator, lambda x: f"func_transformed_{x}"
+        )
+
+        # Test operation
+        actuator_wrapper.operate("direct_action")
+        mock_actuator.operate.assert_called_once_with("func_transformed_direct_action")
