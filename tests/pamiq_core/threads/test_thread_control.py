@@ -12,6 +12,7 @@ from pamiq_core.threads import (
     ThreadStatusesHandler,
     ThreadTypes,
 )
+from tests.helpers import check_log_message
 
 
 class TestThreadController:
@@ -451,9 +452,17 @@ class TestThreadStatusesHandler:
             )
 
         if is_inference_resumed:
-            _check_log_message(ThreadTypes.INFERENCE)
+            check_log_message(
+                expected_log_message="Timeout waiting for 'inference' thread to pause after 0.1 seconds.",
+                log_level="ERROR",
+                caplog=caplog,
+            )
         if is_training_resumed:
-            _check_log_message(ThreadTypes.TRAINING)
+            check_log_message(
+                expected_log_message="Timeout waiting for 'training' thread to pause after 0.1 seconds.",
+                log_level="ERROR",
+                caplog=caplog,
+            )
 
     @pytest.mark.parametrize(
         "is_inference_resumed, is_training_resumed",
