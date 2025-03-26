@@ -439,18 +439,6 @@ class TestThreadStatusesHandler:
         assert 0.1 <= time.perf_counter() - start < 0.2
 
         # check log messages
-        def _check_log_message(thread_type: ThreadTypes):
-            expected_log_message = f"Timeout waiting for '{thread_type.thread_name}' thread to pause after 0.1 seconds."
-
-            error_level_log_messages = [
-                record.message
-                for record in caplog.records
-                if record.levelname == "ERROR"
-            ]
-            assert any(
-                expected_log_message in message for message in error_level_log_messages
-            )
-
         if is_inference_resumed:
             check_log_message(
                 expected_log_message="Timeout waiting for 'inference' thread to pause after 0.1 seconds.",
