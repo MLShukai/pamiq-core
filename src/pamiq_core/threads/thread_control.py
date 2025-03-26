@@ -200,13 +200,14 @@ class ReadOnlyThreadStatus:
 
 
 class ThreadStatusesHandler:
-    """A class to manage the statuses of multiple threads.
-
-    Args:
-        statuses: A dictionary of ThreadTypes and ReadOnlyThreadStatus objects.
-    """
+    """A class to manage the statuses of multiple threads."""
 
     def __init__(self, statuses: dict[ThreadTypes, ReadOnlyThreadStatus]) -> None:
+        """Initialize the ThreadStatusesHandler object.
+
+        Args:
+            statuses: A dictionary of ReadOnlyThreadStatus objects.
+        """
         self._statuses = statuses
         self._logger = logging.getLogger(get_class_module_path(self.__class__))
 
