@@ -3,7 +3,7 @@ import threading
 from concurrent.futures import Future, ThreadPoolExecutor
 
 from pamiq_core.threads.thread_types import ThreadTypes
-from pamiq_core.utils import get_class_module_path
+from pamiq_core.utils.reflection import get_class_module_path
 
 
 class ThreadController:
