@@ -1,9 +1,14 @@
 from pamiq_core.utils import get_class_module_path
 
 
-def test_get_class_module_path():
-    class TestClass:
-        pass
+class TestClass:
+    """A class used only for testing purposes."""
+
+    pass
+
+
+def test_get_class_module_path() -> None:
+    """Test the get_class_module_path function."""
 
     assert (
         get_class_module_path(TestClass)

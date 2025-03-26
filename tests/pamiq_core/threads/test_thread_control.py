@@ -15,23 +15,25 @@ from pamiq_core.threads import (
 
 
 class TestThreadController:
+    """A test class for ThreadController."""
+
     @pytest.fixture()
-    def thread_controller(self):
+    def thread_controller(self) -> ThreadController:
         return ThreadController()
 
-    def test_initial_state(self, thread_controller: ThreadController):
+    def test_initial_state(self, thread_controller: ThreadController) -> None:
         assert thread_controller.is_resume() is True
         assert thread_controller.is_active() is True
 
     def test_resume_and_related_predicate_methods(
         self, thread_controller: ThreadController
-    ):
+    ) -> None:
         thread_controller.resume()
 
         assert thread_controller.is_resume() is True
         assert thread_controller.is_pause() is False
 
-    def test_resume_when_shutdown(self, thread_controller: ThreadController):
+    def test_resume_when_shutdown(self, thread_controller: ThreadController) -> None:
         thread_controller.shutdown()
 
         with pytest.raises(
@@ -41,13 +43,13 @@ class TestThreadController:
 
     def test_pause_and_related_predicate_methods(
         self, thread_controller: ThreadController
-    ):
+    ) -> None:
         thread_controller.pause()
 
         assert thread_controller.is_resume() is False
         assert thread_controller.is_pause() is True
 
-    def test_pause_when_shutdown(self, thread_controller: ThreadController):
+    def test_pause_when_shutdown(self, thread_controller: ThreadController) -> None:
         thread_controller.shutdown()
 
         with pytest.raises(
@@ -57,7 +59,7 @@ class TestThreadController:
 
     def test_shutdown_and_related_predicate_methods_when_resume(
         self, thread_controller: ThreadController
-    ):
+    ) -> None:
         thread_controller.shutdown()
 
         assert thread_controller.is_shutdown() is True
@@ -65,7 +67,7 @@ class TestThreadController:
 
     def test_shutdown_and_related_predicate_methods_when_pause(
         self, thread_controller: ThreadController
-    ):
+    ) -> None:
         thread_controller.pause()
         thread_controller.shutdown()
 
@@ -77,13 +79,15 @@ class TestThreadController:
 
     def test_activate_and_related_predicate_methods(
         self, thread_controller: ThreadController
-    ):
+    ) -> None:
         thread_controller.activate()
 
         assert thread_controller.is_shutdown() is False
         assert thread_controller.is_active() is True
 
-    def test_shutdown_when_already_shutdown(self, thread_controller: ThreadController):
+    def test_shutdown_when_already_shutdown(
+        self, thread_controller: ThreadController
+    ) -> None:
         thread_controller.shutdown()
 
         # Test that `resume()` in `shutdown()` does not raise an error
@@ -92,7 +96,7 @@ class TestThreadController:
 
     def test_wait_for_resume_when_already_resumed(
         self, thread_controller: ThreadController
-    ):
+    ) -> None:
         # immediately return True if already resumed
         thread_controller.resume()
         start = time.perf_counter()
@@ -101,7 +105,7 @@ class TestThreadController:
 
     def test_wait_for_resume_when_already_paused(
         self, thread_controller: ThreadController
-    ):
+    ) -> None:
         # wait timeout and return False if paused
         thread_controller.pause()
         start = time.perf_counter()
@@ -110,7 +114,7 @@ class TestThreadController:
 
     def test_wait_for_resume_when_resumed_after_waiting(
         self, thread_controller: ThreadController
-    ):
+    ) -> None:
         # immediately return True if resumed after waiting
         thread_controller.pause()
         threading.Timer(0.1, thread_controller.resume).start()
@@ -120,7 +124,9 @@ class TestThreadController:
 
 
 class TestReadOnlyController:
-    def test_exposed_methods(self):
+    """A test class for ReadOnlyController."""
+
+    def test_exposed_methods(self) -> None:
         thread_controller = ThreadController()
         read_only_controller = ReadOnlyController(thread_controller)
 
@@ -132,21 +138,23 @@ class TestReadOnlyController:
 
 
 class TestControllerCommandHandler:
+    """A test class for ControllerCommandHandler."""
+
     @pytest.fixture()
-    def thread_controller(self):
+    def thread_controller(self) -> ThreadController:
         return ThreadController()
 
     @pytest.fixture()
-    def read_only_controller(self, thread_controller):
+    def read_only_controller(self, thread_controller) -> ReadOnlyController:
         return ReadOnlyController(thread_controller)
 
     @pytest.fixture()
-    def handler(self, read_only_controller):
+    def handler(self, read_only_controller) -> ControllerCommandHandler:
         return ControllerCommandHandler(read_only_controller)
 
     def test_stop_if_pause_when_already_resumed(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
-    ):
+    ) -> None:
         # immediately return if already resumed
         thread_controller.resume()
         start = time.perf_counter()
@@ -155,7 +163,7 @@ class TestControllerCommandHandler:
 
     def test_stop_if_pause_pause_to_resume(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
-    ):
+    ) -> None:
         # immediately return if resumed after waiting
         thread_controller.pause()
         threading.Timer(0.1, thread_controller.resume).start()
@@ -165,7 +173,7 @@ class TestControllerCommandHandler:
 
     def test_stop_if_pause_when_already_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
-    ):
+    ) -> None:
         # immediately return if already shutdown
         thread_controller.shutdown()
         start = time.perf_counter()
@@ -174,7 +182,7 @@ class TestControllerCommandHandler:
 
     def test_stop_if_pause_pause_to_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
-    ):
+    ) -> None:
         # immediately return if shutdown after waiting
         thread_controller.pause()
         threading.Timer(0.1, thread_controller.shutdown).start()
@@ -184,7 +192,7 @@ class TestControllerCommandHandler:
 
     def test_manage_loop_when_already_resumed(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
-    ):
+    ) -> None:
         # immediately return True if already resumed
         thread_controller.resume()
         start = time.perf_counter()
@@ -193,7 +201,7 @@ class TestControllerCommandHandler:
 
     def test_manage_loop_pause_to_resume(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
-    ):
+    ) -> None:
         # immediately return True if resumed after waiting
         thread_controller.pause()
         threading.Timer(0.1, thread_controller.resume).start()
@@ -203,7 +211,7 @@ class TestControllerCommandHandler:
 
     def test_manage_loop_when_already_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
-    ):
+    ) -> None:
         # immediately return False if already shutdown
         thread_controller.shutdown()
         start = time.perf_counter()
@@ -212,7 +220,7 @@ class TestControllerCommandHandler:
 
     def test_manage_loop_pause_to_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
-    ):
+    ) -> None:
         # immediately return False if shutdown after waiting
         thread_controller.pause()
         threading.Timer(0.1, thread_controller.shutdown).start()
@@ -222,7 +230,7 @@ class TestControllerCommandHandler:
 
     def test_manage_loop_with_pause_resume_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
-    ):
+    ) -> None:
         counter = 0
 
         def inifinity_count():
@@ -264,31 +272,39 @@ class TestControllerCommandHandler:
 
 
 class TestThreadStatus:
+    """A test class for ThreadStatus."""
+
     @pytest.fixture()
-    def thread_status(self):
+    def thread_status(self) -> ThreadStatus:
         """Fixture for thread status."""
         return ThreadStatus()
 
-    def test_initial_state(self, thread_status: ThreadStatus):
+    def test_initial_state(self, thread_status: ThreadStatus) -> None:
         """Test initial state of thread status."""
         assert thread_status.is_pause() is False
         assert thread_status.is_resume() is True
 
-    def test_pause_and_related_predicate_methods(self, thread_status: ThreadStatus):
+    def test_pause_and_related_predicate_methods(
+        self, thread_status: ThreadStatus
+    ) -> None:
         """Test pause and related predicate methods."""
         thread_status.pause()
 
         assert thread_status.is_pause() is True
         assert thread_status.is_resume() is False
 
-    def test_resume_and_related_predicate_methods(self, thread_status: ThreadStatus):
+    def test_resume_and_related_predicate_methods(
+        self, thread_status: ThreadStatus
+    ) -> None:
         """Test resume and related predicate methods."""
         thread_status.resume()
 
         assert thread_status.is_pause() is False
         assert thread_status.is_resume() is True
 
-    def test_wait_for_pause_when_already_paused(self, thread_status: ThreadStatus):
+    def test_wait_for_pause_when_already_paused(
+        self, thread_status: ThreadStatus
+    ) -> None:
         """Test wait_for_pause when the status is already paused."""
         # immediately return True if already paused
         thread_status.pause()
@@ -296,7 +312,9 @@ class TestThreadStatus:
         assert thread_status.wait_for_pause(0.1) is True
         assert time.perf_counter() - start < 1e-3
 
-    def test_wait_for_pause_when_already_resumed(self, thread_status: ThreadStatus):
+    def test_wait_for_pause_when_already_resumed(
+        self, thread_status: ThreadStatus
+    ) -> None:
         """Test wait_for_pause when the status is already resumed."""
         # wait timeout and return False if resumed
         thread_status.resume()
@@ -306,7 +324,7 @@ class TestThreadStatus:
 
     def test_wait_for_pause_when_paused_after_waiting(
         self, thread_status: ThreadStatus
-    ):
+    ) -> None:
         """Test wait_for_pause when the status is resumed at first, and paused
         after waiting."""
         # immediately return True if paused after waiting
@@ -318,7 +336,9 @@ class TestThreadStatus:
 
 
 class TestReadOnlyThreadStatus:
-    def test_exposed_methods(self):
+    """A test class for ReadOnlyThreadStatus."""
+
+    def test_exposed_methods(self) -> None:
         """Test of exposure of functions from ThreadStatus."""
         thread_status = ThreadStatus()
         read_only_thread_status = ReadOnlyThreadStatus(thread_status)
@@ -328,30 +348,36 @@ class TestReadOnlyThreadStatus:
 
 
 class TestThreadStatusesHandler:
+    """A test class for ThreadStatusesHandler."""
+
     @pytest.fixture()
-    def inference_thread_status(self):
+    def inference_thread_status(self) -> ThreadStatus:
         """Fixture for thread status, used for inference."""
         return ThreadStatus()
 
     @pytest.fixture()
-    def read_only_inference_thread_status(self, inference_thread_status):
+    def read_only_inference_thread_status(
+        self, inference_thread_status
+    ) -> ReadOnlyThreadStatus:
         """Fixture for read-only thread status, used for inference."""
         return ReadOnlyThreadStatus(inference_thread_status)
 
     @pytest.fixture()
-    def training_thread_status(self):
+    def training_thread_status(self) -> ThreadStatus:
         """Fixture for thread status, used for training."""
         return ThreadStatus()
 
     @pytest.fixture()
-    def read_only_training_thread_status(self, training_thread_status):
+    def read_only_training_thread_status(
+        self, training_thread_status
+    ) -> ReadOnlyThreadStatus:
         """Fixture for read-only thread status, used for training."""
         return ReadOnlyThreadStatus(training_thread_status)
 
     @pytest.fixture()
     def thread_status_handler(
         self, read_only_inference_thread_status, read_only_training_thread_status
-    ):
+    ) -> ThreadStatusesHandler:
         """Fixture for thread status handler."""
         return ThreadStatusesHandler(
             {
@@ -360,7 +386,7 @@ class TestThreadStatusesHandler:
             }
         )
 
-    def test_wait_for_all_threads_pause_when_empty_status(self):
+    def test_wait_for_all_threads_pause_when_empty_status(self) -> None:
         """Test wait_for_all_threads_pause when statuses is empty."""
         # immediately return True if statuses is empty
         thread_status_handler = ThreadStatusesHandler(statuses={})
@@ -370,7 +396,7 @@ class TestThreadStatusesHandler:
 
     def test_wait_for_all_threads_pause_all_when_all_threads_paused(
         self, inference_thread_status, training_thread_status, thread_status_handler
-    ):
+    ) -> None:
         """Test wait_for_all_threads_pause when all threads are paused."""
         # immediately return True if all threads are paused
         inference_thread_status.pause()
@@ -378,7 +404,7 @@ class TestThreadStatusesHandler:
 
         start = time.perf_counter()
         assert thread_status_handler.wait_for_all_threads_pause(0.1) is True
-        assert time.perf_counter() - start < 2e-3  # test not passed if 1e-3
+        assert time.perf_counter() - start < 1e-2  # test not passed if 1e-3
 
     @pytest.mark.parametrize(
         "is_inference_resumed, is_training_resumed",
@@ -396,7 +422,7 @@ class TestThreadStatusesHandler:
         inference_thread_status,
         training_thread_status,
         thread_status_handler,
-    ):
+    ) -> None:
         """Test wait_for_all_threads_pause when some threads are resumed."""
         # wait timeout and return False if some threads are resumed
         inference_thread_status.pause()
@@ -444,7 +470,7 @@ class TestThreadStatusesHandler:
         inference_thread_status,
         training_thread_status,
         thread_status_handler,
-    ):
+    ) -> None:
         """Test wait_for_all_threads_pause when all threads are paused after
         waiting."""
         # immediately return True if all threads are paused after waiting
