@@ -1,4 +1,4 @@
-from pamiq_core.utils import get_class_module_path
+from pamiq_core.utils.reflection import get_class_module_path
 
 
 class TestClass:
