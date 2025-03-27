@@ -10,6 +10,18 @@ type OnPausedCallback = Callable[[], None]
 type OnResumedCallback = Callable[[], None]
 
 
+class ThreadEventMixin:
+    """A mixin class to provide event handling methods for a thread."""
+
+    def on_paused(self) -> None:
+        """The method to be called when the thread is paused."""
+        pass
+
+    def on_resumed(self) -> None:
+        """The method to be called when the thread is resumed."""
+        pass
+
+
 class ThreadController:
     """The controller class for sending commands from the control thread to
     other threads.
@@ -136,14 +148,14 @@ class ControllerCommandHandler:
             # In this implementation, `self._on_pause()` is invoked almost immediately when a pause occurs.
             # Because the `ControllerCommandHandler` primarily runs `manage_loop()`,
             # the `stop_if_pause()` method is frequently executed.
-            self._on_paused()
+            self.on_paused()
             paused = True
 
         while not self._controller.wait_for_resume(1.0):
             pass
 
         if paused:
-            self._on_resumed()
+            self.on_resumed()
 
     def manage_loop(self) -> bool:
         """Manages the infinite loop: blocking during thread is paused, and returning thread's activity flag.
@@ -264,15 +276,3 @@ class ThreadStatusesHandler:
                 )
             success &= result
         return success
-
-
-class ThreadEventMixin:
-    """A mixin class to provide event handling methods for a thread."""
-
-    def on_paused(self) -> None:
-        """The method to be called when the thread is paused."""
-        pass
-
-    def on_resumed(self) -> None:
-        """The method to be called when the thread is resumed."""
-        pass
