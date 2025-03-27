@@ -154,17 +154,35 @@ class TestControllerCommandHandler:
         return ControllerCommandHandler(read_only_controller)
 
     def test_stop_if_pause_when_already_resumed(
-        self, thread_controller: ThreadController, handler: ControllerCommandHandler
+        self,
+        thread_controller: ThreadController,
+        handler: ControllerCommandHandler,
+        mocker,
     ) -> None:
+        # prepare mock objects
+        on_paused_callback_mock = mocker.patch.object(handler, "_on_paused")
+        on_resumed_callback_mock = mocker.patch.object(handler, "_on_resumed")
+
         # immediately return if already resumed
         thread_controller.resume()
         start = time.perf_counter()
         handler.stop_if_pause()
         assert time.perf_counter() - start < 1e-3
 
+        # callbacks are not called
+        on_paused_callback_mock.assert_not_called()
+        on_resumed_callback_mock.assert_not_called()
+
     def test_stop_if_pause_pause_to_resume(
-        self, thread_controller: ThreadController, handler: ControllerCommandHandler
+        self,
+        thread_controller: ThreadController,
+        handler: ControllerCommandHandler,
+        mocker,
     ) -> None:
+        # prepare mock objects
+        on_paused_callback_mock = mocker.patch.object(handler, "_on_paused")
+        on_resumed_callback_mock = mocker.patch.object(handler, "_on_resumed")
+
         # immediately return if resumed after waiting
         thread_controller.pause()
         threading.Timer(0.1, thread_controller.resume).start()
@@ -172,9 +190,14 @@ class TestControllerCommandHandler:
         handler.stop_if_pause()
         assert 0.1 <= time.perf_counter() - start < 0.2
 
+        # callbacks are called
+        on_paused_callback_mock.assert_called_once()
+        on_resumed_callback_mock.assert_called_once()
+
     def test_stop_if_pause_when_already_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
     ) -> None:
+        # no test for callbacks since callbacks are only related to pause/resume
         # immediately return if already shutdown
         thread_controller.shutdown()
         start = time.perf_counter()
@@ -184,6 +207,7 @@ class TestControllerCommandHandler:
     def test_stop_if_pause_pause_to_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
     ) -> None:
+        # no test for callbacks since callbacks are only related to pause/resume
         # immediately return if shutdown after waiting
         thread_controller.pause()
         threading.Timer(0.1, thread_controller.shutdown).start()
