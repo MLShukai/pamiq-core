@@ -36,7 +36,7 @@ class ThreadController:
         """Get a read-only view of this controller.
 
         Returns:
-            ReadOnlyController: A read-only interface to this controller.
+            A read-only interface to this controller.
         """
         return ReadOnlyController(self)
 
@@ -199,7 +199,7 @@ class ThreadStatus:
         """Get a read-only view of this thread status.
 
         Returns:
-            ReadOnlyThreadStatus: A read-only interface to this thread status.
+            A read-only interface to this thread status.
         """
 
         return ReadOnlyThreadStatus(self)
