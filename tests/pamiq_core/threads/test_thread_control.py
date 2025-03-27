@@ -160,8 +160,8 @@ class TestControllerCommandHandler:
         mocker,
     ) -> None:
         # prepare mock objects
-        on_paused_callback_mock = mocker.patch.object(handler, "_on_paused")
-        on_resumed_callback_mock = mocker.patch.object(handler, "_on_resumed")
+        on_paused_callback_mock = mocker.spy(handler, "on_paused")
+        on_resumed_callback_mock = mocker.spy(handler, "on_resumed")
 
         # immediately return if already resumed
         thread_controller.resume()
