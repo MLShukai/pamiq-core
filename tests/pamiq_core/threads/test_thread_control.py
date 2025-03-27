@@ -191,8 +191,8 @@ class TestControllerCommandHandler:
         assert 0.1 <= time.perf_counter() - start < 0.2
 
         # callbacks are called
-        on_paused_callback_mock.assert_called_once()
-        on_resumed_callback_mock.assert_called_once()
+        on_paused_callback_mock.assert_called_once_with()
+        on_resumed_callback_mock.assert_called_once_with()
 
     def test_stop_if_pause_when_already_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
