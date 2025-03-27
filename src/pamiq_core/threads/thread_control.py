@@ -119,8 +119,8 @@ class ControllerCommandHandler:
             on_resumed_callback: The callback function to be called when the thread is resumed.
         """
         self._controller = controller
-        self._on_paused = on_paused_callback
-        self._on_resumed = on_resumed_callback
+        self.on_paused = on_paused_callback
+        self.on_resumed = on_resumed_callback
 
     def stop_if_pause(self) -> None:
         """Wait until the thread is resumed, or return immediately if the
