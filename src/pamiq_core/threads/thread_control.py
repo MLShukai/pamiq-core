@@ -1,9 +1,25 @@
 import logging
 import threading
+from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 
 from pamiq_core.threads.thread_types import ThreadTypes
 from pamiq_core.utils.reflection import get_class_module_path
+
+type OnPausedCallback = Callable[[], None]
+type OnResumedCallback = Callable[[], None]
+
+
+class ThreadEventMixin:
+    """A mixin class to provide event handling methods for a thread."""
+
+    def on_paused(self) -> None:
+        """The method to be called when the thread is paused."""
+        pass
+
+    def on_resumed(self) -> None:
+        """The method to be called when the thread is resumed."""
+        pass
 
 
 class ThreadController:
@@ -99,25 +115,47 @@ class ReadOnlyController:
 
 class ControllerCommandHandler:
     """A class, handles commands for thread management, facilitating
-    communication and control between the control thread and other threads.
+    communication and control between the control thread and other threads."""
 
-    Args:
-        controller: The ReadOnlyController object to be read.
-    """
+    def __init__(
+        self,
+        controller: ReadOnlyController,
+        on_paused_callback: OnPausedCallback = lambda: None,
+        on_resumed_callback: OnResumedCallback = lambda: None,
+    ) -> None:
+        """Initialize the ControllerCommandHandler object.
 
-    def __init__(self, controller: ReadOnlyController) -> None:
+        Args:
+            controller: The ReadOnlyController object to be read.
+            on_paused_callback: The callback function to be called when the thread is paused.
+            on_resumed_callback: The callback function to be called when the thread is resumed.
+        """
         self._controller = controller
+        self.on_paused = on_paused_callback
+        self.on_resumed = on_resumed_callback
 
     def stop_if_pause(self) -> None:
-        """This function is used to stop the execution of the current thread if
-        the thread is paused.
+        """Wait until the thread is resumed, or return immediately if the
+        thread is resumed. on_paused_callback and on_resumed_callback will be
+        called when the thread is paused and resumed, respectively.
 
         Behavior of this function:
         * If the thread is resume: the function will return immediately.
         * If the thread is paused: the function will block until the thread is resumed or shutdown.
         """
+        paused = False
+        if self._controller.is_pause():
+            # In this implementation, `self._on_pause()` is invoked almost immediately when a pause occurs.
+            # Because the `ControllerCommandHandler` primarily runs `manage_loop()`,
+            # the `stop_if_pause()` method is frequently executed.
+            self.on_paused()
+            paused = True
+
         while not self._controller.wait_for_resume(1.0):
             pass
+
+        if paused:
+            self.on_resumed()
 
     def manage_loop(self) -> bool:
         """Manages the infinite loop: blocking during thread is paused, and returning thread's activity flag.
