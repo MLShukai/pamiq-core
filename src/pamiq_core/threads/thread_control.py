@@ -269,10 +269,10 @@ class ThreadStatusesHandler:
 class ThreadEventMixin:
     """A mixin class to provide event handling methods for a thread."""
 
-    def _on_paused(self) -> None:
+    def on_paused(self) -> None:
         """The method to be called when the thread is paused."""
         pass
 
-    def _on_resumed(self) -> None:
+    def on_resumed(self) -> None:
         """The method to be called when the thread is resumed."""
         pass
