@@ -5,7 +5,6 @@ from typing import Any, Protocol, override
 import pytest
 import torch
 import torch.nn as nn
-from pytest_mock import MockerFixture
 
 from pamiq_core.model import InferenceModel, TrainingModel
 from pamiq_core.torch import (
