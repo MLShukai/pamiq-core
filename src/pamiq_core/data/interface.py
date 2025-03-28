@@ -160,6 +160,10 @@ class DataUser[T](PersistentStateMixin):
         with open(path / "timestamps.pkl", "rb") as f:
             self._timestamps = deque(pickle.load(f), maxlen=self._buffer.max_size)
 
+    def __len__(self) -> int:
+        """Returns the current number of samples in the buffer."""
+        return len(self._buffer)
+
 
 class DataCollector[T]:
     """A thread-safe collector for buffered data.

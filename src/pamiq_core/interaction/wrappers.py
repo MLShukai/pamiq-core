@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
-from typing import override
+from typing import cast, override
 
 from pamiq_core.interaction.env import Environment
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
@@ -70,6 +70,20 @@ class LambdaWrapper[T, W](Wrapper[T, W]):
         return self._func(value)
 
 
+def _ensure_wrapper[T, W](wrapper: Wrapper[T, W] | Callable[[T], W]) -> Wrapper[T, W]:
+    """Ensure the given object is a Wrapper instance.
+
+    Args:
+        wrapper: A wrapper instance or function.
+
+    Returns:
+        A Wrapper instance.
+    """
+    if isinstance(wrapper, Wrapper):
+        return cast(Wrapper[T, W], wrapper)  # Avoid unknown member type error.
+    return LambdaWrapper(wrapper)
+
+
 class EnvironmentWrapper[ObsType, WrappedObsType, ActType, WrappedActType](
     Environment[WrappedObsType, WrappedActType]
 ):
@@ -82,8 +96,10 @@ class EnvironmentWrapper[ObsType, WrappedObsType, ActType, WrappedActType](
     def __init__(
         self,
         env: Environment[ObsType, ActType],
-        obs_wrapper: Wrapper[ObsType, WrappedObsType],
-        act_wrapper: Wrapper[WrappedActType, ActType],
+        obs_wrapper: Wrapper[ObsType, WrappedObsType]
+        | Callable[[ObsType], WrappedObsType],
+        act_wrapper: Wrapper[WrappedActType, ActType]
+        | Callable[[WrappedActType], ActType],
     ) -> None:
         """Initialize with an environment and wrappers.
 
@@ -93,8 +109,8 @@ class EnvironmentWrapper[ObsType, WrappedObsType, ActType, WrappedActType](
             act_wrapper: Wrapper for transforming actions before passing to the environment.
         """
         self.env = env
-        self._obs_wrapper = obs_wrapper
-        self._act_wrapper = act_wrapper
+        self._obs_wrapper = _ensure_wrapper(obs_wrapper)
+        self._act_wrapper = _ensure_wrapper(act_wrapper)
 
     @override
     def observe(self) -> WrappedObsType:
@@ -159,7 +175,9 @@ class SensorWrapper[T, W](Sensor[W]):
     wrapped sensor.
     """
 
-    def __init__(self, sensor: Sensor[T], wrapper: Wrapper[T, W]) -> None:
+    def __init__(
+        self, sensor: Sensor[T], wrapper: Wrapper[T, W] | Callable[[T], W]
+    ) -> None:
         """Initialize with a sensor and a wrapper.
 
         Args:
@@ -167,7 +185,7 @@ class SensorWrapper[T, W](Sensor[W]):
             wrapper: Wrapper for transforming sensor readings.
         """
         self.sensor = sensor
-        self._wrapper = wrapper
+        self._wrapper = _ensure_wrapper(wrapper)
 
     @override
     def read(self) -> W:
@@ -219,7 +237,9 @@ class ActuatorWrapper[T, W](Actuator[W]):
     to the wrapped actuator.
     """
 
-    def __init__(self, actuator: Actuator[T], wrapper: Wrapper[W, T]) -> None:
+    def __init__(
+        self, actuator: Actuator[T], wrapper: Wrapper[W, T] | Callable[[W], T]
+    ) -> None:
         """Initialize with an actuator and a wrapper.
 
         Args:
@@ -227,7 +247,7 @@ class ActuatorWrapper[T, W](Actuator[W]):
             wrapper: Wrapper for transforming actions.
         """
         self.actuator = actuator
-        self._wrapper = wrapper
+        self._wrapper = _ensure_wrapper(wrapper)
 
     @override
     def operate(self, action: W) -> None:

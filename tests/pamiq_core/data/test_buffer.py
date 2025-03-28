@@ -13,6 +13,11 @@ class TestDataBuffer:
         """Test DataBuffer is PersistentStateMixin subclass."""
         assert issubclass(DataBuffer, PersistentStateMixin)
 
+    @pytest.mark.parametrize("name", ["__len__", "get_data", "add"])
+    def test_abstract_methods(self, name):
+        """Test that abstract method in DataBuffer."""
+        assert name in DataBuffer.__abstractmethods__
+
     def test_init(self):
         """Test DataBuffer initialization with valid parameters."""
         data_names = ["state", "action", "reward"]

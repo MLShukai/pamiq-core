@@ -1,4 +1,25 @@
+import logging
 import threading
+from collections.abc import Callable
+from concurrent.futures import Future, ThreadPoolExecutor
+
+from pamiq_core.threads.thread_types import ThreadTypes
+from pamiq_core.utils.reflection import get_class_module_path
+
+type OnPausedCallback = Callable[[], None]
+type OnResumedCallback = Callable[[], None]
+
+
+class ThreadEventMixin:
+    """A mixin class to provide event handling methods for a thread."""
+
+    def on_paused(self) -> None:
+        """The method to be called when the thread is paused."""
+        pass
+
+    def on_resumed(self) -> None:
+        """The method to be called when the thread is resumed."""
+        pass
 
 
 class ThreadController:
@@ -8,13 +29,13 @@ class ThreadController:
     NOTE: **Only one thread can control this object.**
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._shutdown_event = threading.Event()
         self._resume_event = threading.Event()
         self.resume()
         self.activate()
 
-    def resume(self):
+    def resume(self) -> None:
         """Resume the thread, by setting the resume event.
 
         Raises:
@@ -24,7 +45,7 @@ class ThreadController:
             raise RuntimeError("ThreadController must be activated before resume().")
         self._resume_event.set()
 
-    def pause(self):
+    def pause(self) -> None:
         """Pause the thread, by clearing the resume event.
 
         Raises:
@@ -34,15 +55,15 @@ class ThreadController:
             raise RuntimeError("ThreadController must be activated before pause().")
         self._resume_event.clear()
 
-    def is_resume(self):
+    def is_resume(self) -> bool:
         """Returns whether the thread is resumed."""
         return self._resume_event.is_set()
 
-    def is_pause(self):
+    def is_pause(self) -> bool:
         """Returns whether the thread is paused."""
         return not self.is_resume()
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Shutdown the thread, by setting the shutdown event."""
 
         if self.is_shutdown():
@@ -53,19 +74,19 @@ class ThreadController:
         self.resume()
         self._shutdown_event.set()
 
-    def activate(self):
+    def activate(self) -> None:
         """Activate the thread, by clearing the shutdown event."""
         self._shutdown_event.clear()
 
-    def is_shutdown(self):
+    def is_shutdown(self) -> bool:
         """Returns whether the thread is shutdown."""
         return self._shutdown_event.is_set()
 
-    def is_active(self):
+    def is_active(self) -> bool:
         """Returns whether the thread is active."""
         return not self.is_shutdown()
 
-    def wait_for_resume(self, timeout: float):
+    def wait_for_resume(self, timeout: float) -> bool:
         """Wait for the resume event to be set.
 
         Args:
@@ -84,7 +105,7 @@ class ReadOnlyController:
         controller: The ThreadController object to be read.
     """
 
-    def __init__(self, controller: ThreadController):
+    def __init__(self, controller: ThreadController) -> None:
         self.is_resume = controller.is_resume
         self.is_pause = controller.is_pause
         self.is_shutdown = controller.is_shutdown
@@ -94,25 +115,47 @@ class ReadOnlyController:
 
 class ControllerCommandHandler:
     """A class, handles commands for thread management, facilitating
-    communication and control between the control thread and other threads.
+    communication and control between the control thread and other threads."""
 
-    Args:
-        controller: The ReadOnlyController object to be read.
-    """
+    def __init__(
+        self,
+        controller: ReadOnlyController,
+        on_paused_callback: OnPausedCallback = lambda: None,
+        on_resumed_callback: OnResumedCallback = lambda: None,
+    ) -> None:
+        """Initialize the ControllerCommandHandler object.
 
-    def __init__(self, controller: ReadOnlyController):
+        Args:
+            controller: The ReadOnlyController object to be read.
+            on_paused_callback: The callback function to be called when the thread is paused.
+            on_resumed_callback: The callback function to be called when the thread is resumed.
+        """
         self._controller = controller
+        self.on_paused = on_paused_callback
+        self.on_resumed = on_resumed_callback
 
     def stop_if_pause(self) -> None:
-        """This function is used to stop the execution of the current thread if
-        the thread is paused.
+        """Wait until the thread is resumed, or return immediately if the
+        thread is resumed. on_paused_callback and on_resumed_callback will be
+        called when the thread is paused and resumed, respectively.
 
         Behavior of this function:
         * If the thread is resume: the function will return immediately.
         * If the thread is paused: the function will block until the thread is resumed or shutdown.
         """
+        paused = False
+        if self._controller.is_pause():
+            # In this implementation, `self._on_pause()` is invoked almost immediately when a pause occurs.
+            # Because the `ControllerCommandHandler` primarily runs `manage_loop()`,
+            # the `stop_if_pause()` method is frequently executed.
+            self.on_paused()
+            paused = True
+
         while not self._controller.wait_for_resume(1.0):
             pass
+
+        if paused:
+            self.on_resumed()
 
     def manage_loop(self) -> bool:
         """Manages the infinite loop: blocking during thread is paused, and returning thread's activity flag.
@@ -131,3 +174,105 @@ class ControllerCommandHandler:
         """
         self.stop_if_pause()
         return self._controller.is_active()
+
+
+class ThreadStatus:
+    """A class to manage the status of a thread.
+
+    The readonly interface is provided by the ReadOnlyThreadStatus class
+    and mainly used for monitoring the status of a thread.
+    """
+
+    def __init__(self) -> None:
+        self._paused_event = threading.Event()
+
+    def pause(self) -> None:
+        """Marks the thread as paused.
+
+        This function is invoked when the thread enters a paused state.
+        """
+        self._paused_event.set()
+
+    def resume(self) -> None:
+        """Marks the thread as resumed.
+
+        This function is invoked when the thread enters a resumed state.
+        """
+        self._paused_event.clear()
+
+    def is_pause(self) -> bool:
+        """Returns whether the thread is paused.
+
+        Returns:
+            bool: True if the thread is paused, False otherwise.
+        """
+        return self._paused_event.is_set()
+
+    def is_resume(self) -> bool:
+        """Returns whether the thread is resumed.
+
+        Returns:
+            bool: True if the thread is resumed, False otherwise.
+        """
+        return not self.is_pause()
+
+    def wait_for_pause(self, timeout: float) -> bool:
+        """Wait for the thread to be paused.
+
+        Args:
+            timeout: The maximum time (second) to wait for the thread to be paused.
+
+        Returns:
+            bool: True if the thread is already paused or the thread is paused within the timeout, False otherwise.
+        """
+        return self._paused_event.wait(timeout)
+
+
+class ReadOnlyThreadStatus:
+    """A read-only interface to the ThreadStatus class."""
+
+    def __init__(self, status: ThreadStatus) -> None:
+        self.is_pause = status.is_pause
+        self.is_resume = status.is_resume
+        self.wait_for_pause = status.wait_for_pause
+
+
+class ThreadStatusesHandler:
+    """A class to manage the statuses of multiple threads."""
+
+    def __init__(self, statuses: dict[ThreadTypes, ReadOnlyThreadStatus]) -> None:
+        """Initialize the ThreadStatusesHandler object.
+
+        Args:
+            statuses: A dictionary of ReadOnlyThreadStatus objects.
+        """
+        self._statuses = statuses
+        self._logger = logging.getLogger(get_class_module_path(self.__class__))
+
+    def wait_for_all_threads_pause(self, timeout: float) -> bool:
+        """Wait for all threads to be paused.
+
+        Args:
+            timeout: The maximum time (second) to wait for all threads to be paused.
+
+        Returns:
+            bool: True if all threads are already paused or all threads are paused within the timeout, False otherwise.
+        """
+        if len(self._statuses) == 0:
+            # Need to return first to avoid ValueError in ThreadPoolExecutor
+            # (max_workers must be greater than 0)
+            return True
+
+        tasks: dict[ThreadTypes, Future[bool]] = {}
+        with ThreadPoolExecutor(max_workers=len(self._statuses)) as executor:
+            for thread_type, stat in self._statuses.items():
+                tasks[thread_type] = executor.submit(stat.wait_for_pause, timeout)
+
+        success = True
+        for thread_type, tsk in tasks.items():
+            if not (result := tsk.result()):
+                self._logger.error(
+                    f"Timeout waiting for '{thread_type.thread_name}' thread to pause after {timeout} seconds."
+                )
+            success &= result
+        return success

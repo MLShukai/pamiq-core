@@ -62,3 +62,12 @@ class DataBuffer[T](ABC, PersistentStateMixin):
             Each sequence has the same length.
         """
         ...
+
+    @abstractmethod
+    def __len__(self) -> int:
+        """Returns the current number of samples in the buffer.
+
+        Returns:
+            int: The number of samples currently stored in the buffer.
+        """
+        ...

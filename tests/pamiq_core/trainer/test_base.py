@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import override
 
 import pytest
@@ -42,7 +43,11 @@ class TestTrainer:
 
     @pytest.fixture
     def mock_user(self, mocker: MockerFixture) -> DataUser:
-        return mocker.Mock(DataUser)
+        user = mocker.MagicMock(DataUser)
+        # Configure mock for trainability tests
+        user.__len__.return_value = 100  # Mock buffer size
+        user.count_data_added_since.return_value = 10  # Mock new data count
+        return user
 
     @pytest.fixture
     def training_models_dict(self, mock_model) -> TrainingModelsDict:
@@ -61,6 +66,15 @@ class TestTrainer:
         return TrainerImpl()
 
     @pytest.fixture
+    def conditional_trainer(self) -> TrainerImpl:
+        """Fixture providing a trainer with training conditions."""
+        return TrainerImpl(
+            training_condition_data_user="data",
+            min_buffer_size=50,
+            min_new_data_count=5,
+        )
+
+    @pytest.fixture
     def trainer_attached(
         self,
         trainer: TrainerImpl,
@@ -70,6 +84,19 @@ class TestTrainer:
         trainer.attach_training_models_dict(training_models_dict=training_models_dict)
         trainer.attach_data_users_dict(data_users_dict=data_users_dict)
         return trainer
+
+    @pytest.fixture
+    def conditional_trainer_attached(
+        self,
+        conditional_trainer: TrainerImpl,
+        training_models_dict: TrainingModelsDict,
+        data_users_dict: DataUsersDict,
+    ) -> TrainerImpl:
+        conditional_trainer.attach_training_models_dict(
+            training_models_dict=training_models_dict
+        )
+        conditional_trainer.attach_data_users_dict(data_users_dict=data_users_dict)
+        return conditional_trainer
 
     def test_attach_training_models_dict(
         self,
@@ -113,3 +140,87 @@ class TestTrainer:
         mock_train.assert_called_once_with()
         mock_sync_models.assert_called_once_with()
         mock_teardown.assert_called_once_with()
+
+    def test_is_trainable_with_condition_sufficient_data(
+        self,
+        conditional_trainer_attached: TrainerImpl,
+        mock_user,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test is_trainable returns True when conditions are met."""
+        # Configure mock for sufficient data
+        mock_user.__len__.return_value = 100  # > min_buffer_size (50)
+        mock_user.count_data_added_since.return_value = 10  # > min_new_data_count (5)
+
+        # Mock current time for deterministic testing
+        mock_time = mocker.patch("pamiq_core.time.time")
+        mock_time.return_value = 1000.0
+
+        assert conditional_trainer_attached.is_trainable() is True
+
+        # Verify data user was updated and checked properly
+        mock_user.update.assert_called_once()
+        mock_user.count_data_added_since.assert_called_once_with(float("-inf"))
+
+        # Verify previous training time was updated
+        conditional_trainer_attached.is_trainable()
+        mock_user.count_data_added_since.assert_called_with(1000.0)
+
+    def test_is_trainable_with_condition_insufficient_buffer_size(
+        self, conditional_trainer_attached: TrainerImpl, mock_user
+    ) -> None:
+        """Test is_trainable returns False when buffer size is insufficient."""
+        # Configure mock for insufficient buffer size
+        mock_user.__len__.return_value = 30  # < min_buffer_size (50)
+        mock_user.count_data_added_since.return_value = 10  # > min_new_data_count (5)
+
+        assert conditional_trainer_attached.is_trainable() is False
+
+    def test_is_trainable_with_condition_insufficient_new_data(
+        self,
+        conditional_trainer_attached: TrainerImpl,
+        mock_user,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test is_trainable returns False when new data count is
+        insufficient."""
+        # Set an initial previous training time
+
+        # Configure mock for insufficient new data
+        mock_user.__len__.return_value = 100  # > min_buffer_size (50)
+        mock_user.count_data_added_since.return_value = 3  # < min_new_data_count (5)
+
+        assert conditional_trainer_attached.is_trainable() is False
+
+    def test_run_skips_when_not_trainable(
+        self,
+        conditional_trainer_attached: TrainerImpl,
+        mock_user,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test that run() skips execution when not trainable."""
+        # Configure mock to make trainer not trainable
+        mock_user.__len__.return_value = 10  # < min_buffer_size (50)
+
+        # Spy on the methods that should be skipped
+        mock_setup = mocker.spy(conditional_trainer_attached, "setup")
+        mock_train = mocker.spy(conditional_trainer_attached, "train")
+
+        conditional_trainer_attached.run()
+
+        # Verify none of the training steps were executed
+        mock_setup.assert_not_called()
+        mock_train.assert_not_called()
+
+    def test_save_and_load_state(self, trainer: TrainerImpl, tmp_path: Path) -> None:
+        """Test save_state and load_state methods."""
+        test_path = tmp_path / "trainer"
+        state_path = test_path / "previous_training_time"
+        trainer.save_state(test_path)
+
+        assert state_path.is_file()
+        assert state_path.read_text("utf-8") == "-inf"
+
+        trainer._previous_training_time = 0
+        trainer.load_state(test_path)
+        assert trainer._previous_training_time == float("-inf")
