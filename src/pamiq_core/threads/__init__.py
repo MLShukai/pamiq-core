@@ -3,6 +3,7 @@ from .thread_control import (
     ReadOnlyController,
     ReadOnlyThreadStatus,
     ThreadController,
+    ThreadEventMixin,
     ThreadStatus,
     ThreadStatusesHandler,
 )
@@ -18,4 +19,5 @@ __all__ = [
     "ThreadStatus",
     "ReadOnlyThreadStatus",
     "ThreadStatusesHandler",
+    "ThreadEventMixin",
 ]
