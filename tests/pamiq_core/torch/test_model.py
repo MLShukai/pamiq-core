@@ -15,14 +15,6 @@ from pamiq_core.torch import (
 )
 
 
-def test_get_device() -> None:
-    pass
-
-
-def test_default_infer_procedure() -> None:
-    pass
-
-
 class TestTorchInferenceModel:
     @pytest.fixture
     def model(self) -> nn.Module:
