@@ -137,7 +137,7 @@ class ControllerCommandHandler:
     def stop_if_pause(self) -> None:
         """Wait until the thread is resumed, or return immediately if the
         thread is resumed. on_paused_callback and on_resumed_callback will be
-        called when the thread is paused and resumed, respectively.
+        called when the thread is paused and resumed, respectively. s.
 
         Behavior of this function:
         * If the thread is resume: the function will return immediately.
@@ -185,6 +185,7 @@ class ThreadStatus:
 
     def __init__(self) -> None:
         self._paused_event = threading.Event()
+        self._exception_event = threading.Event()
 
     def pause(self) -> None:
         """Marks the thread as paused.
@@ -216,6 +217,22 @@ class ThreadStatus:
         """
         return not self.is_pause()
 
+    def exception_raised(self) -> None:
+        """Marks the thread as having an exception.
+
+        This function is invoked when the thread encounters an
+        exception.
+        """
+        self._exception_event.set()
+
+    def is_exception_raised(self) -> bool:
+        """Returns whether the thread has an exception.
+
+        Returns:
+            bool: True if the thread has an "exception raised flag", False otherwise.
+        """
+        return self._exception_event.is_set()
+
     def wait_for_pause(self, timeout: float) -> bool:
         """Wait for the thread to be paused.
 
@@ -235,6 +252,7 @@ class ReadOnlyThreadStatus:
         self.is_pause = status.is_pause
         self.is_resume = status.is_resume
         self.wait_for_pause = status.wait_for_pause
+        self.is_exception_raised = status.is_exception_raised
 
 
 class ThreadStatusesHandler:
@@ -276,3 +294,18 @@ class ThreadStatusesHandler:
                 )
             success &= result
         return success
+
+    def check_exception_raised(self) -> bool:
+        """Check if any thread has an exception.
+
+        Returns:
+            bool: True if at least one thread has an exception, False otherwise.
+        """
+        flag = False
+        for thread_type, stat in self._statuses.items():
+            if stat.is_exception_raised():
+                self._logger.error(
+                    f"An exception has occurred in the '{thread_type.thread_name}' thread."
+                )
+                flag = True
+        return flag
