@@ -7,6 +7,7 @@ from pamiq_core.interaction.env import Environment
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
 from pamiq_core.interaction.modular_env import Actuator, ModularEnvironment, Sensor
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 
 class TestSensor:
@@ -17,6 +18,7 @@ class TestSensor:
         assert issubclass(Sensor, ABC)
         assert issubclass(Sensor, InteractionEventMixin)
         assert issubclass(Sensor, PersistentStateMixin)
+        assert issubclass(Sensor, ThreadEventMixin)
 
     def test_abstract_methods(self):
         """Test that Sensor has the correct abstract methods."""
@@ -31,6 +33,7 @@ class TestActuator:
         assert issubclass(Actuator, ABC)
         assert issubclass(Actuator, InteractionEventMixin)
         assert issubclass(Actuator, PersistentStateMixin)
+        assert issubclass(Actuator, ThreadEventMixin)
 
     def test_abstract_methods(self):
         """Test that Actuator has the correct abstract methods."""
@@ -115,3 +118,17 @@ class TestModularEnvironment:
 
         mock_sensor.load_state.assert_called_once_with(load_path / "sensor")
         mock_actuator.load_state.assert_called_once_with(load_path / "actuator")
+
+    def test_on_paused(self, env, mock_sensor, mock_actuator):
+        """Test that on_paused() calls on_paused on both sensor and
+        actuator."""
+        env.on_paused()
+        mock_sensor.on_paused.assert_called_once_with()
+        mock_actuator.on_paused.assert_called_once_with()
+
+    def test_on_resumed(self, env, mock_sensor, mock_actuator):
+        """Test that on_resumed() calls on_resumed on both sensor and
+        actuator."""
+        env.on_resumed()
+        mock_sensor.on_resumed.assert_called_once_with()
+        mock_actuator.on_resumed.assert_called_once_with()
