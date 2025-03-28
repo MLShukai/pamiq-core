@@ -137,7 +137,7 @@ class ControllerCommandHandler:
     def stop_if_pause(self) -> None:
         """Wait until the thread is resumed, or return immediately if the
         thread is resumed. on_paused_callback and on_resumed_callback will be
-        called when the thread is paused and resumed, respectively. s.
+        called when the thread is paused and resumed, respectively.
 
         Behavior of this function:
         * If the thread is resume: the function will return immediately.
