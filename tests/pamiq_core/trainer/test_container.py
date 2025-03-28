@@ -89,3 +89,29 @@ class TestTrainersDict:
         trainers_dict.load_state(path)
         for name, trainer in trainers.items():
             trainer.load_state.assert_called_once_with(path / name)
+
+    def test_on_paused(
+        self,
+        trainers_dict: TrainersDict,
+        trainers: dict[str, Trainer],
+    ) -> None:
+        """Test that on_paused calls on_paused on all trainers."""
+        # Call on_paused
+        trainers_dict.on_paused()
+
+        # Verify each trainer's on_paused was called
+        for trainer in trainers.values():
+            trainer.on_paused.assert_called_once_with()
+
+    def test_on_resumed(
+        self,
+        trainers_dict: TrainersDict,
+        trainers: dict[str, Trainer],
+    ) -> None:
+        """Test that on_resumed calls on_resumed on all trainers."""
+        # Call on_resumed
+        trainers_dict.on_resumed()
+
+        # Verify each trainer's on_resumed was called
+        for trainer in trainers.values():
+            trainer.on_resumed.assert_called_once_with()
