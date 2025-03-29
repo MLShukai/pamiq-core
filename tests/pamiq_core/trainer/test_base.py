@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import InferenceModel, TrainingModel, TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 from pamiq_core.trainer import Trainer
 
 
@@ -29,6 +30,7 @@ class TrainerImpl(Trainer):
 class TestTrainer:
     def test_trainer_subclasses(self):
         assert issubclass(Trainer, PersistentStateMixin)
+        assert issubclass(Trainer, ThreadEventMixin)
 
     def test_abstract_methods(self):
         assert Trainer.__abstractmethods__ == frozenset({"train"})
@@ -224,29 +226,3 @@ class TestTrainer:
         trainer._previous_training_time = 0
         trainer.load_state(test_path)
         assert trainer._previous_training_time == float("-inf")
-
-    def test_on_paused(
-        self, trainer_attached: TrainerImpl, mocker: MockerFixture
-    ) -> None:
-        """Test that on_paused calls the implementation method."""
-        # Spy on the on_paused method
-        on_paused_spy = mocker.spy(trainer_attached, "on_paused")
-
-        # Call on_paused
-        trainer_attached.on_paused()
-
-        # Verify it was called
-        on_paused_spy.assert_called_once_with()
-
-    def test_on_resumed(
-        self, trainer_attached: TrainerImpl, mocker: MockerFixture
-    ) -> None:
-        """Test that on_resumed calls the implementation method."""
-        # Spy on the on_resumed method
-        on_resumed_spy = mocker.spy(trainer_attached, "on_resumed")
-
-        # Call on_resumed
-        trainer_attached.on_resumed()
-
-        # Verify it was called
-        on_resumed_spy.assert_called_once_with()
