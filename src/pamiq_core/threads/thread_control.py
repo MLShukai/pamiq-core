@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import threading
 from collections.abc import Callable
@@ -28,6 +30,15 @@ class ThreadController:
 
     NOTE: **Only one thread can control this object.**
     """
+
+    @property
+    def read_only(self) -> ReadOnlyController:
+        """Get a read-only view of this controller.
+
+        Returns:
+            A read-only interface to this controller.
+        """
+        return ReadOnlyController(self)
 
     def __init__(self) -> None:
         self._shutdown_event = threading.Event()
@@ -182,6 +193,16 @@ class ThreadStatus:
     The readonly interface is provided by the ReadOnlyThreadStatus class
     and mainly used for monitoring the status of a thread.
     """
+
+    @property
+    def read_only(self) -> ReadOnlyThreadStatus:
+        """Get a read-only view of this thread status.
+
+        Returns:
+            A read-only interface to this thread status.
+        """
+
+        return ReadOnlyThreadStatus(self)
 
     def __init__(self) -> None:
         self._paused_event = threading.Event()

@@ -22,6 +22,11 @@ class TestThreadController:
     def thread_controller(self) -> ThreadController:
         return ThreadController()
 
+    def test_read_only_property(self, thread_controller: ThreadController) -> None:
+        """Test that the read_only property returns a valid
+        ReadOnlyController."""
+        assert isinstance(thread_controller.read_only, ReadOnlyController)
+
     def test_initial_state(self, thread_controller: ThreadController) -> None:
         assert thread_controller.is_resume() is True
         assert thread_controller.is_active() is True
@@ -303,6 +308,11 @@ class TestThreadStatus:
     def thread_status(self) -> ThreadStatus:
         """Fixture for thread status."""
         return ThreadStatus()
+
+    def test_read_only_property(self, thread_status: ThreadStatus) -> None:
+        """Test that the read_only property returns a valid
+        ReadOnlyThreadStatus."""
+        assert isinstance(thread_status.read_only, ReadOnlyThreadStatus)
 
     def test_initial_state(self, thread_status: ThreadStatus) -> None:
         """Test initial state of thread status."""
