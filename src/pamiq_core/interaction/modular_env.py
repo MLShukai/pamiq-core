@@ -3,12 +3,13 @@ from pathlib import Path
 from typing import override
 
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 from .env import Environment
 from .event_mixin import InteractionEventMixin
 
 
-class Sensor[T](ABC, InteractionEventMixin, PersistentStateMixin):
+class Sensor[T](ABC, InteractionEventMixin, PersistentStateMixin, ThreadEventMixin):
     """Abstract base class for sensors that read data from the environment.
 
     This class provides an interface for reading observations from
@@ -26,7 +27,7 @@ class Sensor[T](ABC, InteractionEventMixin, PersistentStateMixin):
         ...
 
 
-class Actuator[T](ABC, InteractionEventMixin, PersistentStateMixin):
+class Actuator[T](ABC, InteractionEventMixin, PersistentStateMixin, ThreadEventMixin):
     """Abstract base class for actuators that affect the environment.
 
     This class provides an interface for operating actuators based on
@@ -126,3 +127,17 @@ class ModularEnvironment[ObsType, ActType](Environment[ObsType, ActType]):
         """
         self.sensor.load_state(path / "sensor")
         self.actuator.load_state(path / "actuator")
+
+    @override
+    def on_paused(self) -> None:
+        """The method to be called when the thread is paused."""
+        super().on_paused()
+        self.sensor.on_paused()
+        self.actuator.on_paused()
+
+    @override
+    def on_resumed(self) -> None:
+        """The method to be called when the thread is resumed."""
+        super().on_resumed()
+        self.sensor.on_resumed()
+        self.actuator.on_resumed()

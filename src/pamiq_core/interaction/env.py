@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 from .event_mixin import InteractionEventMixin
 
 
-class Environment[ObsType, ActType](ABC, InteractionEventMixin, PersistentStateMixin):
+class Environment[ObsType, ActType](
+    ABC, InteractionEventMixin, PersistentStateMixin, ThreadEventMixin
+):
     """Base environment class for agent interaction."""
 
     @abstractmethod

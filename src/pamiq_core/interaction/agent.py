@@ -4,11 +4,14 @@ from typing import Any
 from pamiq_core.data import DataCollector, DataCollectorsDict
 from pamiq_core.model import InferenceModel, InferenceModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 from .event_mixin import InteractionEventMixin
 
 
-class Agent[ObsType, ActType](ABC, InteractionEventMixin, PersistentStateMixin):
+class Agent[ObsType, ActType](
+    ABC, InteractionEventMixin, PersistentStateMixin, ThreadEventMixin
+):
     """Base agent class for decision making.
 
     An agent receives observations from an environment and decides on

@@ -8,6 +8,7 @@ from pamiq_core.interaction.agent import Agent
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
 from pamiq_core.model import InferenceModel, InferenceModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 
 class AgentImpl(Agent[str, int]):
@@ -36,6 +37,7 @@ class TestAgent:
         """Test that Agent Super Class."""
         assert issubclass(Agent, InteractionEventMixin)
         assert issubclass(Agent, PersistentStateMixin)
+        assert issubclass(Agent, ThreadEventMixin)
 
     def test_abstract_method(self):
         """Test agent's abstract method."""

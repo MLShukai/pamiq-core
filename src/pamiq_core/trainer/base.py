@@ -6,9 +6,10 @@ from pamiq_core import time
 from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import TrainingModel, TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 
-class Trainer(ABC, PersistentStateMixin):
+class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
     """Abstract base trainer class.
 
     The `run` method is called repeatedly in the training thread.

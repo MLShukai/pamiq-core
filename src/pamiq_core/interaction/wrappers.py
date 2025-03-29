@@ -7,9 +7,10 @@ from pamiq_core.interaction.env import Environment
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
 from pamiq_core.interaction.modular_env import Actuator, Sensor
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 
-class Wrapper[T, W](ABC, InteractionEventMixin, PersistentStateMixin):
+class Wrapper[T, W](ABC, InteractionEventMixin, PersistentStateMixin, ThreadEventMixin):
     """Base wrapper class for transforming values.
 
     This abstract class provides an interface for wrapping and
@@ -167,6 +168,22 @@ class EnvironmentWrapper[ObsType, WrappedObsType, ActType, WrappedActType](
         self._obs_wrapper.load_state(path / "obs_wrapper")
         self._act_wrapper.load_state(path / "act_wrapper")
 
+    @override
+    def on_paused(self) -> None:
+        """The method to be called when the thread is paused."""
+        super().on_paused()
+        self.env.on_paused()
+        self._obs_wrapper.on_paused()
+        self._act_wrapper.on_paused()
+
+    @override
+    def on_resumed(self) -> None:
+        """The method to be called when the thread is on_resumed."""
+        super().on_resumed()
+        self.env.on_resumed()
+        self._obs_wrapper.on_resumed()
+        self._act_wrapper.on_resumed()
+
 
 class SensorWrapper[T, W](Sensor[W]):
     """Wrapper for Sensor that transforms sensor readings.
@@ -229,6 +246,20 @@ class SensorWrapper[T, W](Sensor[W]):
         self.sensor.load_state(path / "sensor")
         self._wrapper.load_state(path / "wrapper")
 
+    @override
+    def on_paused(self) -> None:
+        """The method to be called when the thread is paused."""
+        super().on_paused()
+        self.sensor.on_paused()
+        self._wrapper.on_paused()
+
+    @override
+    def on_resumed(self) -> None:
+        """The method to be called when the thread is resumed."""
+        super().on_resumed()
+        self.sensor.on_resumed()
+        self._wrapper.on_resumed()
+
 
 class ActuatorWrapper[T, W](Actuator[W]):
     """Wrapper for Actuator that transforms actions.
@@ -290,3 +321,17 @@ class ActuatorWrapper[T, W](Actuator[W]):
         """
         self.actuator.load_state(path / "actuator")
         self._wrapper.load_state(path / "wrapper")
+
+    @override
+    def on_paused(self) -> None:
+        """The method to be called when the thread is paused."""
+        super().on_paused()
+        self.actuator.on_paused()
+        self._wrapper.on_paused()
+
+    @override
+    def on_resumed(self) -> None:
+        """The method to be called when the thread is resumed."""
+        super().on_resumed()
+        self.actuator.on_resumed()
+        self._wrapper.on_resumed()

@@ -5,10 +5,11 @@ from typing import override
 from pamiq_core.data import DataUsersDict
 from pamiq_core.model import TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 from pamiq_core.trainer import Trainer
 
 
-class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin):
+class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin, ThreadEventMixin):
     """A container class for trainers."""
 
     def attach_training_models_dict(
@@ -43,3 +44,17 @@ class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin):
         """Load states of each trainer from the path."""
         for name, trainer in self.items():
             trainer.load_state(path / name)
+
+    @override
+    def on_paused(self) -> None:
+        """Propagate pause event to all trainers."""
+        super().on_paused()
+        for trainer in self.values():
+            trainer.on_paused()
+
+    @override
+    def on_resumed(self) -> None:
+        """Propagate resume event to all trainers."""
+        super().on_resumed()
+        for trainer in self.values():
+            trainer.on_resumed()
