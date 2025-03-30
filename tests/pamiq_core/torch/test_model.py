@@ -32,10 +32,17 @@ class TestTorchInferenceModel:
     def test_infer(
         self, torch_inference_model: TorchInferenceModel, model: nn.Module
     ) -> None:
-        input_tensor = torch.randn([2, 3])
+        input_tensor = torch.randn([2, 3], requires_grad=True)
         output_tensor = torch_inference_model.infer(input_tensor)
         expected_tensor = model(input_tensor)
+        # check if output tensors match.
         assert torch.equal(output_tensor, expected_tensor)
+        # check if grad tracking is disabled.
+        assert not output_tensor.requires_grad
+        assert output_tensor.grad_fn is None
+        # check if backward results in an error.
+        with pytest.raises(RuntimeError):
+            output_tensor.backward()
 
 
 @pytest.mark.parametrize(
@@ -64,7 +71,7 @@ class TestTorchTrainingModel:
     ) -> None:
         if has_inference_model:
             torch_inference_model = torch_training_model.inference_model
-            # check if the internal modelsz are same
+            # check if the internal models are same
             assert torch.equal(
                 torch_training_model.model.weight,
                 torch_inference_model._raw_model.weight,
