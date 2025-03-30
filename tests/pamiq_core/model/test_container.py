@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -74,3 +76,39 @@ class TestTrainingModelsDict:
             KeyError, match="model 'inference_only' is inference thread only."
         ):
             training_models_dict["inference_only"]
+
+    def test_save_and_load_state(
+        self,
+        training_models_dict: TrainingModelsDict,
+        default_model,
+        no_inference_model,
+        inference_only_model,
+        tmp_path: Path,
+    ):
+        test_path = tmp_path / "models"
+
+        # Testing `save_state`
+        assert test_path.exists() is False
+        training_models_dict.save_state(test_path)
+        assert test_path.is_dir()
+
+        default_model.save_state.assert_called_once_with(test_path / "model")
+        no_inference_model.save_state.assert_called_once_with(
+            test_path / "no_inference"
+        )
+        inference_only_model.save_state.assert_called_once_with(
+            test_path / "inference_only"
+        )
+
+        # Testing `load_state`
+        training_models_dict.load_state(test_path)
+        default_model.load_state.assert_called_once_with(test_path / "model")
+        no_inference_model.load_state.assert_called_once_with(
+            test_path / "no_inference"
+        )
+        inference_only_model.load_state.assert_called_once_with(
+            test_path / "inference_only"
+        )
+
+        for m in [default_model, no_inference_model, inference_only_model]:
+            m.sync.assert_called_once_with()
