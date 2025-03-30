@@ -1,92 +1,98 @@
-from collections import deque
-from collections.abc import Iterable
-from typing import Any, override
+from typing import override
 
 import pytest
 
 from pamiq_core.model import InferenceModel, TrainingModel
+from pamiq_core.state_persistence import PersistentStateMixin
 
 
-class DummyInferenceModel(InferenceModel):
-    _dummy_param: int = 1234
+class InferenceModelImpl(InferenceModel):
+    param: int = 1234
 
     @override
     def infer(self, input: list[int]) -> int:
         return sum(input)
 
 
-class DummyTrainingModel(TrainingModel[DummyInferenceModel]):
-    _dummy_param: int = 9999
+class TrainingModelImpl(TrainingModel[InferenceModelImpl]):
+    param: int = 9999
 
     @override
-    def _create_inference_model(self) -> DummyInferenceModel:
-        return DummyInferenceModel()
+    def _create_inference_model(self) -> InferenceModelImpl:
+        return InferenceModelImpl()
 
     @override
     def forward(self, input: list[str]) -> str:
         return "".join(input)
 
     @override
-    def sync_impl(self, inference_model: DummyInferenceModel) -> None:
-        inference_model._dummy_param = self._dummy_param
+    def sync_impl(self, inference_model: InferenceModelImpl) -> None:
+        inference_model.param = self.param
 
 
 class TestInferenceModel:
+    @pytest.mark.parametrize("method", ["infer"])
+    def test_abstractmethods(self, method):
+        assert method in InferenceModel.__abstractmethods__
+
     @pytest.mark.parametrize("input", [[1, 10, 100]])
     def test_call(self, input: list[int]) -> None:
-        dummy_inference_model = DummyInferenceModel()
-        output = dummy_inference_model(input)
+        inference_model = InferenceModelImpl()
+        output = inference_model(input)
         expected_output = sum(input)
         assert output == expected_output
 
 
-@pytest.mark.parametrize("has_inference_model", [True, False])
-@pytest.mark.parametrize("inference_thread_only", [True, False])
 class TestTrainingModel:
     @pytest.fixture
-    def dummy_training_model(
-        self, has_inference_model: bool, inference_thread_only: bool
-    ) -> TrainingModel:
-        if inference_thread_only and not has_inference_model:
-            with pytest.raises(ValueError):
-                DummyTrainingModel(
-                    has_inference_model=has_inference_model,
-                    inference_thread_only=inference_thread_only,
-                )
-            pytest.skip()
-        return DummyTrainingModel(
-            has_inference_model=has_inference_model,
-            inference_thread_only=inference_thread_only,
-        )
+    def training_model(self) -> TrainingModel:
+        return TrainingModelImpl()
 
-    def test_inference_model(
-        self, dummy_training_model: TrainingModel, has_inference_model: bool
-    ) -> None:
-        if has_inference_model:
-            dummy_inference_model = dummy_training_model.inference_model
-            assert isinstance(dummy_inference_model, InferenceModel)
-        else:
-            with pytest.raises(RuntimeError):
-                dummy_training_model.inference_model
+    @pytest.fixture
+    def training_model_no_inference(self):
+        return TrainingModelImpl(has_inference_model=False)
+
+    @pytest.fixture
+    def training_model_inference_only(self):
+        return TrainingModelImpl(inference_thread_only=True)
+
+    def test_inconsistent_inference_model_option(self):
+        with pytest.raises(ValueError):
+            TrainingModelImpl(
+                has_inference_model=False,
+                inference_thread_only=True,
+            )
 
     @pytest.mark.parametrize(
-        "input",
-        [["The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"]],
+        "method", ["_create_inference_model", "forward", "sync_impl"]
     )
-    def test_call(self, dummy_training_model: TrainingModel, input: list[str]) -> None:
-        output = dummy_training_model(input)
-        expected_output = "".join(input)
+    def test_abstractmethods(self, method):
+        assert method in TrainingModel.__abstractmethods__
+
+    def test_model_subclass(self):
+        assert issubclass(TrainingModel, PersistentStateMixin)
+
+    def test_inference_model(
+        self, training_model, training_model_inference_only, training_model_no_inference
+    ) -> None:
+        for model in [training_model, training_model_inference_only]:
+            assert isinstance(model.inference_model, InferenceModelImpl)
+
+        with pytest.raises(RuntimeError):
+            training_model_no_inference.inference_model
+
+    def test_call(self, training_model: TrainingModel) -> None:
+        input = ["The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"]
+        output = training_model(input)
+        expected_output = training_model.forward(input)
         assert output == expected_output
 
     def test_sync(
         self,
-        dummy_training_model: DummyTrainingModel,
-        has_inference_model: bool,
-        inference_thread_only: bool,
+        training_model: TrainingModelImpl,
     ) -> None:
-        if has_inference_model and (not inference_thread_only):
-            dummy_training_model.sync()
-            dummy_inference_model = dummy_training_model.inference_model
-            assert (
-                dummy_training_model._dummy_param == dummy_inference_model._dummy_param
-            )
+        inference_model = training_model.inference_model
+        training_model.param += 1
+        assert training_model.param != inference_model.param
+        training_model.sync()
+        assert training_model.param == inference_model.param
