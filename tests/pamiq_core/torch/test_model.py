@@ -45,10 +45,6 @@ class TestTorchInferenceModel:
             output_tensor.backward()
 
 
-@pytest.mark.parametrize(
-    ["has_inference_model", "inference_thread_only"],
-    [[True, True], [True, False], [False, False]],
-)
 class TestTorchTrainingModel:
     @pytest.fixture
     def model(self) -> nn.Module:
@@ -56,12 +52,18 @@ class TestTorchTrainingModel:
 
     @pytest.fixture
     def torch_training_model(
-        self, model: nn.Module, has_inference_model: bool, inference_thread_only: bool
+        self, model: nn.Module
     ) -> TorchTrainingModel:
-        torch_training_model = TorchTrainingModel(
-            model, has_inference_model, inference_thread_only
+        return TorchTrainingModel(
+            model, True, False
         )
-        return torch_training_model
+
+    @pytest.fixture
+    def torch_training_model_inference_only(
+        self, model: nn.Module) -> TorchTrainingModel:
+        return TorchTrainingModel(
+            model, True, True
+        )
 
     def test_create_inference(
         self,
@@ -99,10 +101,7 @@ class TestTorchTrainingModel:
     def test_sync_impl(
         self,
         torch_training_model: TorchTrainingModel,
-        has_inference_model: bool,
-        inference_thread_only: bool,
     ) -> None:
-        if has_inference_model and not inference_thread_only:
             torch_inference_model = torch_training_model.inference_model
             # make differences between params of torch_training_model and torch_inference_model.
             torch_training_model.model.weight.data += 1.0
