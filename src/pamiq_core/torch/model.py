@@ -17,9 +17,9 @@ class InferenceProcedureCallable(Protocol):
     def __call__(self, inference_model: nn.Module, *args: Any, **kwds: Any) -> Any: ...
 
 
-def get_device[T](
-    module: nn.Module, default_device: T = CPU_DEVICE
-) -> torch.device | T:
+def get_device(
+    module: nn.Module, default_device: torch.device = CPU_DEVICE
+) -> torch.device:
     """Retrieves the device where the module runs.
 
     Args:
@@ -36,7 +36,7 @@ def get_device[T](
 
 
 def default_infer_procedure(inference_model: nn.Module, *args: Any, **kwds: Any) -> Any:
-    """Default inference forward flow.
+    """Default inference procedure.
 
     Tensors in `args` and `kwds` are sent to the computing device. If
     you override this method, be careful to send the input tensor to the
@@ -44,7 +44,7 @@ def default_infer_procedure(inference_model: nn.Module, *args: Any, **kwds: Any)
     """
     device = get_device(inference_model, CPU_DEVICE)
     new_args: list[Any] = []
-    new_kwds: dict[Any, Any] = {}
+    new_kwds: dict[str, Any] = {}
     for i in args:
         if isinstance(i, torch.Tensor):
             i = i.to(device)
