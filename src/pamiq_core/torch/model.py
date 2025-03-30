@@ -127,7 +127,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         super().__init__(has_inference_model, inference_thread_only)
         if dtype is not None:
             model = model.type(dtype)
-        self.model: T = model
+        self.model = model
         if (
             default_device is None
         ):  # prevents from moving the model to cpu unintentionally.
