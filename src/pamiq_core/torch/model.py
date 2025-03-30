@@ -35,14 +35,14 @@ def get_device(
     return default_device
 
 
-def default_infer_procedure(inference_model: nn.Module, *args: Any, **kwds: Any) -> Any:
+def default_infer_procedure(model: nn.Module, *args: Any, **kwds: Any) -> Any:
     """Default inference procedure.
 
     Tensors in `args` and `kwds` are sent to the computing device. If
     you override this method, be careful to send the input tensor to the
     computing device.
     """
-    device = get_device(inference_model, CPU_DEVICE)
+    device = get_device(model, CPU_DEVICE)
     new_args: list[Any] = []
     new_kwds: dict[str, Any] = {}
     for i in args:
@@ -55,7 +55,7 @@ def default_infer_procedure(inference_model: nn.Module, *args: Any, **kwds: Any)
             v = v.to(device)
         new_kwds[k] = v
 
-    return inference_model(*new_args, **new_kwds)
+    return model(*new_args, **new_kwds)
 
 
 class TorchInferenceModel[T: nn.Module](InferenceModel):
@@ -95,7 +95,7 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
     def infer(self, *args: Any, **kwds: Any) -> Any:
         """Performs the inference in a thread-safe manner."""
         with self._lock:
-            return self._inference_procedure(self.raw_model, *args, **kwds)
+            return self._inference_procedure(self._model, *args, **kwds)
 
 
 class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
