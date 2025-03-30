@@ -5,7 +5,7 @@ from pamiq_core.model import (
     TrainingModelsDict,
 )
 
-from .test_interface import InferenceModelImpl, TrainingModelImpl
+from .helpers import InferenceModelImpl, TrainingModelImpl
 
 
 class TestTrainingModelsDict:
