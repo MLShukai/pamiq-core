@@ -75,7 +75,7 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
         self._lock = RLock()
 
     @property
-    def raw_model(self) -> T:
+    def _raw_model(self) -> T:
         """Returns the internal dnn model.
 
         Do not access this property in the inference thread. This
@@ -84,8 +84,8 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
         """
         return self._model
 
-    @raw_model.setter
-    def raw_model(self, m: T) -> None:
+    @_raw_model.setter
+    def _raw_model(self, m: T) -> None:
         """Sets the model in a thread-safe manner."""
         with self._lock:
             self._model = m
@@ -167,11 +167,13 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             p.grad = None
 
         # Swap the training model and the inference model.
-        self.model, inference_model.raw_model = (
-            inference_model.raw_model,
+        self.model, inference_model._raw_model = (  # pyright: ignore[reportPrivateUsage]
+            inference_model._raw_model,  # pyright: ignore[reportPrivateUsage]
             self.model,
         )
-        self.model.load_state_dict(self.inference_model.raw_model.state_dict())
+        self.model.load_state_dict(
+            self.inference_model._raw_model.state_dict()  # pyright: ignore[reportPrivateUsage]
+        )
 
         # Assign the model grads.
         for i, p in enumerate(self.model.parameters()):

@@ -27,7 +27,7 @@ class TestTorchInferenceModel:
     def test_raw_model(
         self, torch_inference_model: TorchInferenceModel, model: nn.Module
     ) -> None:
-        assert model is torch_inference_model.raw_model
+        assert model is torch_inference_model._raw_model
 
     def test_infer(
         self, torch_inference_model: TorchInferenceModel, model: nn.Module
@@ -67,13 +67,15 @@ class TestTorchTrainingModel:
             # check if the internal modelsz are same
             assert torch.equal(
                 torch_training_model.model.weight,
-                torch_inference_model.raw_model.weight,
+                torch_inference_model._raw_model.weight,
             )
             # check about pointers
             if inference_thread_only:
-                assert torch_training_model.model is torch_inference_model.raw_model
+                assert torch_training_model.model is torch_inference_model._raw_model
             else:
-                assert torch_training_model.model is not torch_inference_model.raw_model
+                assert (
+                    torch_training_model.model is not torch_inference_model._raw_model
+                )
 
     def test_forward(
         self,
@@ -103,10 +105,10 @@ class TestTorchTrainingModel:
             # check if differences are made correctly.
             assert not torch.equal(
                 torch_training_model.model.weight,
-                torch_inference_model.raw_model.weight,
+                torch_inference_model._raw_model.weight,
             )
             assert isinstance(torch_training_model.model.weight.grad, torch.Tensor)
-            assert torch_inference_model.raw_model.weight.grad is None
+            assert torch_inference_model._raw_model.weight.grad is None
 
             weight_data = torch_training_model.model.weight.data.clone()
             weight_grad = torch_training_model.model.weight.grad.clone()
@@ -116,10 +118,10 @@ class TestTorchTrainingModel:
             assert torch.equal(torch_training_model.model.weight.grad, weight_grad)
             assert torch.equal(
                 torch_training_model.model.weight,
-                torch_inference_model.raw_model.weight,
+                torch_inference_model._raw_model.weight,
             )
             assert (
                 torch_training_model.model.weight
-                is not torch_inference_model.raw_model.weight
+                is not torch_inference_model._raw_model.weight
             )
-            assert torch_inference_model.raw_model.weight.grad is None
+            assert torch_inference_model._raw_model.weight.grad is None
