@@ -326,7 +326,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "torch", specifier = ">=2.6.0" }]
+requires-dist = [{ name = "torch", specifier = ">=2.0.0" }]
 
 [package.metadata.requires-dev]
 dev = [
