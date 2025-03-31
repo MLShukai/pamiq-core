@@ -53,6 +53,17 @@ class TestGetDevice:
         assert get_device(model, default_device=default_device) == default_device
 
 
+@pytest.mark.parametrize(
+    "device", [CPU_DEVICE, CUDA_DEVICE] if torch.cuda.is_available() else [CPU_DEVICE]
+)
+def test_default_infer_procedure(device: torch.device) -> None:
+    model = nn.Linear(5, 3).to(device)
+    input_tensor = torch.randn([2, 5])
+    output_tensor = default_infer_procedure(model, input_tensor)
+    expected_tensor = model(input_tensor.to(device))
+    assert torch.equal(output_tensor, expected_tensor)
+
+
 class TestTorchInferenceModel:
     @pytest.fixture
     def model(self) -> nn.Module:
