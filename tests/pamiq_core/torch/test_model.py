@@ -11,7 +11,46 @@ from pamiq_core.torch import (
     TorchInferenceModel,
     TorchTrainingModel,
     default_infer_procedure,
+    get_device,
 )
+
+CPU_DEVICE = torch.device("cpu")
+CUDA_DEVICE = torch.device("cuda:0")
+
+
+@pytest.mark.parametrize(
+    "device", [CPU_DEVICE, CUDA_DEVICE] if torch.cuda.is_available() else [CPU_DEVICE]
+)
+@pytest.mark.parametrize("default_device", [CPU_DEVICE])
+class TestGetDevice:
+    def test_get_device_with_parameters(
+        self, device: torch.device, default_device: torch.device
+    ) -> None:
+        model = nn.Linear(2, 3).to(device)
+        expected_device = next(model.parameters()).device
+        assert get_device(model, default_device) == expected_device
+
+    def test_get_device_with_buffers_only(
+        self, device: torch.device, default_device: torch.device
+    ) -> None:
+        class BufferOnlyModule(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.register_buffer("sample_buffer", torch.tensor([1.0]))
+
+        model = BufferOnlyModule().to(device)
+        expected_device = next(model.buffers()).device
+        assert get_device(model, default_device) == expected_device
+
+    def test_get_device_with_empty_module(
+        self, device: torch.device, default_device: torch.device
+    ) -> None:
+        class EmptyModule(nn.Module):
+            def __init__(self):
+                super().__init__()
+
+        model = EmptyModule().to(device)
+        assert get_device(model, default_device=default_device) == default_device
 
 
 class TestTorchInferenceModel:
