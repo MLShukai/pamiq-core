@@ -91,6 +91,20 @@ class TestInteraction:
         mock_agent.load_state.assert_called_once_with(load_path / "agent")
         mock_environment.load_state.assert_called_once_with(load_path / "environment")
 
+    def test_on_paused(self, interaction: Interaction, mock_agent, mock_environment):
+        """Test that on_paused() calls on_paused on both agent and
+        environment."""
+        interaction.on_paused()
+        mock_agent.on_paused.assert_called_once_with()
+        mock_environment.on_paused.assert_called_once_with()
+
+    def test_on_resumed(self, interaction: Interaction, mock_agent, mock_environment):
+        """Test that on_resumed() calls on_resumed on both agent and
+        environment."""
+        interaction.on_resumed()
+        mock_agent.on_resumed.assert_called_once_with()
+        mock_environment.on_resumed.assert_called_once_with()
+
 
 class TestFixedIntervalInteraction:
     """Tests for FixedIntervalInteraction class."""

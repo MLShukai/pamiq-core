@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import threading
 from collections.abc import Callable
@@ -28,6 +30,15 @@ class ThreadController:
 
     NOTE: **Only one thread can control this object.**
     """
+
+    @property
+    def read_only(self) -> ReadOnlyController:
+        """Get a read-only view of this controller.
+
+        Returns:
+            A read-only interface to this controller.
+        """
+        return ReadOnlyController(self)
 
     def __init__(self) -> None:
         self._shutdown_event = threading.Event()
@@ -183,8 +194,19 @@ class ThreadStatus:
     and mainly used for monitoring the status of a thread.
     """
 
+    @property
+    def read_only(self) -> ReadOnlyThreadStatus:
+        """Get a read-only view of this thread status.
+
+        Returns:
+            A read-only interface to this thread status.
+        """
+
+        return ReadOnlyThreadStatus(self)
+
     def __init__(self) -> None:
         self._paused_event = threading.Event()
+        self._exception_event = threading.Event()
 
     def pause(self) -> None:
         """Marks the thread as paused.
@@ -216,6 +238,22 @@ class ThreadStatus:
         """
         return not self.is_pause()
 
+    def exception_raised(self) -> None:
+        """Marks the thread as having an exception.
+
+        This function is invoked when the thread encounters an
+        exception.
+        """
+        self._exception_event.set()
+
+    def is_exception_raised(self) -> bool:
+        """Returns whether the thread has an exception.
+
+        Returns:
+            bool: True if the thread has an "exception raised flag", False otherwise.
+        """
+        return self._exception_event.is_set()
+
     def wait_for_pause(self, timeout: float) -> bool:
         """Wait for the thread to be paused.
 
@@ -235,6 +273,7 @@ class ReadOnlyThreadStatus:
         self.is_pause = status.is_pause
         self.is_resume = status.is_resume
         self.wait_for_pause = status.wait_for_pause
+        self.is_exception_raised = status.is_exception_raised
 
 
 class ThreadStatusesHandler:
@@ -276,3 +315,18 @@ class ThreadStatusesHandler:
                 )
             success &= result
         return success
+
+    def check_exception_raised(self) -> bool:
+        """Check if any thread has an exception.
+
+        Returns:
+            bool: True if at least one thread has an exception, False otherwise.
+        """
+        flag = False
+        for thread_type, stat in self._statuses.items():
+            if stat.is_exception_raised():
+                self._logger.error(
+                    f"An exception has occurred in the '{thread_type.thread_name}' thread."
+                )
+                flag = True
+        return flag

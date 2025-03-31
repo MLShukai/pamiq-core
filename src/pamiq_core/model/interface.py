@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from pamiq_core.state_persistence import PersistentStateMixin
+
 
 class InferenceModel(ABC):
     """Base interface class for model to infer in InferenceThread.
@@ -32,7 +34,7 @@ class InferenceModel(ABC):
         return self.infer(*args, **kwds)
 
 
-class TrainingModel[T: InferenceModel](ABC):
+class TrainingModel[T: InferenceModel](ABC, PersistentStateMixin):
     """Base interface class to train model in TrainingThread.
 
     Needed for multi-thread training and inference in parallel.
@@ -71,7 +73,7 @@ class TrainingModel[T: InferenceModel](ABC):
         Returns:
             InferenceModel.
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
     def forward(self, *args: Any, **kwds: Any) -> Any:
@@ -83,7 +85,7 @@ class TrainingModel[T: InferenceModel](ABC):
         Returns:
             Result of forward path of the model.
         """
-        raise NotImplementedError
+        ...
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         """Calls `forward` method."""
@@ -101,10 +103,11 @@ class TrainingModel[T: InferenceModel](ABC):
         inference model."""
         return self.has_inference_model and (not self.inference_thread_only)
 
+    @abstractmethod
     def sync_impl(self, inference_model: T) -> None:
         """Copies params of training model to self._inference_model if needed.
 
         Args:
             InferenceModel to sync.
         """
-        raise NotImplementedError
+        ...

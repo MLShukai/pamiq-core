@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Self, override
 
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 from .agent import Agent
 from .env import Environment
@@ -9,7 +10,9 @@ from .event_mixin import InteractionEventMixin
 from .interval_adjustors import IntervalAdjustor, SleepIntervalAdjustor
 
 
-class Interaction[ObsType, ActType](InteractionEventMixin, PersistentStateMixin):
+class Interaction[ObsType, ActType](
+    InteractionEventMixin, PersistentStateMixin, ThreadEventMixin
+):
     """Class that combines an agent and environment to create an interaction
     loop.
 
@@ -88,6 +91,20 @@ class Interaction[ObsType, ActType](InteractionEventMixin, PersistentStateMixin)
         """
         self.agent.load_state(path / "agent")
         self.environment.load_state(path / "environment")
+
+    @override
+    def on_paused(self) -> None:
+        """The method to be called when the thread is paused."""
+        super().on_paused()
+        self.agent.on_paused()
+        self.environment.on_paused()
+
+    @override
+    def on_resumed(self) -> None:
+        """The method to be called when the thread is resumed."""
+        super().on_resumed()
+        self.agent.on_resumed()
+        self.environment.on_resumed()
 
 
 class FixedIntervalInteraction[ObsType, ActType](Interaction[ObsType, ActType]):

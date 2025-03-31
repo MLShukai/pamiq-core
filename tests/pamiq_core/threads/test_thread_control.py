@@ -22,6 +22,11 @@ class TestThreadController:
     def thread_controller(self) -> ThreadController:
         return ThreadController()
 
+    def test_read_only_property(self, thread_controller: ThreadController) -> None:
+        """Test that the read_only property returns a valid
+        ReadOnlyController."""
+        assert isinstance(thread_controller.read_only, ReadOnlyController)
+
     def test_initial_state(self, thread_controller: ThreadController) -> None:
         assert thread_controller.is_resume() is True
         assert thread_controller.is_active() is True
@@ -304,10 +309,16 @@ class TestThreadStatus:
         """Fixture for thread status."""
         return ThreadStatus()
 
+    def test_read_only_property(self, thread_status: ThreadStatus) -> None:
+        """Test that the read_only property returns a valid
+        ReadOnlyThreadStatus."""
+        assert isinstance(thread_status.read_only, ReadOnlyThreadStatus)
+
     def test_initial_state(self, thread_status: ThreadStatus) -> None:
         """Test initial state of thread status."""
         assert thread_status.is_pause() is False
         assert thread_status.is_resume() is True
+        assert thread_status.is_exception_raised() is False
 
     def test_pause_and_related_predicate_methods(
         self, thread_status: ThreadStatus
@@ -326,6 +337,14 @@ class TestThreadStatus:
 
         assert thread_status.is_pause() is False
         assert thread_status.is_resume() is True
+
+    def test_exception_raised_and_related_predicate_methods(
+        self, thread_status: ThreadStatus
+    ) -> None:
+        """Test exception_raised and related predicate methods."""
+        thread_status.exception_raised()
+
+        assert thread_status.is_exception_raised() is True
 
     def test_wait_for_pause_when_already_paused(
         self, thread_status: ThreadStatus
@@ -369,6 +388,10 @@ class TestReadOnlyThreadStatus:
         read_only_thread_status = ReadOnlyThreadStatus(thread_status)
         assert read_only_thread_status.is_pause == thread_status.is_pause
         assert read_only_thread_status.is_resume == thread_status.is_resume
+        assert (
+            read_only_thread_status.is_exception_raised
+            == thread_status.is_exception_raised
+        )
         assert read_only_thread_status.wait_for_pause == thread_status.wait_for_pause
 
 
@@ -508,3 +531,45 @@ class TestThreadStatusesHandler:
         start = time.perf_counter()
         assert thread_status_handler.wait_for_all_threads_pause(0.5) is True
         assert 0.1 <= time.perf_counter() - start < 0.2
+
+    @pytest.mark.parametrize(
+        "is_inference_exception_raised, is_training_exception_raised",
+        [
+            (False, False),
+            (True, False),
+            (False, True),
+            (True, True),
+        ],
+    )
+    def test_check_exception_raised(
+        self,
+        caplog,
+        is_inference_exception_raised,
+        is_training_exception_raised,
+        inference_thread_status,
+        training_thread_status,
+        thread_status_handler,
+    ) -> None:
+        """Test check_exception_raised: return value and log messages."""
+        if is_inference_exception_raised:
+            inference_thread_status.exception_raised()
+        if is_training_exception_raised:
+            training_thread_status.exception_raised()
+
+        assert thread_status_handler.check_exception_raised() is any(
+            [is_inference_exception_raised, is_training_exception_raised]
+        )
+
+        # check log messages
+        if is_inference_exception_raised:
+            check_log_message(
+                expected_log_message="An exception has occurred in the 'inference' thread.",
+                log_level="ERROR",
+                caplog=caplog,
+            )
+        if is_training_exception_raised:
+            check_log_message(
+                expected_log_message="An exception has occurred in the 'training' thread.",
+                log_level="ERROR",
+                caplog=caplog,
+            )

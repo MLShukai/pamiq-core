@@ -13,6 +13,7 @@ from pamiq_core.interaction.wrappers import (
     Wrapper,
 )
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 
 class WrapperImpl(Wrapper[int, str]):
@@ -30,6 +31,7 @@ class TestWrapper:
         """Test that Wrapper inherits from correct base classes."""
         assert issubclass(Wrapper, InteractionEventMixin)
         assert issubclass(Wrapper, PersistentStateMixin)
+        assert issubclass(Wrapper, ThreadEventMixin)
 
     def test_abstract_methods(self):
         """Test that Wrapper has the correct abstract methods."""
@@ -170,6 +172,30 @@ class TestEnvironmentWrapper:
         env_wrapper.affect("direct_action")
         mock_env.affect.assert_called_with("func_unwrapped_direct_action")
 
+    def test_on_paused(self, env_wrapper, mock_env, obs_wrapper, act_wrapper, mocker):
+        """Test that on_paused calls on_paused on all components."""
+        # Spy on the on_paused methods
+        obs_on_paused_spy = mocker.spy(obs_wrapper, "on_paused")
+        act_on_paused_spy = mocker.spy(act_wrapper, "on_paused")
+
+        env_wrapper.on_paused()
+
+        mock_env.on_paused.assert_called_once_with()
+        obs_on_paused_spy.assert_called_once_with()
+        act_on_paused_spy.assert_called_once_with()
+
+    def test_on_resumed(self, env_wrapper, mock_env, obs_wrapper, act_wrapper, mocker):
+        """Test that on_resumed calls on_resumed on all components."""
+        # Spy on the on_resumed methods
+        obs_on_resumed_spy = mocker.spy(obs_wrapper, "on_resumed")
+        act_on_resumed_spy = mocker.spy(act_wrapper, "on_resumed")
+
+        env_wrapper.on_resumed()
+
+        mock_env.on_resumed.assert_called_once_with()
+        obs_on_resumed_spy.assert_called_once_with()
+        act_on_resumed_spy.assert_called_once_with()
+
 
 class TestSensorWrapper:
     """Test suite for the SensorWrapper class."""
@@ -253,6 +279,26 @@ class TestSensorWrapper:
         # Test reading
         result = sensor_wrapper.read()
         assert result == "func_processed_raw_sensor_data"
+
+    def test_on_paused(self, sensor_wrapper, mock_sensor, wrapper, mocker):
+        """Test that on_paused calls on_paused on all components."""
+        # Spy on the on_paused method
+        wrapper_on_paused_spy = mocker.spy(wrapper, "on_paused")
+
+        sensor_wrapper.on_paused()
+
+        mock_sensor.on_paused.assert_called_once_with()
+        wrapper_on_paused_spy.assert_called_once_with()
+
+    def test_on_resumed(self, sensor_wrapper, mock_sensor, wrapper, mocker):
+        """Test that on_resumed calls on_resumed on all components."""
+        # Spy on the on_resumed method
+        wrapper_on_resumed_spy = mocker.spy(wrapper, "on_resumed")
+
+        sensor_wrapper.on_resumed()
+
+        mock_sensor.on_resumed.assert_called_once_with()
+        wrapper_on_resumed_spy.assert_called_once_with()
 
 
 class TestActuatorWrapper:
@@ -341,3 +387,23 @@ class TestActuatorWrapper:
         # Test operation
         actuator_wrapper.operate("direct_action")
         mock_actuator.operate.assert_called_once_with("func_transformed_direct_action")
+
+    def test_on_paused(self, actuator_wrapper, mock_actuator, wrapper, mocker):
+        """Test that on_paused calls on_paused on all components."""
+        # Spy on the on_paused method
+        wrapper_on_paused_spy = mocker.spy(wrapper, "on_paused")
+
+        actuator_wrapper.on_paused()
+
+        mock_actuator.on_paused.assert_called_once_with()
+        wrapper_on_paused_spy.assert_called_once_with()
+
+    def test_on_resumed(self, actuator_wrapper, mock_actuator, wrapper, mocker):
+        """Test that on_resumed calls on_resumed on all components."""
+        # Spy on the on_resumed method
+        wrapper_on_resumed_spy = mocker.spy(wrapper, "on_resumed")
+
+        actuator_wrapper.on_resumed()
+
+        mock_actuator.on_resumed.assert_called_once_with()
+        wrapper_on_resumed_spy.assert_called_once_with()

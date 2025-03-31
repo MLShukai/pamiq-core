@@ -1,10 +1,5 @@
-import dataclasses
-import random
-from collections import deque
-from collections.abc import Iterable
-from typing import Any, override
-
 import pytest
+from pytest_mock import MockerFixture
 
 from pamiq_core.model import (
     InferenceModel,
@@ -14,110 +9,68 @@ from pamiq_core.model import (
 )
 
 
-class DummyInferenceModel(InferenceModel):
-    def __init__(self, model_id: int) -> None:
-        self.model_id = model_id
-
-    @override
-    def infer(self) -> None:
-        pass
-
-
-class DummyTrainingModel(TrainingModel):
-    def __init__(
-        self, model_id: int, has_inference_model: bool, inference_thread_only: bool
-    ) -> None:
-        super().__init__(
-            has_inference_model=has_inference_model,
-            inference_thread_only=inference_thread_only,
-        )
-        self.model_id = model_id
-
-    @override
-    def _create_inference_model(self) -> InferenceModel:
-        return DummyInferenceModel(self.model_id)
-
-    @override
-    def forward(self) -> None:
-        pass
-
-
-@dataclasses.dataclass
-class DataclassForTest:
-    has_inference_model: bool
-    inference_thread_only: bool
-    key: str
-    model_id: int
-
-
 class TestTrainingModelsDict:
+    def create_model(
+        self,
+        mocker: MockerFixture,
+        has_inference_model: bool = True,
+        inference_thread_only: bool = False,
+    ):
+        model = mocker.Mock(TrainingModel)
+        model.inference_model = mocker.Mock(InferenceModel)
+        model.has_inference_model = has_inference_model
+        model.inference_thread_only = inference_thread_only
+        return model
+
     @pytest.fixture
-    def dataclasses_for_test(self) -> list[DataclassForTest]:
-        return [
-            DataclassForTest(
-                has_inference_model=True,
-                inference_thread_only=True,
-                key="test_model_99999",
-                model_id=99999,
-            ),
-            DataclassForTest(
-                has_inference_model=True,
-                inference_thread_only=False,
-                key="test_model_2048",
-                model_id=4096,
-            ),
-            DataclassForTest(
-                has_inference_model=False,
-                inference_thread_only=False,
-                key="test_model_123456789",
-                model_id=3333,
-            ),
-        ]
+    def default_model(self, mocker):
+        return self.create_model(mocker)
+
+    @pytest.fixture
+    def no_inference_model(self, mocker):
+        return self.create_model(mocker, has_inference_model=False)
+
+    @pytest.fixture
+    def inference_only_model(self, mocker):
+        return self.create_model(mocker, inference_thread_only=True)
 
     @pytest.fixture
     def training_models_dict(
-        self, dataclasses_for_test: list[DataclassForTest]
+        self, default_model, no_inference_model, inference_only_model
     ) -> TrainingModelsDict:
-        training_models_dict = TrainingModelsDict()
-        for dataclass in dataclasses_for_test:
-            training_models_dict[dataclass.key] = DummyTrainingModel(
-                model_id=dataclass.model_id,
-                has_inference_model=dataclass.has_inference_model,
-                inference_thread_only=dataclass.inference_thread_only,
-            )
-        return training_models_dict
+        return TrainingModelsDict(
+            {
+                "model": default_model,
+                "no_inference": no_inference_model,
+                "inference_only": inference_only_model,
+            }
+        )
 
     def test_inference_models_dict(
         self,
         training_models_dict: TrainingModelsDict,
-        dataclasses_for_test: list[DataclassForTest],
+        default_model,
+        inference_only_model,
     ) -> None:
         inference_models_dict = training_models_dict.inference_models_dict
-        # For each key, check if the correct inference model is registered or not.
-        for dataclass in dataclasses_for_test:
-            if dataclass.has_inference_model:
-                inference_model = inference_models_dict[dataclass.key]
-                assert isinstance(inference_model, DummyInferenceModel)
-                assert inference_model.model_id == dataclass.model_id
-        # Check if all keys are correct.
-        expected_keys: list[str] = [
-            dataclass.key
-            for dataclass in dataclasses_for_test
-            if dataclass.has_inference_model
-        ]
-        assert list(inference_models_dict.keys()) == expected_keys
+        assert isinstance(inference_models_dict, InferenceModelsDict)
+        assert inference_models_dict["model"] is default_model.inference_model
+        assert (
+            inference_models_dict["inference_only"]
+            is inference_only_model.inference_model
+        )
+        assert "no_inference" not in inference_models_dict
 
     def test_getitem(
         self,
         training_models_dict: TrainingModelsDict,
-        dataclasses_for_test: list[DataclassForTest],
+        default_model,
+        no_inference_model,
     ) -> None:
-        for dataclass in dataclasses_for_test:
-            if dataclass.inference_thread_only:
-                with pytest.raises(KeyError):
-                    training_models_dict[dataclass.key]
-            else:
-                # For each key, check if the correct training model is registered or not.
-                training_model = training_models_dict[dataclass.key]
-                assert isinstance(training_model, DummyTrainingModel)
-                assert training_model.model_id == dataclass.model_id
+        assert training_models_dict["model"] is default_model
+        assert training_models_dict["no_inference"] is no_inference_model
+
+        with pytest.raises(
+            KeyError, match="model 'inference_only' is inference thread only."
+        ):
+            training_models_dict["inference_only"]

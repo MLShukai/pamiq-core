@@ -1,6 +1,7 @@
 from pamiq_core.interaction.env import Environment
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.threads import ThreadEventMixin
 
 
 class TestEnvironment:
@@ -10,6 +11,7 @@ class TestEnvironment:
         """Test Environment subclass."""
         assert issubclass(Environment, InteractionEventMixin)
         assert issubclass(Environment, PersistentStateMixin)
+        assert issubclass(Environment, ThreadEventMixin)
 
     def test_abstract_methods(self):
         """Test abstract methods of Environment."""
