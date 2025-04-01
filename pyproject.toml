@@ -5,7 +5,9 @@ description = "The core package for creating autonomous machine intelligence"
 license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "torch>=2.0.0",
+]
 
 keywords = [
   "AI",
