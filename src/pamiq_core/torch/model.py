@@ -110,7 +110,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         model: T,
         has_inference_model: bool = True,
         inference_thread_only: bool = False,
-        default_device: torch.device | str | None = None,
+        device: torch.device | str | None = None,
         dtype: torch.dtype | None = None,
         inference_procedure: InferenceProcedureCallable = default_infer_procedure,
     ):
@@ -120,7 +120,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             model: A torch model.
             has_inference_model: Whether to have inference model.
             inference_thread_only: Whether it is an inference thread only.
-            default_device: A device if any device not found.
+            device: A device on which the model is placed.
             dtype: Data type of the model.
             inference_procedure: An inference procedure as Callable.
         """
@@ -128,13 +128,10 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         if dtype is not None:
             model = model.type(dtype)
         self.model = model
-        if (
-            default_device is None
-        ):  # prevents from moving the model to cpu unintentionally.
-            default_device = get_device(model, CPU_DEVICE)
+        if device is None:  # prevents from moving the model to cpu unintentionally.
+            device = get_device(model, CPU_DEVICE)
         self._inference_procedure = inference_procedure
-
-        self.model.to(default_device)
+        self.model.to(device)
 
     @override
     def _create_inference_model(self) -> TorchInferenceModel[T]:
