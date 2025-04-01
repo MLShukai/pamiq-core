@@ -1,5 +1,8 @@
 from collections import UserDict
+from pathlib import Path
 from typing import Any, override
+
+from pamiq_core.state_persistence import PersistentStateMixin
 
 from .interface import InferenceModel, TrainingModel
 
@@ -8,7 +11,7 @@ class InferenceModelsDict(UserDict[str, InferenceModel]):
     """Dictionary mapping keys to inference models."""
 
 
-class TrainingModelsDict(UserDict[str, TrainingModel[Any]]):
+class TrainingModelsDict(UserDict[str, TrainingModel[Any]], PersistentStateMixin):
     """Dictionary mapping keys to training models.
 
     This class stores training models and manages their associated
@@ -66,3 +69,31 @@ class TrainingModelsDict(UserDict[str, TrainingModel[Any]]):
         super().__setitem__(key, model)
         if model.has_inference_model:
             self._inference_models_dict[key] = model.inference_model
+
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save the state of all training models in the dictionary.
+
+        Creates a directory at the given path and saves each model's state
+        in a subdirectory named after its key in this dictionary.
+
+        Args:
+            path: Directory path where the states should be saved
+        """
+        path.mkdir()
+        for name, model in self.data.items():
+            model.save_state(path / name)
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load the state of all training models from the given path.
+
+        Loads each model's state from a subdirectory named after its key in this
+        dictionary, then synchronizes the changes to their associated inference models.
+
+        Args:
+            path: Directory path from where the states should be loaded
+        """
+        for name, model in self.data.items():
+            model.load_state(path / name)
+            model.sync()
