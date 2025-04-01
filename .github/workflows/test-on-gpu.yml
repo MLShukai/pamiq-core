@@ -1,0 +1,14 @@
+name: Test workflow on GPU machine
+
+on:
+  push:
+    branches: [main, released]
+  pull_request:
+    branches: [main, released]
+
+jobs:
+  Hello-World-Job:
+    runs-on:
+      - codebuild-pamiq-core-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - run: echo "Hello World"
