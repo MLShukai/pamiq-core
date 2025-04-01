@@ -132,10 +132,9 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             default_device is None
         ):  # prevents from moving the model to cpu unintentionally.
             default_device = get_device(model, CPU_DEVICE)
-        self._default_device = torch.device(default_device)
         self._inference_procedure = inference_procedure
 
-        self.model.to(self._default_device)
+        self.model.to(default_device)
 
     @override
     def _create_inference_model(self) -> TorchInferenceModel[T]:
