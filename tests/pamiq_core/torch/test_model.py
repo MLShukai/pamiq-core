@@ -17,14 +17,18 @@ from pamiq_core.torch import (
 CPU_DEVICE = torch.device("cpu")
 CUDA_DEVICE = torch.device("cuda:0")
 
-def get_devices() -> list[torch.device]:
+
+def get_available_devices() -> list[torch.device]:
     devices = [CPU_DEVICE]
     if torch.cuda.is_available():
         devices.append(CUDA_DEVICE)
     return devices
 
 
-parametrize_device=pytest.mark.parametrize("device", get_devices())
+parametrize_device = pytest.mark.parametrize("device", get_available_devices())
+
+
+@parametrize_device
 @pytest.mark.parametrize("default_device", [CPU_DEVICE])
 class TestGetDevice:
     def test_get_device_with_parameters(
@@ -57,9 +61,7 @@ class TestGetDevice:
         assert get_device(model, default_device=default_device) == default_device
 
 
-@pytest.mark.parametrize(
-    "device", [CPU_DEVICE, CUDA_DEVICE] if torch.cuda.is_available() else [CPU_DEVICE]
-)
+@parametrize_device
 def test_default_infer_procedure(device: torch.device) -> None:
     model = nn.Linear(5, 3).to(device)
     input_tensor = torch.randn([2, 5])
