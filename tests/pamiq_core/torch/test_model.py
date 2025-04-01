@@ -141,27 +141,34 @@ class TestTorchTrainingModel:
             torch_training_model_inference_only,
         ]
 
-    def test_create_inference(
-        self, torch_training_models: list[TorchTrainingModel]
+    def test_create_inference_with_torch_training_model_default(
+        self, torch_training_model_default: TorchTrainingModel
     ) -> None:
-        for torch_training_model in torch_training_models:
-            if torch_training_model.has_inference_model:
-                torch_inference_model = torch_training_model.inference_model
-                # check if the internal models are same
-                assert torch.equal(
-                    torch_training_model.model.weight,
-                    torch_inference_model._raw_model.weight,
-                )
-                # check about pointers
-                if torch_training_model.inference_thread_only:
-                    assert (
-                        torch_training_model.model is torch_inference_model._raw_model
-                    )
-                else:
-                    assert (
-                        torch_training_model.model
-                        is not torch_inference_model._raw_model
-                    )
+        torch_inference_model = torch_training_model_default.inference_model
+        # check if the internal models have same params.
+        assert torch.equal(
+            torch_training_model_default.model.weight,
+            torch_inference_model._raw_model.weight,
+        )
+        # two models must have different pointers.
+        assert (
+            torch_training_model_default.model is not torch_inference_model._raw_model
+        )
+
+    def test_create_inference_with_torch_training_model_inference_only(
+        self, torch_training_model_inference_only: TorchTrainingModel
+    ) -> None:
+        torch_inference_model = torch_training_model_inference_only.inference_model
+        # check if the internal models have same params.
+        assert torch.equal(
+            torch_training_model_inference_only.model.weight,
+            torch_inference_model._raw_model.weight,
+        )
+        # two models must have same pointers.
+        assert (
+            torch_training_model_inference_only.model
+            is torch_inference_model._raw_model
+        )
 
     def test_forward(
         self, model: nn.Module, torch_training_models: list[TorchTrainingModel]
