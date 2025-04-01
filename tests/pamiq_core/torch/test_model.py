@@ -51,11 +51,34 @@ class TestGetDevice:
 
 @parametrize_device
 def test_default_infer_procedure(device: torch.device) -> None:
-    model = nn.Linear(5, 3).to(device)
-    input_tensor = torch.randn([2, 5])
-    output_tensor = default_infer_procedure(model, input_tensor)
-    expected_tensor = model(input_tensor.to(device))
+    class Model(nn.Module):
+        def __init__(self) -> None:
+            super().__init__()
+            self.p = torch.nn.Parameter(torch.randn([2, 3]))
+
+        def forward(
+            self, a: torch.Tensor, b: torch.Tensor, use_b: bool = True
+        ) -> torch.Tensor:
+            x = a @ self.p
+            if use_b:
+                x = x + b
+            return x
+
+    model = Model().to(device)
+    a = torch.randn([5, 2])
+    b = torch.randn([5, 3])
+
+    # check whether tensors are correctly passed to the model
+    # when they are included in *args and **kwds.
+    output_tensor = default_infer_procedure(model, a, b=b)
+    expected_tensor = model(a.to(device), b.to(device))
     assert torch.equal(output_tensor, expected_tensor)
+    assert output_tensor.device == device
+    # Check whether an arg that is not a tensor can also be correctly passed to.
+    output_tensor = default_infer_procedure(model, a, b, use_b=False)
+    expected_tensor = model(a.to(device), b, use_b=False)
+    assert torch.equal(output_tensor, expected_tensor)
+    assert output_tensor.device == device
 
 
 class TestTorchInferenceModel:
