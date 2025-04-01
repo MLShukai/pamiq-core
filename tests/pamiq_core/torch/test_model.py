@@ -92,7 +92,7 @@ class TestTorchInferenceModel:
         assert output_tensor.grad_fn is None
         # check if backward results in an error.
         with pytest.raises(RuntimeError):
-            output_tensor.backward()
+            output_tensor.mean().backward()
 
 
 class TestTorchTrainingModel:
