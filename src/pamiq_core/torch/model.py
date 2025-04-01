@@ -157,7 +157,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             inference_model: InferenceModel to sync.
         """
 
-        self.model.eval()  # ignore: python-no-eval
+        self.model.eval()
 
         # Hold the grads.
         grads: list[torch.Tensor | None] = []
