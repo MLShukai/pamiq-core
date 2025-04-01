@@ -17,10 +17,14 @@ from pamiq_core.torch import (
 CPU_DEVICE = torch.device("cpu")
 CUDA_DEVICE = torch.device("cuda:0")
 
+def get_devices() -> list[torch.device]:
+    devices = [CPU_DEVICE]
+    if torch.cuda.is_available():
+        devices.append(CUDA_DEVICE)
+    return devices
 
-@pytest.mark.parametrize(
-    "device", [CPU_DEVICE, CUDA_DEVICE] if torch.cuda.is_available() else [CPU_DEVICE]
-)
+
+parametrize_device=pytest.mark.parametrize("device", get_devices())
 @pytest.mark.parametrize("default_device", [CPU_DEVICE])
 class TestGetDevice:
     def test_get_device_with_parameters(
