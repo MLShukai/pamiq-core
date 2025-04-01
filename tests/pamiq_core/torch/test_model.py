@@ -29,36 +29,24 @@ parametrize_device = pytest.mark.parametrize("device", get_available_devices())
 
 
 @parametrize_device
-@pytest.mark.parametrize("default_device", [CPU_DEVICE])
 class TestGetDevice:
-    def test_get_device_with_parameters(
-        self, device: torch.device, default_device: torch.device
-    ) -> None:
+    def test_get_device_with_parameters(self, device: torch.device) -> None:
         model = nn.Linear(2, 3).to(device)
-        expected_device = next(model.parameters()).device
-        assert get_device(model, default_device) == expected_device
+        assert get_device(model) == device
 
-    def test_get_device_with_buffers_only(
-        self, device: torch.device, default_device: torch.device
-    ) -> None:
+    def test_get_device_with_buffers_only(self, device: torch.device) -> None:
         class BufferOnlyModule(nn.Module):
             def __init__(self):
                 super().__init__()
                 self.register_buffer("sample_buffer", torch.tensor([1.0]))
 
         model = BufferOnlyModule().to(device)
-        expected_device = next(model.buffers()).device
-        assert get_device(model, default_device) == expected_device
+        assert get_device(model) == device
 
-    def test_get_device_with_empty_module(
-        self, device: torch.device, default_device: torch.device
-    ) -> None:
-        class EmptyModule(nn.Module):
-            def __init__(self):
-                super().__init__()
-
-        model = EmptyModule().to(device)
-        assert get_device(model, default_device=default_device) == default_device
+    def test_get_device_with_empty_module(self, device: torch.device) -> None:
+        model = nn.Module().to(device)
+        assert get_device(model, CPU_DEVICE) == CPU_DEVICE
+        assert get_device(model, CUDA_DEVICE) == CUDA_DEVICE
 
 
 @parametrize_device
