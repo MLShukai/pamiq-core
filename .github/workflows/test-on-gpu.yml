@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      - name: Show PCi
+        run: lspci
       - name: Check NVIDIA GPU driver
         run: |
           if ! command -v nvidia-smi &> /dev/null; then
