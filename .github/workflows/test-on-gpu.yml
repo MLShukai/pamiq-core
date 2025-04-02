@@ -36,7 +36,7 @@ jobs:
           key: uv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
 
       - name: Install dependencies
-        run: uv sync --extra tor
+        run: uv sync --extra torch
 
       - name: Check installed packages
         run: |
