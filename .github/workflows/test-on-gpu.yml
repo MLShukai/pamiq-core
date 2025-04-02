@@ -20,6 +20,17 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      - name: Check NVIDIA GPU driver
+        run: |
+          if ! command -v nvidia-smi &> /dev/null; then
+            echo "ERROR: NVIDIA GPU driver not found! This workflow requires NVIDIA GPU."
+            echo "Please check your self-hosted runner configuration."
+            exit 1
+          fi
+          echo "==== NVIDIA Driver Information ===="
+          nvidia-smi
+          echo "=================================="
+
       - uses: actions/checkout@v4
 
       - name: Install uv and set the python version
