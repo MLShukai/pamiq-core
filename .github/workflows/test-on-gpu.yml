@@ -44,6 +44,17 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra torch
 
+      - name: Check PyTorch GPU Detection
+        run: |
+          CUDA_AVAILABLE=$(uv run python -c "import torch; print(torch.cuda.is_available())")
+          echo "PyTorch CUDA detection result: $CUDA_AVAILABLE"
+          if [ "$CUDA_AVAILABLE" != "True" ]; then
+            echo "::error::PyTorch cannot detect CUDA/GPU capability!"
+            echo "Driver may be installed but CUDA is not properly configured for PyTorch."
+            exit 1
+          fi
+          uv run python -c "import torch; print(f'Found {torch.cuda.device_count()} GPU(s)'); [print(f'GPU {i}: {torch.cuda.get_device_name(i)}') for i in range(torch.cuda.device_count())]"
+
       - name: Check installed packages
         run: |
           echo "Python version:"
