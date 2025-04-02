@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Show PCi
         run: |
-          sudo apt install pciutils
+          sudo apt-get install -y pciutils
           lspci
       - name: Check NVIDIA GPU driver
         run: |
