@@ -1,4 +1,4 @@
-name: Test workflow on GPU machine
+name: Test on GPU
 
 on:
   push:
@@ -39,6 +39,6 @@ jobs:
           echo "All installed packages:"
           uv pip list
 
-      - name: Run pytest with coverage
+      - name: Run pytest
         run: |
           uv run pytest -v --log-level=INFO tests/pamiq_core/torch/
