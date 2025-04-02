@@ -9,6 +9,6 @@ on:
 jobs:
   Hello-World-Job:
     runs-on:
-      - codebuild-pamiq-core-${{ github.run_id }}-${{ github.run_attempt }}
+      - codebuild-pamiq-core-linux-gpu-runner-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - run: echo "Hello World"
