@@ -6,9 +6,45 @@ on:
   pull_request:
     branches: [main, released]
 
+env:
+  PYTHON_VERSION: "3.12"
+  UV_VERSION: "0.5.10"
+
 jobs:
-  Hello-World-Job:
+  test-on-gpu:
     runs-on:
       - codebuild-pamiq-core-linux-gpu-runner-${{ github.run_id }}-${{ github.run_attempt }}
+    strategy:
+      fail-fast: false
+
+    timeout-minutes: 20
+
     steps:
-      - run: echo "Hello World"
+      - uses: actions/checkout@v4
+
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: uv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
+
+      - name: Install dependencies
+        run: uv sync --extra tor
+
+      - name: Check installed packages
+        run: |
+          echo "Python version:"
+          uv run python -V
+          echo "All installed packages:"
+          uv pip list
+
+      - name: Run pytest with coverage
+        run: |
+          uv run pytest -vv --log-level=INFO --cov tests/pamiq_core/torch/
