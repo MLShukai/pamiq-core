@@ -20,20 +20,17 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Show PCi
+      - name: Check NVIDIA Driver Version File
         run: |
-          sudo apt-get install -y pciutils
-          lspci
-      - name: Check NVIDIA GPU driver
-        run: |
-          if ! command -v nvidia-smi &> /dev/null; then
-            echo "ERROR: NVIDIA GPU driver not found! This workflow requires NVIDIA GPU."
-            echo "Please check your self-hosted runner configuration."
+          NVIDIA_VERSION_FILE="/proc/driver/nvidia/version"
+          if [ -f "$NVIDIA_VERSION_FILE" ]; then
+            echo "NVIDIA driver version file found:"
+            cat "$NVIDIA_VERSION_FILE"
+          else
+            echo "::error::NVIDIA driver version file not found at $NVIDIA_VERSION_FILE"
+            echo "This self-hosted runner does not appear to have NVIDIA GPU drivers installed."
             exit 1
           fi
-          echo "==== NVIDIA Driver Information ===="
-          nvidia-smi
-          echo "=================================="
 
       - uses: actions/checkout@v4
 
