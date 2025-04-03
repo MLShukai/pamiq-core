@@ -22,8 +22,9 @@ jobs:
         run: cat /etc/os-release
       - name: Install NVIDIA Driver
         run: |
-          sudo apt-get update
-          sudo apt-get install -y nvidia-utils-535-server nvidia-driver-535-server
+          export DEBIAN_FRONTEND=noninteractive
+          sudo -E apt-get update
+          sudo -E apt-get install -y --no-install-recommends nvidia-utils-535-server nvidia-driver-535-server
           nvidia-smi
 
       - name: Check NVIDIA Driver Version File
