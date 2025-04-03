@@ -14,6 +14,24 @@ class SystemStatus(Enum):
     RESUMING = auto()
     SHUTTING_DOWN = auto()
 
+    @property
+    def status_name(self) -> str:
+        """Returns the lowercase string representation of the status.
+
+        Returns:
+            The lowercase string name of the status.
+        """
+        return _STATUS_NAMES[self]
+
+
+_STATUS_NAMES = {
+    SystemStatus.ACTIVE: "active",
+    SystemStatus.PAUSING: "pausing",
+    SystemStatus.PAUSED: "paused",
+    SystemStatus.RESUMING: "resuming",
+    SystemStatus.SHUTTING_DOWN: "shutting_down",
+}
+
 
 class SystemStatusProvider:
     """Provides the current status of the system based on thread controller and
