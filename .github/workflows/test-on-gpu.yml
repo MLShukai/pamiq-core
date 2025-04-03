@@ -49,43 +49,7 @@ jobs:
           echo "=== CUDA Device Information ==="
           ls -la /dev/nvidia* || echo "No NVIDIA devices found in /dev"
 
-          echo "=== Environment Variables ==="
-          env | grep -i cuda || echo "No CUDA-related environment variables found"
-
           echo "=== PyTorch CUDA Configuration ==="
-          uv run python -c "import torch; print(f'PyTorch version: {torch.__version__}')"
-          uv run python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
-          uv run python -c "import torch; print(f'CUDA compiled version: {torch.version.cuda}')"
-          uv run python -c "import torch; print(f'CUDNN version: {torch.backends.cudnn.version() if torch.backends.cudnn.is_available() else \"Not available\"}')"
-
-          echo "=== Python Error Information ==="
-          uv run python -c "
-          import torch
-          try:
-              if not torch.cuda.is_available():
-                  print('CUDA not available, detailed debugging:')
-                  import os
-                  print(f'- CUDA_VISIBLE_DEVICES: {os.environ.get(\"CUDA_VISIBLE_DEVICES\", \"Not set\")}')
-                  # Check if NVIDIA CUDA Driver libraries are loaded in memory
-                  try:
-                      import ctypes
-                      ctypes.CDLL('libcuda.so.1')
-                      print('- libcuda.so.1 can be loaded')
-                  except OSError as e:
-                      print(f'- Failed to load libcuda.so.1: {e}')
-                  # Check if PyTorch can see any CUDA devices
-                  print(f'- NVIDIA Driver count: {torch.cuda.device_count()}')
-          except Exception as e:
-              print(f'Exception during diagnostics: {e}')
-          "
-
-          # Exit with error if CUDA is not available
-          CUDA_AVAILABLE=$(uv run python -c "import torch; print(torch.cuda.is_available())")
-          if [ "$CUDA_AVAILABLE" != "True" ]; then
-            echo "::error::PyTorch cannot detect CUDA capability! This runner requires GPU support."
-            exit 1
-          fi
-
           # Print GPU info if available
           uv run python -c "
           import torch
