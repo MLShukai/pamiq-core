@@ -25,6 +25,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           sudo -E apt-get update
           sudo -E apt-get install -y --no-install-recommends nvidia-utils-535-server nvidia-driver-535-server
+          sudo modprobe nvidia
           nvidia-smi
 
       - name: Check NVIDIA Driver Version File
