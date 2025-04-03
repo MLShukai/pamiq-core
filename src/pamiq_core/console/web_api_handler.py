@@ -2,7 +2,7 @@
 
 This module provides a simple web API for controlling the system,
 allowing external applications to pause, resume, shutdown the system and
-save checkpoints.
+save states.
 """
 
 import logging
@@ -28,7 +28,7 @@ class ControlCommands(Enum):
     SHUTDOWN = auto()
     PAUSE = auto()
     RESUME = auto()
-    SAVE_CHECKPOINT = auto()
+    SAVE_STATE = auto()
 
 
 # Constants for commonly used responses
@@ -67,8 +67,8 @@ class WebApiHandler:
             Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
             Status codes: 200 OK, 503 Service Unavailable
 
-        POST /api/save-checkpoint
-            Saves a checkpoint of the current system state.
+        POST /api/save-state
+            Saves a state of the current system state.
             Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
             Status codes: 200 OK, 503 Service Unavailable
 
@@ -111,8 +111,8 @@ class WebApiHandler:
             Route("/api/resume", endpoint=self._post_resume, methods=["POST"]),
             Route("/api/shutdown", endpoint=self._post_shutdown, methods=["POST"]),
             Route(
-                "/api/save-checkpoint",
-                endpoint=self._post_save_checkpoint,
+                "/api/save-state",
+                endpoint=self._post_save_state,
                 methods=["POST"],
             ),
         ]
@@ -233,8 +233,8 @@ class WebApiHandler:
         self._logger.info("Shutdown command received")
         return await self._add_command(ControlCommands.SHUTDOWN)
 
-    async def _post_save_checkpoint(self, request: Request) -> JSONResponse:
-        """Handle POST /api/save-checkpoint request.
+    async def _post_save_state(self, request: Request) -> JSONResponse:
+        """Handle POST /api/save-state request.
 
         Args:
             request: The HTTP request.
@@ -242,8 +242,8 @@ class WebApiHandler:
         Returns:
             JSONResponse: Success or error response.
         """
-        self._logger.info("Save checkpoint command received")
-        return await self._add_command(ControlCommands.SAVE_CHECKPOINT)
+        self._logger.info("Save state command received")
+        return await self._add_command(ControlCommands.SAVE_STATE)
 
     async def _error_404(self, request: Request, exc: Any) -> JSONResponse:
         """Handle 404 errors.

@@ -150,19 +150,19 @@ class TestWebApiHandler:
         assert web_api_handler.has_commands()
         assert web_api_handler.receive_command() is ControlCommands.SHUTDOWN
 
-    def test_post_save_checkpoint_endpoint_queues_save_checkpoint_command(
+    def test_post_save_state_endpoint_queues_save_state_command(
         self, test_client: TestClient, web_api_handler: WebApiHandler
     ) -> None:
-        """Test POST /api/save-checkpoint endpoint successfully queues a
-        SAVE_CHECKPOINT command."""
+        """Test POST /api/save-state endpoint successfully queues a SAVE_state
+        command."""
         # Act - send request to API endpoint
-        response = test_client.post("/api/save-checkpoint")
+        response = test_client.post("/api/save-state")
 
         # Assert - verify response and command queue state
         assert response.status_code == 200
         assert response.json() == RESULT_OK
         assert web_api_handler.has_commands()
-        assert web_api_handler.receive_command() is ControlCommands.SAVE_CHECKPOINT
+        assert web_api_handler.receive_command() is ControlCommands.SAVE_STATE
 
     def test_command_queue_overflow_returns_error(
         self, test_client: TestClient, web_api_handler: WebApiHandler
