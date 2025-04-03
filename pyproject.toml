@@ -7,7 +7,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "starlette>=0.46.1",
-    "torch>=2.0.0",
     "uvicorn>=0.34.0",
 ]
 
@@ -35,6 +34,11 @@ classifiers = [
 [project.urls]
 Repository = "https://github.com/MLShukai/pamiq-core"
 Issues = "https://github.com/MLShukai/pamiq-core/issues"
+
+[project.optional-dependencies]
+torch = [
+    "torch>=2.0.0",
+]
 
 [build-system]
 requires = ["hatchling"]
