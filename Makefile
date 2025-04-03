@@ -24,6 +24,10 @@ docker-down-volume:  ## Stop docker containers with removing volumes.
 docker-attach: ## Attach to development container
 	docker compose exec dev bash
 
+venv: ## Make virtual environment
+	uv venv
+	uv sync --all-extras
+
 format: ## Run pre-commit hooks
 	uv run pre-commit run -a
 
