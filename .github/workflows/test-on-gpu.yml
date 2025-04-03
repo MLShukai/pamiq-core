@@ -1,11 +1,11 @@
 name: Test on GPU
 
 on:
-  push:
-    branches: [main, released]
   pull_request:
     branches: [main, released]
-
+    paths:
+      - "src/pamiq_core/torch/**"
+      - "tests/pamiq_core/torch/**"
 env:
   PYTHON_VERSION: "3.12"
   UV_VERSION: "0.5.10"
