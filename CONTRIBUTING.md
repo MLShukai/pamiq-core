@@ -84,6 +84,9 @@ PAMIQ Core への貢献に興味を持っていただき、ありがとうござ
 以下のコマンドで開発を行います：
 
 ```sh
+# Python仮想環境の構築
+make venv
+
 # コードのフォーマットとpre-commitフックの実行
 make format
 
