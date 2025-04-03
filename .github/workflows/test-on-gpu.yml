@@ -18,6 +18,8 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Check OS
+        run: cat /etc/os-release
       - name: Check NVIDIA Driver Version File
         run: |
           NVIDIA_VERSION_FILE="/proc/driver/nvidia/version"
