@@ -330,3 +330,19 @@ class ThreadStatusesHandler:
                 )
                 flag = True
         return flag
+
+    def check_all_threads_paused(self) -> bool:
+        """Check if all threads are paused.
+
+        Returns:
+            bool: True if all threads are paused, False otherwise.
+        """
+        return all(status.is_pause() for status in self._statuses.values())
+
+    def check_any_threads_paused(self) -> bool:
+        """Check if any thread is paused.
+
+        Returns:
+            bool: True if at least one thread is paused, False otherwise.
+        """
+        return any(status.is_pause() for status in self._statuses.values())

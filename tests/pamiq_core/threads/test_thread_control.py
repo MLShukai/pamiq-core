@@ -573,3 +573,75 @@ class TestThreadStatusesHandler:
                 log_level="ERROR",
                 caplog=caplog,
             )
+
+    def test_check_all_threads_paused_empty_statuses(self) -> None:
+        """Test check_all_threads_paused when statuses is empty."""
+        thread_status_handler = ThreadStatusesHandler(statuses={})
+        assert thread_status_handler.check_all_threads_paused() is True
+
+    @pytest.mark.parametrize(
+        "is_inference_paused, is_training_paused, expected_result",
+        [
+            (False, False, False),  # No threads paused
+            (True, False, False),  # Some threads paused
+            (False, True, False),  # Some threads paused
+            (True, True, True),  # All threads paused
+        ],
+    )
+    def test_check_all_threads_paused(
+        self,
+        is_inference_paused,
+        is_training_paused,
+        expected_result,
+        inference_thread_status,
+        training_thread_status,
+        thread_status_handler,
+    ) -> None:
+        """Test check_all_threads_paused with different thread pause states."""
+        # Set initial state to resumed
+        inference_thread_status.resume()
+        training_thread_status.resume()
+
+        # Set the specified pause states
+        if is_inference_paused:
+            inference_thread_status.pause()
+        if is_training_paused:
+            training_thread_status.pause()
+
+        assert thread_status_handler.check_all_threads_paused() is expected_result
+
+    def test_check_any_threads_paused_empty_statuses(self) -> None:
+        """Test check_any_threads_paused when statuses is empty."""
+        thread_status_handler = ThreadStatusesHandler(statuses={})
+        assert thread_status_handler.check_any_threads_paused() is False
+
+    @pytest.mark.parametrize(
+        "is_inference_paused, is_training_paused, expected_result",
+        [
+            (False, False, False),  # No threads paused
+            (True, False, True),  # Some threads paused
+            (False, True, True),  # Some threads paused
+            (True, True, True),  # All threads paused
+        ],
+    )
+    def test_check_any_threads_paused(
+        self,
+        is_inference_paused,
+        is_training_paused,
+        expected_result,
+        inference_thread_status,
+        training_thread_status,
+        thread_status_handler,
+    ) -> None:
+        """Test check_any_threads_paused with different thread pause states."""
+        # Set initial state to resumed
+        inference_thread_status.resume()
+        training_thread_status.resume()
+
+        # Set the specified pause states
+        if is_inference_paused:
+            inference_thread_status.pause()
+        if is_training_paused:
+            training_thread_status.pause()
+
+        assert thread_status_handler.check_any_threads_paused() is expected_result
