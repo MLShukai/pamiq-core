@@ -40,13 +40,43 @@ _ERROR_INTERNAL_SERVER = {"error": "Internal server error"}
 
 
 class WebApiHandler:
-    """Web API handler for controlling the system.
+    f"""Web API handler for controlling the system.
 
     This class provides a simple Web API for controlling the thread
     controller, allowing external applications to pause, resume, and
     shutdown the system.
-    """
 
+    API Endpoints:
+        GET /api/status
+            Returns the current system status.
+            Response: {{"status": "<status_name>"}}
+            Status codes: 200 OK, 500 Internal Server Error
+
+        POST /api/pause
+            Pauses the system.
+            Response: {_RESULT_OK} or {_ERROR_QUEUE_FULL}
+            Status codes: 200 OK, 503 Service Unavailable
+
+        POST /api/resume
+            Resumes the system.
+            Response: {_RESULT_OK} or {_ERROR_QUEUE_FULL}
+            Status codes: 200 OK, 503 Service Unavailable
+
+        POST /api/shutdown
+            Shuts down the system.
+            Response: {_RESULT_OK} or {_ERROR_QUEUE_FULL}
+            Status codes: 200 OK, 503 Service Unavailable
+
+        POST /api/save-checkpoint
+            Saves a checkpoint of the current system state.
+            Response: {_RESULT_OK} or {_ERROR_QUEUE_FULL}
+            Status codes: 200 OK, 503 Service Unavailable
+
+    Error Responses:
+        404 Not Found: {_ERROR_INVALID_ENDPOINT}
+        405 Method Not Allowed: {_ERROR_INVALID_METHOD}
+        500 Internal Server Error: {_ERROR_INTERNAL_SERVER}
+    """
     # Default maximum size of command queue
     DEFAULT_QUEUE_SIZE = 1
 
