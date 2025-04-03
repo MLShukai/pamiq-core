@@ -6,7 +6,9 @@ license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "starlette>=0.46.1",
     "torch>=2.0.0",
+    "uvicorn>=0.34.0",
 ]
 
 keywords = [
@@ -40,10 +42,12 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pamiq-core",
     "pre-commit>=4.0.1",
     "pyright>=1.1.391",
     "pytest>=8.3.4",
+    "pytest-asyncio>=0.26.0",
     "pytest-cov>=6.0.0",
     "pytest-mock>=3.14.0",
 ]
@@ -66,6 +70,7 @@ log_cli = "True"
 
 minversion = "6.0"
 testpaths = "tests/"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.pyright]
 pythonVersion = "3.12"
