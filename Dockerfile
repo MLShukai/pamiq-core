@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     git \
     make \
     && rm -rf /var/lib/apt/lists/* \
-    && uv sync \
+    && make venv \
     # Install pre-commit hook.
     && uv run pre-commit install \
     # Shell completion
