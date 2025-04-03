@@ -1,6 +1,9 @@
 import pytest
 
-from pamiq_core.console.system_status import SystemStatus, SystemStatusProvider
+from pamiq_core.console.system_status import (
+    SystemStatus,
+    SystemStatusProvider,
+)
 from pamiq_core.threads import (
     ThreadController,
     ThreadStatus,
@@ -222,3 +225,20 @@ class TestSystemStatusProvider:
 
         thread_controller.shutdown()
         assert status_provider.get_current_status() is SystemStatus.SHUTTING_DOWN
+
+
+class TestSystemStatusEnum:
+    """Test class for SystemStatus enum and its status_name property."""
+
+    def test_status_name_property(self) -> None:
+        """Test that the status_name property returns the correct lowercase
+        string."""
+        # Test all status values
+        assert SystemStatus.ACTIVE.status_name == "active"
+        assert SystemStatus.PAUSING.status_name == "pausing"
+        assert SystemStatus.PAUSED.status_name == "paused"
+        assert SystemStatus.RESUMING.status_name == "resuming"
+        assert SystemStatus.SHUTTING_DOWN.status_name == "shutting down"
+
+        for status in SystemStatus:
+            status.status_name
