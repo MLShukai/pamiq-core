@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [main, released]
     paths:
+      - ".github/workflows/test-on-gpu.yml"
       - "src/pamiq_core/torch/**"
       - "tests/pamiq_core/torch/**"
 env:
