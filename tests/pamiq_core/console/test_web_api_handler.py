@@ -98,8 +98,7 @@ class TestWebApiHandler:
 
         # Assert - verify error response
         assert response.status_code == 500
-        assert "error" in response.json()
-        assert "Test error" in response.json()["error"]
+        assert response.json() == {"error": "Internal server error"}
 
     def test_post_pause_endpoint_queues_pause_command(
         self, test_client: TestClient, web_api_handler: WebApiHandler

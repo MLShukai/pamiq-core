@@ -165,9 +165,7 @@ class WebApiHandler:
             return JSONResponse({"status": status_value})
         except Exception as e:
             self._logger.exception("Error getting system status")
-            return JSONResponse(
-                {"error": f"Internal server error: {str(e)}"}, status_code=500
-            )
+            return await self._error_500(request, e)
 
     async def _post_pause(self, request: Request) -> JSONResponse:
         """Handle POST /api/pause request.
