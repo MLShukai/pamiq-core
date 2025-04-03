@@ -20,6 +20,11 @@ jobs:
     steps:
       - name: Check OS
         run: cat /etc/os-release
+      - name: Install NVIDIA SMI
+        run: |
+          sudo apt install nvidia-utils-535-server
+          nvidia-smi
+
       - name: Check NVIDIA Driver Version File
         run: |
           NVIDIA_VERSION_FILE="/proc/driver/nvidia/version"
@@ -41,12 +46,6 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
 
-      - name: Install cuda
-        run: |
-          wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
-          sudo dpkg -i cuda-keyring_1.1-1_all.deb
-          sudo apt-get update
-          sudo apt-get -y install cuda-toolkit-12-8
       - name: Install dependencies
         run: uv sync --extra torch
 
