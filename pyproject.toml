@@ -5,9 +5,7 @@ description = "The core package for creating autonomous machine intelligence"
 license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "torch>=2.0.0",
-]
+dependencies = []
 
 keywords = [
   "AI",
@@ -33,6 +31,11 @@ classifiers = [
 [project.urls]
 Repository = "https://github.com/MLShukai/pamiq-core"
 Issues = "https://github.com/MLShukai/pamiq-core/issues"
+
+[project.optional-dependencies]
+torch = [
+    "torch>=2.0.0",
+]
 
 [build-system]
 requires = ["hatchling"]

@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.12"
 
 [[package]]
@@ -311,7 +312,9 @@ wheels = [
 name = "pamiq-core"
 version = "0.0.3"
 source = { editable = "." }
-dependencies = [
+
+[package.optional-dependencies]
+torch = [
     { name = "torch" },
 ]
 
@@ -326,7 +329,8 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "torch", specifier = ">=2.0.0" }]
+requires-dist = [{ name = "torch", marker = "extra == 'torch'", specifier = ">=2.0.0" }]
+provides-extras = ["torch"]
 
 [package.metadata.requires-dev]
 dev = [
