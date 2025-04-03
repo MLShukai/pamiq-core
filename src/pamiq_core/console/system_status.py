@@ -29,7 +29,7 @@ _STATUS_NAMES = {
     SystemStatus.PAUSING: "pausing",
     SystemStatus.PAUSED: "paused",
     SystemStatus.RESUMING: "resuming",
-    SystemStatus.SHUTTING_DOWN: "shutting_down",
+    SystemStatus.SHUTTING_DOWN: "shutting down",
 }
 
 
