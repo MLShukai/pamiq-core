@@ -1,3 +1,4 @@
+from .base import Thread
 from .thread_control import (
     ControllerCommandHandler,
     ReadOnlyController,
@@ -12,6 +13,7 @@ from .thread_types import (
 )
 
 __all__ = [
+    "Thread",
     "ThreadTypes",
     "ThreadController",
     "ReadOnlyController",
