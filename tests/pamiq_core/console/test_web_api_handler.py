@@ -7,7 +7,15 @@ from pytest_mock import MockerFixture
 from starlette.testclient import TestClient
 
 from pamiq_core.console.system_status import SystemStatus, SystemStatusProvider
-from pamiq_core.console.web_api_handler import ControlCommands, WebApiHandler
+from pamiq_core.console.web_api_handler import (
+    ERROR_INTERNAL_SERVER,
+    ERROR_INVALID_ENDPOINT,
+    ERROR_INVALID_METHOD,
+    ERROR_QUEUE_FULL,
+    RESULT_OK,
+    ControlCommands,
+    WebApiHandler,
+)
 
 
 class TestWebApiHandler:
@@ -98,7 +106,7 @@ class TestWebApiHandler:
 
         # Assert - verify error response
         assert response.status_code == 500
-        assert response.json() == {"error": "Internal server error"}
+        assert response.json() == ERROR_INTERNAL_SERVER
 
     def test_post_pause_endpoint_queues_pause_command(
         self, test_client: TestClient, web_api_handler: WebApiHandler
@@ -110,7 +118,7 @@ class TestWebApiHandler:
 
         # Assert - verify response and command queue state
         assert response.status_code == 200
-        assert response.json() == {"result": "ok"}
+        assert response.json() == RESULT_OK
         assert web_api_handler.has_commands()
         assert web_api_handler.receive_command() is ControlCommands.PAUSE
 
@@ -124,7 +132,7 @@ class TestWebApiHandler:
 
         # Assert - verify response and command queue state
         assert response.status_code == 200
-        assert response.json() == {"result": "ok"}
+        assert response.json() == RESULT_OK
         assert web_api_handler.has_commands()
         assert web_api_handler.receive_command() is ControlCommands.RESUME
 
@@ -138,7 +146,7 @@ class TestWebApiHandler:
 
         # Assert - verify response and command queue state
         assert response.status_code == 200
-        assert response.json() == {"result": "ok"}
+        assert response.json() == RESULT_OK
         assert web_api_handler.has_commands()
         assert web_api_handler.receive_command() is ControlCommands.SHUTDOWN
 
@@ -152,7 +160,7 @@ class TestWebApiHandler:
 
         # Assert - verify response and command queue state
         assert response.status_code == 200
-        assert response.json() == {"result": "ok"}
+        assert response.json() == RESULT_OK
         assert web_api_handler.has_commands()
         assert web_api_handler.receive_command() is ControlCommands.SAVE_CHECKPOINT
 
@@ -212,7 +220,7 @@ class TestWebApiHandler:
 
         # Assert
         assert response.status_code == 404
-        assert response.json() == {"error": "Invalid API endpoint"}
+        assert response.json() == ERROR_INVALID_ENDPOINT
 
     def test_invalid_method_returns_405(self, test_client: TestClient) -> None:
         """Test that using an invalid HTTP method returns a 405 error."""
@@ -221,4 +229,4 @@ class TestWebApiHandler:
 
         # Assert
         assert response.status_code == 405
-        assert response.json() == {"error": "Invalid API method"}
+        assert response.json() == ERROR_INVALID_METHOD

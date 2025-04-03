@@ -32,11 +32,11 @@ class ControlCommands(Enum):
 
 
 # Constants for commonly used responses
-_RESULT_OK = {"result": "ok"}
-_ERROR_QUEUE_FULL = {"error": "Command queue is full, try again later"}
-_ERROR_INVALID_ENDPOINT = {"error": "Invalid API endpoint"}
-_ERROR_INVALID_METHOD = {"error": "Invalid API method"}
-_ERROR_INTERNAL_SERVER = {"error": "Internal server error"}
+RESULT_OK = {"result": "ok"}
+ERROR_QUEUE_FULL = {"error": "Command queue is full, try again later"}
+ERROR_INVALID_ENDPOINT = {"error": "Invalid API endpoint"}
+ERROR_INVALID_METHOD = {"error": "Invalid API method"}
+ERROR_INTERNAL_SERVER = {"error": "Internal server error"}
 
 
 class WebApiHandler:
@@ -54,28 +54,28 @@ class WebApiHandler:
 
         POST /api/pause
             Pauses the system.
-            Response: {_RESULT_OK} or {_ERROR_QUEUE_FULL}
+            Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
             Status codes: 200 OK, 503 Service Unavailable
 
         POST /api/resume
             Resumes the system.
-            Response: {_RESULT_OK} or {_ERROR_QUEUE_FULL}
+            Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
             Status codes: 200 OK, 503 Service Unavailable
 
         POST /api/shutdown
             Shuts down the system.
-            Response: {_RESULT_OK} or {_ERROR_QUEUE_FULL}
+            Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
             Status codes: 200 OK, 503 Service Unavailable
 
         POST /api/save-checkpoint
             Saves a checkpoint of the current system state.
-            Response: {_RESULT_OK} or {_ERROR_QUEUE_FULL}
+            Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
             Status codes: 200 OK, 503 Service Unavailable
 
     Error Responses:
-        404 Not Found: {_ERROR_INVALID_ENDPOINT}
-        405 Method Not Allowed: {_ERROR_INVALID_METHOD}
-        500 Internal Server Error: {_ERROR_INTERNAL_SERVER}
+        404 Not Found: {ERROR_INVALID_ENDPOINT}
+        405 Method Not Allowed: {ERROR_INVALID_METHOD}
+        500 Internal Server Error: {ERROR_INTERNAL_SERVER}
     """
     # Default maximum size of command queue
     DEFAULT_QUEUE_SIZE = 1
@@ -175,10 +175,10 @@ class WebApiHandler:
         """
         try:
             self._received_commands_queue.put_nowait(command)
-            return JSONResponse(_RESULT_OK)
+            return JSONResponse(RESULT_OK)
         except Full:
             self._logger.error(f"Command queue is full, rejecting {command}")
-            return JSONResponse(_ERROR_QUEUE_FULL, status_code=503)
+            return JSONResponse(ERROR_QUEUE_FULL, status_code=503)
 
     async def _get_status(self, request: Request) -> JSONResponse:
         """Handle GET /api/status request.
@@ -258,7 +258,7 @@ class WebApiHandler:
         path = request.url.path
         method = request.method
         self._logger.error(f"404: {method} {path} is invalid API endpoint")
-        return JSONResponse(_ERROR_INVALID_ENDPOINT, status_code=404)
+        return JSONResponse(ERROR_INVALID_ENDPOINT, status_code=404)
 
     async def _error_405(self, request: Request, exc: Any) -> JSONResponse:
         """Handle 405 errors.
@@ -273,7 +273,7 @@ class WebApiHandler:
         path = request.url.path
         method = request.method
         self._logger.error(f"405: {method} {path} is invalid API method")
-        return JSONResponse(_ERROR_INVALID_METHOD, status_code=405)
+        return JSONResponse(ERROR_INVALID_METHOD, status_code=405)
 
     async def _error_500(self, request: Request, exc: Any) -> JSONResponse:
         """Handle 500 errors.
@@ -289,4 +289,4 @@ class WebApiHandler:
         method = request.method
         error_msg = str(exc) if exc else "Unknown error"
         self._logger.error(f"500: {method} {path} caused an error: {error_msg}")
-        return JSONResponse(_ERROR_INTERNAL_SERVER, status_code=500)
+        return JSONResponse(ERROR_INTERNAL_SERVER, status_code=500)
