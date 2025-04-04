@@ -13,8 +13,8 @@ from pamiq_core.trainer import Trainer
 
 class TrainerImpl(Trainer):
     @override
-    def on_data_users_dict_attached(self):
-        super().on_data_users_dict_attached()
+    def on_data_users_attached(self):
+        super().on_data_users_attached()
         self.user = self.get_data_user("data")
 
     @override
@@ -83,8 +83,8 @@ class TestTrainer:
         training_models_dict: TrainingModelsDict,
         data_users_dict: DataUsersDict,
     ) -> TrainerImpl:
-        trainer.attach_training_models_dict(training_models_dict=training_models_dict)
-        trainer.attach_data_users_dict(data_users_dict=data_users_dict)
+        trainer.attach_training_models(training_models=training_models_dict)
+        trainer.attach_data_users(data_users=data_users_dict)
         return trainer
 
     @pytest.fixture
@@ -94,25 +94,23 @@ class TestTrainer:
         training_models_dict: TrainingModelsDict,
         data_users_dict: DataUsersDict,
     ) -> TrainerImpl:
-        conditional_trainer.attach_training_models_dict(
-            training_models_dict=training_models_dict
-        )
-        conditional_trainer.attach_data_users_dict(data_users_dict=data_users_dict)
+        conditional_trainer.attach_training_models(training_models=training_models_dict)
+        conditional_trainer.attach_data_users(data_users=data_users_dict)
         return conditional_trainer
 
-    def test_attach_training_models_dict(
+    def test_attach_training_models(
         self,
         trainer: TrainerImpl,
         training_models_dict: TrainingModelsDict,
         mock_model,
     ) -> None:
-        trainer.attach_training_models_dict(training_models_dict)
+        trainer.attach_training_models(training_models_dict)
         assert trainer.model == mock_model
 
-    def test_attach_data_users_dict(
+    def test_attach_data_users(
         self, trainer: TrainerImpl, data_users_dict: DataUsersDict, mock_user
     ) -> None:
-        trainer.attach_data_users_dict(data_users_dict)
+        trainer.attach_data_users(data_users_dict)
         assert trainer.user == mock_user
 
     def test_get_training_model(
