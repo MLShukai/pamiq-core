@@ -5,7 +5,7 @@ from .thread_control import (
     ThreadController,
     ThreadEventMixin,
     ThreadStatus,
-    ThreadStatusesHandler,
+    ThreadStatusesMonitor,
 )
 from .thread_types import (
     ThreadTypes,
@@ -18,6 +18,6 @@ __all__ = [
     "ControllerCommandHandler",
     "ThreadStatus",
     "ReadOnlyThreadStatus",
-    "ThreadStatusesHandler",
+    "ThreadStatusesMonitor",
     "ThreadEventMixin",
 ]

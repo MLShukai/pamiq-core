@@ -276,11 +276,11 @@ class ReadOnlyThreadStatus:
         self.is_exception_raised = status.is_exception_raised
 
 
-class ThreadStatusesHandler:
-    """A class to manage the statuses of multiple threads."""
+class ThreadStatusesMonitor:
+    """A class to monitor the statuses of multiple threads."""
 
     def __init__(self, statuses: dict[ThreadTypes, ReadOnlyThreadStatus]) -> None:
-        """Initialize the ThreadStatusesHandler object.
+        """Initialize the ThreadStatusesMonitor object.
 
         Args:
             statuses: A dictionary of ReadOnlyThreadStatus objects.

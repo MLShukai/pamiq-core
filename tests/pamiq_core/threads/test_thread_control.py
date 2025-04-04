@@ -9,7 +9,7 @@ from pamiq_core.threads import (
     ReadOnlyThreadStatus,
     ThreadController,
     ThreadStatus,
-    ThreadStatusesHandler,
+    ThreadStatusesMonitor,
     ThreadTypes,
 )
 from tests.helpers import check_log_message
@@ -395,8 +395,8 @@ class TestReadOnlyThreadStatus:
         assert read_only_thread_status.wait_for_pause == thread_status.wait_for_pause
 
 
-class TestThreadStatusesHandler:
-    """A test class for ThreadStatusesHandler."""
+class TestThreadStatusesMonitor:
+    """A test class for ThreadStatusesMonitor."""
 
     @pytest.fixture()
     def inference_thread_status(self) -> ThreadStatus:
@@ -425,9 +425,9 @@ class TestThreadStatusesHandler:
     @pytest.fixture()
     def thread_status_handler(
         self, read_only_inference_thread_status, read_only_training_thread_status
-    ) -> ThreadStatusesHandler:
-        """Fixture for thread status handler."""
-        return ThreadStatusesHandler(
+    ) -> ThreadStatusesMonitor:
+        """Fixture for thread status monitor."""
+        return ThreadStatusesMonitor(
             {
                 ThreadTypes.INFERENCE: read_only_inference_thread_status,
                 ThreadTypes.TRAINING: read_only_training_thread_status,
@@ -437,7 +437,7 @@ class TestThreadStatusesHandler:
     def test_wait_for_all_threads_pause_when_empty_status(self) -> None:
         """Test wait_for_all_threads_pause when statuses is empty."""
         # immediately return True if statuses is empty
-        thread_status_handler = ThreadStatusesHandler(statuses={})
+        thread_status_handler = ThreadStatusesMonitor(statuses={})
         start = time.perf_counter()
         assert thread_status_handler.wait_for_all_threads_pause(0.1) is True
         assert time.perf_counter() - start < 1e-3
@@ -576,7 +576,7 @@ class TestThreadStatusesHandler:
 
     def test_check_all_threads_paused_empty_statuses(self) -> None:
         """Test check_all_threads_paused when statuses is empty."""
-        thread_status_handler = ThreadStatusesHandler(statuses={})
+        thread_status_handler = ThreadStatusesMonitor(statuses={})
         assert thread_status_handler.check_all_threads_paused() is True
 
     @pytest.mark.parametrize(
@@ -612,7 +612,7 @@ class TestThreadStatusesHandler:
 
     def test_check_any_threads_paused_empty_statuses(self) -> None:
         """Test check_any_threads_paused when statuses is empty."""
-        thread_status_handler = ThreadStatusesHandler(statuses={})
+        thread_status_handler = ThreadStatusesMonitor(statuses={})
         assert thread_status_handler.check_any_threads_paused() is False
 
     @pytest.mark.parametrize(

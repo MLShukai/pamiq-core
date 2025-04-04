@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum, auto
 
-from pamiq_core.threads import ReadOnlyController, ThreadStatusesHandler
+from pamiq_core.threads import ReadOnlyController, ThreadStatusesMonitor
 
 
 class SystemStatus(Enum):
@@ -45,16 +45,16 @@ class SystemStatusProvider:
     def __init__(
         self,
         controller: ReadOnlyController,
-        thread_statuses_handler: ThreadStatusesHandler,
+        thread_statuses_monitor: ThreadStatusesMonitor,
     ) -> None:
         """Initialize the SystemStatusProvider.
 
         Args:
             controller: A read-only interface to the thread controller
-            thread_statuses_handler: Handler for managing and querying thread statuses
+            thread_statuses_monitor: Monitor for observing and querying thread statuses
         """
         self._controller = controller
-        self._thread_statuses_handler = thread_statuses_handler
+        self._thread_statuses_monitor = thread_statuses_monitor
 
     def get_current_status(self) -> SystemStatus:
         """Determine the current status of the system.
@@ -73,12 +73,12 @@ class SystemStatusProvider:
             return SystemStatus.SHUTTING_DOWN
 
         if self._controller.is_pause():
-            if self._thread_statuses_handler.check_all_threads_paused():
+            if self._thread_statuses_monitor.check_all_threads_paused():
                 return SystemStatus.PAUSED
             else:
                 return SystemStatus.PAUSING
         elif self._controller.is_resume():
-            if self._thread_statuses_handler.check_any_threads_paused():
+            if self._thread_statuses_monitor.check_any_threads_paused():
                 return SystemStatus.RESUMING
 
         return SystemStatus.ACTIVE
