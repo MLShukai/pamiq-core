@@ -14,7 +14,7 @@ class Thread(ABC, PersistentStateMixin, ThreadEventMixin):
     This class provides a common interface for all threads in the system.
 
     Attributes:
-        THREAD_TYPE (ClassVar[ThreadTypes]): The type of the thread.
+        THREAD_TYPE: The type of the thread. Subclasses must define this class variable.
     """
 
     THREAD_TYPE: ClassVar[ThreadTypes]
