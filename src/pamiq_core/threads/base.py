@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 from typing import ClassVar
 
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads.thread_control import ThreadEventMixin
-from pamiq_core.threads.thread_types import ThreadTypes
+from .thread_control import ThreadEventMixin
+from .thread_types import ThreadTypes
 from pamiq_core.utils.reflection import get_class_module_path
 
 
