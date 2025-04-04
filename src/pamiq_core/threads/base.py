@@ -20,6 +20,11 @@ class Thread(ABC, PersistentStateMixin, ThreadEventMixin):
     THREAD_TYPE: ClassVar[ThreadTypes]
 
     def __init__(self) -> None:
+        """Initialize Thread class.
+        
+        Raises:
+            AttributeError: If `THREAD_TYPE` attribute is not defined.
+        """
         if not hasattr(self, "THREAD_TYPE"):
             raise AttributeError(
                 "Subclasses must define `THREAD_TYPE` attribute before instantiation."
