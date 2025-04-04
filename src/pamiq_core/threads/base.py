@@ -32,7 +32,9 @@ class Thread(ABC, PersistentStateMixin, ThreadEventMixin):
         self._logger = logging.getLogger(get_class_module_path(self.__class__))
 
     @abstractmethod
-    def worker(self) -> None: ...
+    def worker(self) -> None:
+        """Please override this method to implement specified procedures.
+        ...
 
     def run(self) -> None:
         """Run the thread's worker method."""
