@@ -49,29 +49,27 @@ class TestTrainersDict:
     def trainers_dict(self, trainers: dict[str, Trainer]) -> TrainersDict:
         return TrainersDict(trainers)
 
-    def test_attach_training_models_dict(
+    def test_attach_training_models(
         self,
         mocker: MockerFixture,
         trainers_dict: TrainersDict,
         trainers: dict[str, Trainer],
     ) -> None:
         training_models_dict = mocker.Mock(TrainingModelsDict)
-        trainers_dict.attach_training_models_dict(training_models_dict)
+        trainers_dict.attach_training_models(training_models_dict)
         for trainer in trainers.values():
-            trainer.attach_training_models_dict.assert_called_once_with(
-                training_models_dict
-            )
+            trainer.attach_training_models.assert_called_once_with(training_models_dict)
 
-    def test_attach_data_users_dict(
+    def test_attach_data_users(
         self,
         mocker: MockerFixture,
         trainers_dict: TrainersDict,
         trainers: dict[str, Trainer],
     ) -> None:
         data_users_dict = mocker.Mock(DataUsersDict)
-        trainers_dict.attach_data_users_dict(data_users_dict)
+        trainers_dict.attach_data_users(data_users_dict)
         for trainer in trainers.values():
-            trainer.attach_data_users_dict.assert_called_once_with(data_users_dict)
+            trainer.attach_data_users.assert_called_once_with(data_users_dict)
 
     def test_save_state(
         self, trainers_dict: TrainersDict, trainers: dict[str, Trainer], tmp_path: Path

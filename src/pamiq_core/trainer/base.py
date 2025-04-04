@@ -15,8 +15,8 @@ class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
     The `run` method is called repeatedly in the training thread.
 
     Override the following methods:
-        - `on_training_models_attached`: Callback method for when `training_models_dict` is attached to the trainer.
-        - `on_data_users_dict_attached`: Callback method when `data_users_dict` is attached to the trainer.
+        - `on_training_models_attached`: Callback method for when training models are attached to the trainer.
+        - `on_data_users_attached`: Callback method when data_users are attached to the trainer.
         - `is_trainable`: Return whether the training can be executed.
         - `setup`: To setup before training starts.
         - `train`: The training process.
@@ -25,8 +25,8 @@ class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
     Models and data buffers become available after the thread has started.
     """
 
-    _training_models_dict: TrainingModelsDict
-    _data_users_dict: DataUsersDict
+    _training_models: TrainingModelsDict
+    _data_users: DataUsersDict
 
     def __init__(
         self,
@@ -49,28 +49,26 @@ class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
         self._min_new_data_count = min_new_data_count
         self._previous_training_time = float("-inf")
 
-    def attach_training_models_dict(
-        self, training_models_dict: TrainingModelsDict
-    ) -> None:
+    def attach_training_models(self, training_models: TrainingModelsDict) -> None:
         """Attaches TrainingModelsDict to this trainer."""
-        self._training_models_dict = training_models_dict
+        self._training_models = training_models
         self.on_training_models_attached()
 
     def on_training_models_attached(self) -> None:
-        """Callback method for when `training_models_dict` is attached to the
+        """Callback method for when training models are attached to the
         trainer.
 
         Use :meth:`get_training_model` to retrieve the model that will be trained.
         """
         pass
 
-    def attach_data_users_dict(self, data_users_dict: DataUsersDict) -> None:
-        """Attaches DataUsersDict dictionary."""
-        self._data_users_dict = data_users_dict
-        self.on_data_users_dict_attached()
+    def attach_data_users(self, data_users: DataUsersDict) -> None:
+        """Attaches DataUsersDict to this trainer."""
+        self._data_users = data_users
+        self.on_data_users_attached()
 
-    def on_data_users_dict_attached(self) -> None:
-        """Callback method when `data_users_dict` is attached to the trainer.
+    def on_data_users_attached(self) -> None:
+        """Callback method when data users are attached to the trainer.
 
         Use :meth:`get_data_user` to obtain the data user class for dataset.
         """
@@ -82,13 +80,13 @@ class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
         If the specified model includes an inference model, it is
         automatically synchronized after training.
         """
-        model = self._training_models_dict[name]
+        model = self._training_models[name]
         self._retrieved_model_names.add(name)
         return model
 
     def get_data_user(self, name: str) -> DataUser[Any]:
         """Retrieves the data user."""
-        return self._data_users_dict[name]
+        return self._data_users[name]
 
     def is_trainable(self) -> bool:
         """Determines if the training can be executed.
@@ -134,7 +132,7 @@ class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
     def sync_models(self) -> None:
         """Synchronizes params of trained models to inference models."""
         for name in self._retrieved_model_names:
-            self._training_models_dict[name].sync()
+            self._training_models[name].sync()
 
     def teardown(self) -> None:
         """Teardown procedure after training."""

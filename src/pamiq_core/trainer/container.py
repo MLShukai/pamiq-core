@@ -12,25 +12,23 @@ from pamiq_core.trainer import Trainer
 class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin, ThreadEventMixin):
     """A container class for trainers."""
 
-    def attach_training_models_dict(
-        self, training_models_dict: TrainingModelsDict
-    ) -> None:
-        """Attach the training_models_dict to all trainers.
+    def attach_training_models(self, training_models: TrainingModelsDict) -> None:
+        """Attach the training_models to all trainers.
 
         Args:
-            training_models_dict: TrainingModelsDict to be added to each trainer.
+            training_models: TrainingModelsDict to be added to each trainer.
         """
         for trainer in self.values():
-            trainer.attach_training_models_dict(training_models_dict)
+            trainer.attach_training_models(training_models)
 
-    def attach_data_users_dict(self, data_users_dict: DataUsersDict) -> None:
-        """Attach the data_users_dict to all trainers.
+    def attach_data_users(self, data_users: DataUsersDict) -> None:
+        """Attach the data_users to all trainers.
 
         Args:
-            data_users_dict: DataUsersDict to be added to each trainer.
+            data_users: DataUsersDict to be added to each trainer.
         """
         for trainer in self.values():
-            trainer.attach_data_users_dict(data_users_dict)
+            trainer.attach_data_users(data_users)
 
     @override
     def save_state(self, path: Path) -> None:
