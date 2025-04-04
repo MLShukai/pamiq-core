@@ -3,9 +3,10 @@ from abc import ABC, abstractmethod
 from typing import ClassVar
 
 from pamiq_core.state_persistence import PersistentStateMixin
+from pamiq_core.utils.reflection import get_class_module_path
+
 from .thread_control import ThreadEventMixin
 from .thread_types import ThreadTypes
-from pamiq_core.utils.reflection import get_class_module_path
 
 
 class Thread(ABC, PersistentStateMixin, ThreadEventMixin):
@@ -21,7 +22,7 @@ class Thread(ABC, PersistentStateMixin, ThreadEventMixin):
 
     def __init__(self) -> None:
         """Initialize Thread class.
-        
+
         Raises:
             AttributeError: If `THREAD_TYPE` attribute is not defined.
         """
@@ -33,7 +34,7 @@ class Thread(ABC, PersistentStateMixin, ThreadEventMixin):
 
     @abstractmethod
     def worker(self) -> None:
-        """Please override this method to implement specified procedures.
+        """Please override this method to implement specified procedures."""
         ...
 
     def run(self) -> None:
