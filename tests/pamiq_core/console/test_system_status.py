@@ -7,7 +7,7 @@ from pamiq_core.console.system_status import (
 from pamiq_core.threads import (
     ThreadController,
     ThreadStatus,
-    ThreadStatusesHandler,
+    ThreadStatusesMonitor,
     ThreadTypes,
 )
 
@@ -31,14 +31,14 @@ class TestSystemStatusProvider:
         return ThreadStatus()
 
     @pytest.fixture()
-    def thread_statuses_handler(
+    def thread_statuses_monitor(
         self,
         inference_thread_status: ThreadStatus,
         training_thread_status: ThreadStatus,
-    ) -> ThreadStatusesHandler:
-        """Fixture for a ThreadStatusesHandler instance with real thread
+    ) -> ThreadStatusesMonitor:
+        """Fixture for a ThreadStatusesMonitor instance with real thread
         statuses."""
-        return ThreadStatusesHandler(
+        return ThreadStatusesMonitor(
             {
                 ThreadTypes.INFERENCE: inference_thread_status.read_only,
                 ThreadTypes.TRAINING: training_thread_status.read_only,
@@ -49,11 +49,11 @@ class TestSystemStatusProvider:
     def status_provider(
         self,
         thread_controller: ThreadController,
-        thread_statuses_handler: ThreadStatusesHandler,
+        thread_statuses_monitor: ThreadStatusesMonitor,
     ) -> SystemStatusProvider:
         """Fixture for a SystemStatusProvider instance with real objects."""
         return SystemStatusProvider(
-            thread_controller.read_only, thread_statuses_handler
+            thread_controller.read_only, thread_statuses_monitor
         )
 
     def test_status_shutting_down(
