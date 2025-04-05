@@ -231,7 +231,7 @@ class TestTorchTrainingModel:
         torch_training_model_default: TorchTrainingModel,
         tmp_path: Path,
     ):
-        test_path = tmp_path / "model_params.pth"
+        test_path = tmp_path / "model_params"
         torch_training_model_default.save_state(test_path)
         saved_params = copy.deepcopy(torch_training_model_default.model.state_dict())
         # make differences
