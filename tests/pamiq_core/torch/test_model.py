@@ -257,8 +257,6 @@ class TestTorchTrainingModel:
         """Test initialization with a parameter file."""
         # Create a model with custom parameters
         custom_model = nn.Linear(3, 5)
-        custom_model.weight.data.fill_(1.0)
-        custom_model.bias.data.fill_(0.5)
 
         # Save the parameters to a file
         param_file = tmp_path / "model_params.pt"
