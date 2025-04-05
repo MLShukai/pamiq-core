@@ -1,4 +1,6 @@
+import copy
 import logging
+from pathlib import Path
 
 import pytest
 import torch
@@ -223,3 +225,29 @@ class TestTorchTrainingModel:
             is not torch_inference_model._raw_model.weight
         )
         assert torch_inference_model._raw_model.weight.grad is None
+
+    def test_save_and_load_state(
+        self,
+        torch_training_model_default: TorchTrainingModel,
+        tmp_path: Path,
+    ):
+        test_path = tmp_path / "model_params"
+        torch_training_model_default.save_state(test_path)
+        assert (tmp_path / "model_params.pt").is_file()
+        saved_params = copy.deepcopy(torch_training_model_default.model.state_dict())
+        # make differences
+        for model_weight in torch_training_model_default.model.parameters():
+            model_weight.data += 1.0
+        # check if the differences between the models are made correctly.
+        model_params = torch_training_model_default.model.state_dict()
+        assert model_params is not saved_params
+        assert list(model_params.keys()) == list(saved_params.keys())
+        for key in saved_params.keys():
+            assert not torch.equal(model_params[key], saved_params[key])
+        # check if load can be performed correctly.
+        torch_training_model_default.load_state(test_path)
+        loaded_params = torch_training_model_default.model.state_dict()
+        assert loaded_params is not saved_params
+        assert list(loaded_params.keys()) == list(saved_params.keys())
+        for key in saved_params.keys():
+            assert torch.equal(loaded_params[key], saved_params[key])

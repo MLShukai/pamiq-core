@@ -1,4 +1,5 @@
 import copy
+from pathlib import Path
 from threading import RLock
 from typing import Any, Protocol, override
 
@@ -180,3 +181,21 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
     def forward(self, *args: Any, **kwds: Any) -> Any:
         """forward."""
         return self.model(*args, **kwds)
+
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save the model params.
+
+        Args:
+            path: Path where the states should be saved.
+        """
+        torch.save(self.model.state_dict(), f"{path}.pt")  # pyright: ignore[reportUnknownMemberType]
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load the model params.
+
+        Args:
+            path: Path where the states should be loaded.
+        """
+        self.model.load_state_dict(torch.load(f"{path}.pt"))  # pyright: ignore[reportUnknownMemberType]
