@@ -114,6 +114,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         device: torch.device | str | None = None,
         dtype: torch.dtype | None = None,
         inference_procedure: InferenceProcedureCallable = default_infer_procedure,
+        parameter_file: str | Path | None = None,
     ):
         """Initialize.
 
@@ -124,6 +125,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             device: A device on which the model is placed.
             dtype: Data type of the model.
             inference_procedure: An inference procedure as Callable.
+            parameter_file: Path to a pre-trained model parameter file to load. If provided, the model parameters will be loaded from this file.
         """
         super().__init__(has_inference_model, inference_thread_only)
         if dtype is not None:
@@ -133,6 +135,11 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             device = get_device(model, CPU_DEVICE)
         self._inference_procedure = inference_procedure
         self.model.to(device)
+
+        if parameter_file is not None:
+            self.model.load_state_dict(
+                torch.load(parameter_file, map_location=device)  # pyright: ignore[reportUnknownMemberType]
+            )
 
     @override
     def _create_inference_model(self) -> TorchInferenceModel[T]:
