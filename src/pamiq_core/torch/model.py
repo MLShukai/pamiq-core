@@ -189,7 +189,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         Args:
             path: Path where the states should be saved.
         """
-        torch.save(self.model.state_dict(), f"{path}.pth")  # pyright: ignore[reportUnknownMemberType]
+        torch.save(self.model.state_dict(), f"{path}.pt")  # pyright: ignore[reportUnknownMemberType]
 
     @override
     def load_state(self, path: Path) -> None:
@@ -198,4 +198,4 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         Args:
             path: Path where the states should be loaded.
         """
-        self.model.load_state_dict(torch.load(f"{path}.pth"))  # pyright: ignore[reportUnknownMemberType]
+        self.model.load_state_dict(torch.load(f"{path}.pt"))  # pyright: ignore[reportUnknownMemberType]
