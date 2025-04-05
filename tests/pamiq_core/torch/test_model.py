@@ -233,6 +233,7 @@ class TestTorchTrainingModel:
     ):
         test_path = tmp_path / "model_params"
         torch_training_model_default.save_state(test_path)
+        assert (tmp_path / "model_params.pth").is_file()
         saved_params = copy.deepcopy(torch_training_model_default.model.state_dict())
         # make differences
         for model_weight in torch_training_model_default.model.parameters():
