@@ -267,7 +267,7 @@ class TestTorchTrainingModel:
             nn.Linear(3, 5),
             has_inference_model=True,
             inference_thread_only=False,
-            parameter_file=param_file,
+            pretrained_parameter_file=param_file,
             device=device,
         )
 
