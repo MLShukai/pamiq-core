@@ -271,6 +271,8 @@ class TestTorchTrainingModel:
             device=device,
         )
 
+        custom_model.to(device)
+
         # Verify the parameters were loaded correctly
         assert torch.allclose(
             training_model.model.weight.data, custom_model.weight.data
