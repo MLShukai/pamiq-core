@@ -274,16 +274,12 @@ class TestTorchTrainingModel:
         custom_model.to(device)
 
         # Verify the parameters were loaded correctly
-        assert torch.allclose(
-            training_model.model.weight.data, custom_model.weight.data
-        )
-        assert torch.allclose(training_model.model.bias.data, custom_model.bias.data)
+        assert torch.equal(training_model.model.weight.data, custom_model.weight.data)
+        assert torch.equal(training_model.model.bias.data, custom_model.bias.data)
 
         # Ensure the inference model also has the correct parameters
         inference_model = training_model.inference_model
-        assert torch.allclose(
+        assert torch.equal(
             inference_model._raw_model.weight.data, custom_model.weight.data
         )
-        assert torch.allclose(
-            inference_model._raw_model.bias.data, custom_model.bias.data
-        )
+        assert torch.equal(inference_model._raw_model.bias.data, custom_model.bias.data)
