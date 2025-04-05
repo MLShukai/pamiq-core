@@ -1,4 +1,5 @@
 from typing import override
+from unittest.mock import call
 
 import pytest
 
@@ -14,10 +15,6 @@ class TestThread:
         class TestThreadWithThreadType(Thread):
             THREAD_TYPE = ThreadTypes.CONTROL
 
-            @override
-            def worker(self) -> None:
-                pass
-
         _ = TestThreadWithThreadType()  # no error should be raised
 
     def test_init_without_THREAD_TYPE_attribute(self) -> None:
@@ -25,9 +22,8 @@ class TestThread:
         is not defined."""
 
         class TestThreadWithoutThreadType(Thread):
-            @override
-            def worker(self) -> None:
-                pass
+            # class without THREAD_TYPE attribute
+            pass
 
         with pytest.raises(
             AttributeError,
@@ -35,40 +31,92 @@ class TestThread:
         ):
             _ = TestThreadWithoutThreadType()
 
-    def test_run_without_error(self, mocker) -> None:
-        """Test that `run()` method executes worker() method."""
+    def test_run_without_exception(self, caplog, mocker) -> None:
+        """Test that the run method works without exceptions."""
 
-        class TestThreadWithoutError(Thread):
+        class TestThreadWithoutException(Thread):
             THREAD_TYPE = ThreadTypes.CONTROL
 
-            @override
-            def worker(self) -> None:
-                pass
+            def __init__(self) -> None:
+                super().__init__()
+                self._counter = 0
 
-        thread = TestThreadWithoutError()
-        worker_spy = mocker.spy(thread, "worker")
+            @override
+            def is_running(self) -> bool:
+                # rerutn True for 3 times and then False
+                self._counter += 1
+                return self._counter <= 3
+
+        thread = TestThreadWithoutException()
+
+        # set the spy on the methods
+        spy_on_start = mocker.spy(thread, "on_start")
+        spy_on_tick = mocker.spy(thread, "on_tick")
+        spy_on_end = mocker.spy(thread, "on_end")
+        spy_on_exception = mocker.spy(thread, "on_exception")
+        spy_on_finally = mocker.spy(thread, "on_finally")
+        spy_logger_info = mocker.spy(
+            thread._logger, "info"
+        )  # INFO level logs are not being emitted thus test with `assert_has_calls()`.
+
         thread.run()
-        worker_spy.assert_called_once_with()
 
-    def test_run_with_error(self, caplog) -> None:
-        """Test that `run()` raises exception and output logs if worker raises
-        exception."""
+        # Check method calls
+        spy_on_start.assert_called_once_with()
+        assert spy_on_tick.call_count == 3
+        spy_on_end.assert_called_once_with()
+        spy_on_exception.assert_not_called()  # not called
+        spy_on_finally.assert_called_once_with()
 
-        class TestThreadWithError(Thread):
+        # Check log calls
+        spy_logger_info.assert_has_calls(
+            [
+                call("Start 'control' thread."),
+                call("End 'control' thread."),
+            ]
+        )
+
+    def test_run_with_exception(self, caplog, mocker) -> None:
+        """Test that the run method works with exceptions."""
+
+        class TestThreadWithException(Thread):
             THREAD_TYPE = ThreadTypes.CONTROL
 
             @override
-            def worker(self) -> None:
-                raise RuntimeError("Test error")
+            def on_tick(self) -> None:
+                raise RuntimeError("Test exception")
 
-        thread = TestThreadWithError()
+        thread = TestThreadWithException()
 
-        with pytest.raises(RuntimeError, match="Test error"):
+        # set the spy on the methods
+        spy_on_start = mocker.spy(thread, "on_start")
+        spy_on_tick = mocker.spy(thread, "on_tick")
+        spy_on_end = mocker.spy(thread, "on_end")
+        spy_on_exception = mocker.spy(thread, "on_exception")
+        spy_on_finally = mocker.spy(thread, "on_finally")
+        spy_logger_info = mocker.spy(
+            thread._logger, "info"
+        )  # INFO level logs are not being emitted thus test with `assert_has_calls()`.
+
+        with pytest.raises(RuntimeError, match="Test exception"):
             thread.run()
 
-        # check the log message
+        # Check method calls
+        spy_on_start.assert_called_once_with()
+        spy_on_tick.assert_called_once_with()
+        spy_on_end.assert_not_called()  # not called
+        spy_on_exception.assert_called_once_with()
+        spy_on_finally.assert_called_once_with()
+
+        # Check log messages and calls
         check_log_message(
             expected_log_message="An exception has occurred in 'control' thread.",
             log_level="ERROR",
             caplog=caplog,
+        )
+        spy_logger_info.assert_has_calls(
+            [
+                call("Start 'control' thread."),
+                call("End 'control' thread."),
+            ]
         )
