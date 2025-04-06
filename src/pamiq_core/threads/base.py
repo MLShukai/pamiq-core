@@ -1,5 +1,5 @@
 import logging
-import time
+from pamiq_core import time
 from typing import ClassVar
 
 from pamiq_core.state_persistence import PersistentStateMixin
