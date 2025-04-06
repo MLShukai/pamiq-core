@@ -1,7 +1,7 @@
 import logging
-from pamiq_core import time
 from typing import ClassVar
 
+from pamiq_core import time
 from pamiq_core.state_persistence import PersistentStateMixin
 from pamiq_core.utils.reflection import get_class_module_path
 

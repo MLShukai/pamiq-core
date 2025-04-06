@@ -55,25 +55,24 @@ class TestThread:
         spy_on_end = mocker.spy(thread, "on_end")
         spy_on_exception = mocker.spy(thread, "on_exception")
         spy_on_finally = mocker.spy(thread, "on_finally")
-        spy_logger_info = mocker.spy(
-            thread._logger, "info"
-        )  # INFO level logs are not being emitted thus test with `assert_has_calls()`.
 
         thread.run()
 
-        # Check method calls
+        # Check method calls and log messages
+        check_log_message(
+            expected_log_message="Start 'control' thread.",
+            log_level="INFO",
+            caplog=caplog,
+        )
         spy_on_start.assert_called_once_with()
         assert spy_on_tick.call_count == 3
         spy_on_end.assert_called_once_with()
         spy_on_exception.assert_not_called()  # not called
         spy_on_finally.assert_called_once_with()
-
-        # Check log calls
-        spy_logger_info.assert_has_calls(
-            [
-                call("Start 'control' thread."),
-                call("End 'control' thread."),
-            ]
+        check_log_message(
+            expected_log_message="End 'control' thread.",
+            log_level="INFO",
+            caplog=caplog,
         )
 
     def test_run_with_exception(self, caplog, mocker) -> None:
@@ -94,29 +93,30 @@ class TestThread:
         spy_on_end = mocker.spy(thread, "on_end")
         spy_on_exception = mocker.spy(thread, "on_exception")
         spy_on_finally = mocker.spy(thread, "on_finally")
-        spy_logger_info = mocker.spy(
-            thread._logger, "info"
-        )  # INFO level logs are not being emitted thus test with `assert_has_calls()`.
 
         with pytest.raises(RuntimeError, match="Test exception"):
             thread.run()
 
-        # Check method calls
+        # Check method calls and log messages
+        check_log_message(
+            expected_log_message="Start 'control' thread.",
+            log_level="INFO",
+            caplog=caplog,
+        )
         spy_on_start.assert_called_once_with()
         spy_on_tick.assert_called_once_with()
         spy_on_end.assert_not_called()  # not called
-        spy_on_exception.assert_called_once_with()
-        spy_on_finally.assert_called_once_with()
-
-        # Check log messages and calls
         check_log_message(
             expected_log_message="An exception has occurred in 'control' thread.",
             log_level="ERROR",
             caplog=caplog,
         )
-        spy_logger_info.assert_has_calls(
-            [
-                call("Start 'control' thread."),
-                call("End 'control' thread."),
-            ]
+        spy_on_exception.assert_called_once_with()
+        spy_on_finally.assert_called_once_with()
+        check_log_message(
+            expected_log_message="An exception has occurred in 'control' thread.",
+            log_level="ERROR",
+            caplog=caplog,
         )
+
+        # Check log messages and calls
