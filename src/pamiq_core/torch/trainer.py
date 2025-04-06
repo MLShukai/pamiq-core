@@ -38,14 +38,27 @@ class TorchTrainer(Trainer):
     to define the specific training behavior.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        training_condition_data_user: str | None = None,
+        min_buffer_size: int = 0,
+        min_new_data_count: int = 0,
+    ) -> None:
         """Initialize the PyTorch trainer.
 
         Sets up empty containers for optimizers, schedulers, and their
         respective states. Actual optimizer and scheduler instances will
         be created during the setup phase.
+
+        Args:
+            training_condition_data_user: Name of the data user to check for trainability.
+                If None, trainer is always trainable.
+            min_buffer_size: Minimum total data points required in the buffer.
+            min_new_data_count: Minimum number of new data points required since last training.
         """
-        super().__init__()
+        super().__init__(
+            training_condition_data_user, min_buffer_size, min_new_data_count
+        )
 
         # Containers for optimizer and scheduler instances
         self._optimizers: OptimizersDict = {}
