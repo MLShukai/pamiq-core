@@ -251,3 +251,35 @@ class TestTorchTrainingModel:
         assert list(loaded_params.keys()) == list(saved_params.keys())
         for key in saved_params.keys():
             assert torch.equal(loaded_params[key], saved_params[key])
+
+    @parametrize_device
+    def test_initialize_with_parameter_file(self, tmp_path: Path, device):
+        """Test initialization with a parameter file."""
+        # Create a model with custom parameters
+        custom_model = nn.Linear(3, 5)
+
+        # Save the parameters to a file
+        param_file = tmp_path / "model_params.pt"
+        torch.save(custom_model.state_dict(), param_file)
+
+        # Initialize a training model with the parameter file
+        training_model = TorchTrainingModel(
+            nn.Linear(3, 5),
+            has_inference_model=True,
+            inference_thread_only=False,
+            pretrained_parameter_file=param_file,
+            device=device,
+        )
+
+        custom_model.to(device)
+
+        # Verify the parameters were loaded correctly
+        assert torch.equal(training_model.model.weight.data, custom_model.weight.data)
+        assert torch.equal(training_model.model.bias.data, custom_model.bias.data)
+
+        # Ensure the inference model also has the correct parameters
+        inference_model = training_model.inference_model
+        assert torch.equal(
+            inference_model._raw_model.weight.data, custom_model.weight.data
+        )
+        assert torch.equal(inference_model._raw_model.bias.data, custom_model.bias.data)
