@@ -17,7 +17,7 @@ from torch.optim.lr_scheduler import LRScheduler
 
 from pamiq_core.trainer import Trainer
 
-from .model import TorchModelWrapper
+from .model import TorchTrainingModel
 
 # Type definitions for improved type safety and readability
 type StateDict = dict[str, Any]
@@ -70,10 +70,10 @@ class TorchTrainer(Trainer):
     @override
     def get_training_model[T: nn.Module](
         self, name: str, module_cls: type[T] = nn.Module
-    ) -> TorchModelWrapper[T]:
+    ) -> TorchTrainingModel[T]:
         """Get a PyTorch training model with type checking.
 
-        Retrieves a PyTorch model wrapper by name and validates that it contains
+        Retrieves a TorchTrainingModel by name and validates that it contains
         a model of the expected type.
 
         Args:
@@ -81,22 +81,21 @@ class TorchTrainer(Trainer):
             module_cls: Expected module class type
 
         Returns:
-            TorchModelWrapper containing the requested model
+            TorchTrainingModel containing the requested model
 
         Raises:
-            ValueError: If the model is not a TorchModelWrapper or doesn't match the expected type
+            ValueError: If the model is not a TorchTrainingModel or doesn't match the expected type
         """
-        wrapper = super().get_training_model(name)
-        if not isinstance(wrapper, TorchModelWrapper):
-            raise ValueError(f"Model {name} is not a TorchModelWrapper")
+        training_model = super().get_training_model(name)
+        if not isinstance(training_model, TorchTrainingModel):
+            raise ValueError(f"Model {name} is not a TorchTrainingModel")
 
-        model = wrapper.model
-        if not isinstance(model, module_cls):
+        if not isinstance(training_model.model, module_cls):
             raise ValueError(
                 f"Model {name} is not an instance of {module_cls.__name__}"
             )
 
-        return wrapper
+        return training_model
 
     @override
     def setup(self) -> None:
@@ -182,11 +181,11 @@ class TorchTrainer(Trainer):
 
         # Save optimizer states to disk
         for name, optimizer_state in self._optimizer_states.items():
-            torch.save(optimizer_state, path / f"{name}.optim.pt")
+            torch.save(optimizer_state, path / f"{name}.optim.pt")  # pyright: ignore[reportUnknownMemberType]
 
         # Save scheduler states to disk
         for name, scheduler_state in self._scheduler_states.items():
-            torch.save(scheduler_state, path / f"{name}.lrsch.pt")
+            torch.save(scheduler_state, path / f"{name}.lrsch.pt")  # pyright: ignore[reportUnknownMemberType]
 
     @override
     def load_state(self, path: Path) -> None:
@@ -209,9 +208,9 @@ class TorchTrainer(Trainer):
         # Load optimizer states from disk
         for optimizer_path in path.glob("*.optim.pt"):
             name = optimizer_path.name.replace(".optim.pt", "")
-            self._optimizer_states[name] = torch.load(optimizer_path)
+            self._optimizer_states[name] = torch.load(optimizer_path)  # pyright: ignore[reportUnknownMemberType]
 
         # Load scheduler states from disk
         for scheduler_path in path.glob("*.lrsch.pt"):
             name = scheduler_path.name.replace(".lrsch.pt", "")
-            self._scheduler_states[name] = torch.load(scheduler_path)
+            self._scheduler_states[name] = torch.load(scheduler_path)  # pyright: ignore[reportUnknownMemberType]
