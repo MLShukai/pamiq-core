@@ -129,13 +129,15 @@ class TestTrainer:
         mock_model.sync.assert_called_once_with()
 
     def test_run(self, trainer_attached: TrainerImpl, mocker: MockerFixture) -> None:
+        """Test that run() executes training and returns True."""
         mock_setup = mocker.spy(trainer_attached, "setup")
         mock_train = mocker.spy(trainer_attached, "train")
         mock_sync_models = mocker.spy(trainer_attached, "sync_models")
         mock_teardown = mocker.spy(trainer_attached, "teardown")
 
-        trainer_attached.run()
+        result = trainer_attached.run()
 
+        assert result is True
         mock_setup.assert_called_once_with()
         mock_train.assert_called_once_with()
         mock_sync_models.assert_called_once_with()
@@ -206,7 +208,9 @@ class TestTrainer:
         mock_setup = mocker.spy(conditional_trainer_attached, "setup")
         mock_train = mocker.spy(conditional_trainer_attached, "train")
 
-        conditional_trainer_attached.run()
+        result = conditional_trainer_attached.run()
+        # Verify run returns False when training is skipped
+        assert result is False
 
         # Verify none of the training steps were executed
         mock_setup.assert_not_called()
