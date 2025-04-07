@@ -36,6 +36,12 @@ class TestScheduler:
         scheduler = MockScheduler(callbacks)
         assert scheduler._callbacks == callbacks
 
+    def test_init_with_single_callback(self):
+        callback = MagicMock()
+        scheduler = MockScheduler(callback)
+        assert len(scheduler._callbacks) == 1
+        assert callback in scheduler._callbacks
+
     def test_register_callback(self):
         scheduler = MockScheduler()
         callback = MagicMock()
@@ -61,6 +67,13 @@ class TestScheduler:
         scheduler.update()
         for callback in callbacks:
             callback.assert_called_once()
+
+    def test_update_with_single_callback(self):
+        callback = MagicMock()
+        scheduler = MockScheduler(callback)
+        scheduler.available = True
+        scheduler.update()
+        callback.assert_called_once()
 
     def test_update_when_not_available(self):
         callbacks = [MagicMock(), MagicMock()]

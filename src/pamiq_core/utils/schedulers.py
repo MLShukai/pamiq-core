@@ -16,13 +16,18 @@ class Scheduler(ABC):
     functionality for managing callbacks.
     """
 
-    def __init__(self, callbacks: CallbackIterable | None = None) -> None:
+    def __init__(self, callbacks: Callback | CallbackIterable | None = None) -> None:
         """Initialize the scheduler.
 
         Args:
-            callbacks: Optional iterable of callback functions to register.
+            callbacks: Optional iterable of callback functions to register or callback.
         """
-        self._callbacks = list(callbacks) if callbacks is not None else []
+        if callbacks is None:
+            callbacks = []
+        if isinstance(callbacks, Callable):
+            callbacks = [callbacks]
+
+        self._callbacks = list(callbacks)
 
     def register_callback(self, callback: Callback) -> None:
         """Register a new callback function.
