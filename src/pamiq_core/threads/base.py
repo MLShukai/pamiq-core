@@ -1,11 +1,18 @@
 import logging
-from typing import ClassVar
+import threading
+from typing import ClassVar, override
 
 from pamiq_core import time
 from pamiq_core.state_persistence import PersistentStateMixin
 from pamiq_core.utils.reflection import get_class_module_path
 
-from .thread_control import ThreadEventMixin
+from .thread_control import (
+    ControllerCommandHandler,
+    ReadOnlyController,
+    ReadOnlyThreadStatus,
+    ThreadEventMixin,
+    ThreadStatus,
+)
 from .thread_types import ThreadTypes
 
 
@@ -96,3 +103,104 @@ class Thread(PersistentStateMixin, ThreadEventMixin):
     def on_finally(self) -> None:
         """Called when the thread is finally terminated."""
         pass
+
+
+class BackgroundThread(Thread):
+    """Background thread class, a subclass of Thread and is used for background
+    processing.
+
+    Attributes:
+        _controller_command_handler: Handles commands from the controller.
+        _thread: thread object.
+        _thread_status: ThreadStatus of the thread.
+    Raises:
+        ValueError: If THREAD_TYPE is set to 'control'.
+    """
+
+    _controller_command_handler: (
+        ControllerCommandHandler  # Variable declaration for delay settings
+    )
+
+    def __init__(self) -> None:
+        """Initialize BackgroundThread class.
+
+        Raises:
+            ValueError: If THREAD_TYPE is set to 'control'.
+        """
+        super().__init__()
+        if self.THREAD_TYPE is ThreadTypes.CONTROL:
+            raise ValueError("BackgroundThread cannot be of type 'control'.")
+
+        self._thread = threading.Thread(target=self.run)
+        self._thread_status = ThreadStatus()
+
+    @property
+    def thread_status(self) -> ReadOnlyThreadStatus:
+        """Get a read-only view of the ThreadStatus object of this thread.
+
+        Returns:
+            A read-only interface to the thread status.
+        """
+
+        return self._thread_status.read_only
+
+    def attach_controller(self, controller: ReadOnlyController) -> None:
+        """Attach a controller to the thread.
+
+        The controller is used to manage the thread's lifecycle and handle commands.
+
+        Args:
+            controller: The controller to attach.
+        """
+        self._controller_command_handler = ControllerCommandHandler(
+            controller,
+            self.on_paused,
+            self.on_resumed,
+        )
+
+    @override
+    def on_paused(self) -> None:
+        """The method to be called when the thread is paused."""
+        super().on_paused()
+        self._thread_status.pause()
+
+    @override
+    def on_resumed(self) -> None:
+        """The method to be called when the thread is resumed."""
+        super().on_resumed()
+        self._thread_status.resume()
+
+    ### threading.Thread-like-API
+
+    def start(self) -> None:
+        """Start the thread like `threading.Thread.start()`"""
+        self._thread.start()
+
+    def join(self) -> None:
+        """Join the thread like `threading.Thread.join()`"""
+        self._thread.join()
+
+    def is_alive(self) -> bool:
+        """Check if the thread is alive like `threading.Thread.is_alive()`
+
+        Returns:
+            bool: True if the thread is alive, False otherwise.
+        """
+        return self._thread.is_alive()
+
+    ### override event hook
+
+    @override
+    def is_running(self) -> bool:
+        """Check if the thread is running.
+
+        This is determined by the controller command handler.
+        Returns:
+            bool: True if the thread is running, False otherwise.
+        """
+        return self._controller_command_handler.manage_loop()
+
+    @override
+    def on_exception(self) -> None:
+        """Called when an exception occurs in the thread."""
+        self._thread_status.exception_raised()
