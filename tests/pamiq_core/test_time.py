@@ -1,9 +1,10 @@
 import time as original_time
+from pathlib import Path
 
 import pytest
 
 from pamiq_core import time as pamiq_time
-from pamiq_core.time import TimeController
+from pamiq_core.time import TimeController, get_global_time_controller
 from tests.helpers import skip_if_kernel_is_linuxkit, skip_if_platform_is_not_linux
 
 
@@ -22,6 +23,10 @@ def test_module_global_values():
 
     assert pamiq_time.fixed_sleep == original_time.sleep
     assert pamiq_time.fixed_time == original_time.time
+
+
+def test_get_global_time_controller():
+    assert get_global_time_controller() is pamiq_time._time_controller
 
 
 @pytest.fixture
@@ -277,3 +282,13 @@ def test_is_paused(controller):
     assert controller.is_paused()
     controller.resume()
     assert not controller.is_paused()
+
+
+def test_save_and_load_state(controller: TimeController, tmp_path: Path):
+    time_path = tmp_path / "time"
+
+    controller.save_state(time_path)
+
+    assert time_path.with_suffix(".pkl").is_file()
+
+    controller.load_state(time_path)
