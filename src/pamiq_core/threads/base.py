@@ -109,10 +109,6 @@ class BackgroundThread(Thread):
     """Background thread class, a subclass of Thread and is used for background
     processing.
 
-    Attributes:
-        _controller_command_handler: Handles commands from the controller.
-        _thread: thread object.
-        _thread_status: ThreadStatus of the thread.
     Raises:
         ValueError: If THREAD_TYPE is set to 'control'.
     """
