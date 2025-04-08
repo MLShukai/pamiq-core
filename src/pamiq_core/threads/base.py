@@ -117,9 +117,8 @@ class BackgroundThread(Thread):
         ValueError: If THREAD_TYPE is set to 'control'.
     """
 
-    _controller_command_handler: (
-        ControllerCommandHandler  # Variable declaration for delay settings
-    )
+    # Variable declaration for delay settings
+    _controller_command_handler: ControllerCommandHandler  
 
     def __init__(self) -> None:
         """Initialize BackgroundThread class.
