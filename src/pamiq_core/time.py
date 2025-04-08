@@ -45,11 +45,14 @@ from __future__ import annotations
 import time as _original_time
 from collections.abc import Callable
 from functools import wraps
+from pathlib import Path
 from threading import RLock
-from typing import Concatenate, TypedDict
+from typing import Concatenate, TypedDict, override
+
+from pamiq_core.state_persistence import PersistentStateMixin, load_pickle, save_pickle
 
 
-class TimeController:
+class TimeController(PersistentStateMixin):
     def __init__(self) -> None:
         self._lock = RLock()
         self._anchor_time = _original_time.time()
@@ -226,9 +229,39 @@ class TimeController:
         self._scaled_anchor_perf_counter = state_dict["scaled_anchor_perf_counter"]
         self._update_anchor_values()
 
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save the current TimeController state to disk.
+
+        Args:
+            path: Base path where the state will be saved. Will be appended with
+                 .pkl extension.
+        """
+        save_pickle(self.state_dict(), path.with_suffix(".pkl"))
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load TimeController state from disk.
+
+        Args:
+            path: Base path where the state was previously saved. Will be appended
+                 with .pkl extension.
+        """
+        self.load_state_dict(load_pickle(path.with_suffix(".pkl")))
+
 
 # Create a global instance of TimeController
 _time_controller = TimeController()
+
+
+def get_global_time_controller() -> TimeController:
+    """Retrieves the global instance of TimeController.
+
+    Returns:
+        Global instance of TimeController
+    """
+    return _time_controller
+
 
 # Expose the public methods
 is_paused = _time_controller.is_paused
