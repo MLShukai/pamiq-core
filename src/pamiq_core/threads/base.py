@@ -109,8 +109,6 @@ class BackgroundThread(Thread):
     """Background thread class, a subclass of Thread and is used for background
     processing.
 
-    Raises:
-        ValueError: If THREAD_TYPE is set to 'control'.
     """
 
     # Variable declaration for delay settings
