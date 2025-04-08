@@ -176,7 +176,7 @@ class TestBackgroundThread:
         attribute other than 'control'."""
 
         class TestThreadWithAppropriateThreadType(BackgroundThread):
-            THREAD_TYPE = ThreadTypes.INFERENCE
+            THREAD_TYPE = ThreadTypes.TRAINING
 
             def __init__(self) -> None:
                 super().__init__()
