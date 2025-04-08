@@ -208,9 +208,10 @@ class TestBackgroundThread:
         """Test that the controller can be attached to the thread."""
 
         background_thread.attach_controller(read_only_controller)
-        assert isinstance(
-            background_thread._controller_command_handler, ControllerCommandHandler
-        )
+        handler = background_thread._controller_command_handler
+        assert isinstance(handler, ControllerCommandHandler)
+        assert handler.on_paused == background_thread.on_paused
+        assert handler.on_resumed == background_thread.on_resumed
 
     def test_on_paused(self, background_thread, mocker) -> None:
         """Test that the on_paused method changes thread status."""
