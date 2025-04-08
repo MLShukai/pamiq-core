@@ -226,38 +226,19 @@ class TestBackgroundThread:
 
         assert background_thread.thread_status.is_resume() is True
 
-    def test_start(self, background_thread, mocker) -> None:
-        """Test that the start method actually starts the thread."""
-        spy_thread_start = mocker.spy(background_thread._thread, "start")
-        _ = mocker.patch.object(
-            background_thread, "is_running", return_value=False
-        )  # make this to finish the `run()` method
-
-        background_thread.start()
-
-        spy_thread_start.assert_called_once_with()
-
-    def test_join(self, background_thread, mocker) -> None:
-        """Test that the join method actually joins the thread."""
-        spy_thread_join = mocker.spy(background_thread._thread, "join")
-
-        background_thread.start()
-        background_thread.join()
-
-        spy_thread_join.assert_called_once_with()
-
-    def test_is_alive_when_alive(self, background_thread, mocker) -> None:
-        """Test that the is_alive returns True when the thread is alive."""
-        mocker.patch.object(background_thread._thread, "is_alive", return_value=True)
-
-        assert background_thread.is_alive() is True
-
-    def test_is_alive_when_not_alive(self, background_thread, mocker) -> None:
-        """Test that the is_alive returns False when the thread is not
-        alive."""
-        mocker.patch.object(background_thread._thread, "is_alive", return_value=False)
-
+    def test_thread_life_cycle(self,thread_controller, background_thread, mocker) -> None:
+        spy_run = mocker.spy(background_thread, "run")
         assert background_thread.is_alive() is False
+        timer = threading.Timer(0.1, thread_controller.shutdown)
+        start = time.perf_counter()
+        background_thread.start()
+        timer.start()
+        assert background_thread.is_alive()
+        
+        background_thread.join()
+        assert 0.1 < time.perf_counter() - start < 0.2
+        assert background_thread.is_alive() is False
+        spy_run.assert_called_once_with()
 
     def test_is_running_when_manage_loop_true(
         self, background_thread_with_controller, mocker
