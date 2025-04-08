@@ -78,7 +78,7 @@ class TimeIntervalScheduler(Scheduler):
 
     @override
     def __init__(
-        self, interval: float, callbacks: CallbackIterable | None = None
+        self, interval: float, callbacks: Callback | CallbackIterable | None = None
     ) -> None:
         """Initialize the time interval scheduler.
 
@@ -125,7 +125,7 @@ class StepIntervalScheduler(Scheduler):
 
     @override
     def __init__(
-        self, interval: int, callbacks: CallbackIterable | None = None
+        self, interval: int, callbacks: Callback | CallbackIterable | None = None
     ) -> None:
         """Initialize the step interval scheduler.
 
