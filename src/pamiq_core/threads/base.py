@@ -107,12 +107,10 @@ class Thread(PersistentStateMixin, ThreadEventMixin):
 
 class BackgroundThread(Thread):
     """Background thread class, a subclass of Thread and is used for background
-    processing.
-
-    """
+    processing."""
 
     # Variable declaration for delay settings
-    _controller_command_handler: ControllerCommandHandler  
+    _controller_command_handler: ControllerCommandHandler
 
     def __init__(self) -> None:
         """Initialize BackgroundThread class.

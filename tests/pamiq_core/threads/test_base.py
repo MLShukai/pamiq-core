@@ -1,5 +1,6 @@
+import threading
 from typing import override
-from unittest.mock import call
+from unittest.mock import MagicMock, call
 
 import pytest
 
@@ -12,6 +13,7 @@ from pamiq_core.threads import (
     ThreadController,
     ThreadTypes,
 )
+from pamiq_core.time import perf_counter
 from tests.helpers import check_log_message
 
 
@@ -141,6 +143,14 @@ class ValidBackgroundThread(BackgroundThread):
 
 
 class TestBackgroundThread:
+    # Need to set spy before instantiaing the BackgroundThread
+    # since it is set in the `target` of `threadint.Thread()`.
+    # If we set spy after instantiation, it will not be called.
+    @pytest.fixture
+    def spy_run(self, mocker) -> MagicMock:
+        """Fixture to create a spy on the run method."""
+        return mocker.spy(ValidBackgroundThread, "run")
+
     @pytest.fixture
     def background_thread(self) -> ValidBackgroundThread:
         """Fixture to create a valid BackgroundThread instance."""
@@ -226,45 +236,35 @@ class TestBackgroundThread:
 
         assert background_thread.thread_status.is_resume() is True
 
-    def test_thread_life_cycle(self,thread_controller, background_thread, mocker) -> None:
-        spy_run = mocker.spy(background_thread, "run")
-        assert background_thread.is_alive() is False
-        timer = threading.Timer(0.1, thread_controller.shutdown)
-        start = time.perf_counter()
-        background_thread.start()
-        timer.start()
-        assert background_thread.is_alive()
-        
-        background_thread.join()
-        assert 0.1 < time.perf_counter() - start < 0.2
-        assert background_thread.is_alive() is False
-        spy_run.assert_called_once_with()
-
-    def test_is_running_when_manage_loop_true(
-        self, background_thread_with_controller, mocker
+    def test_thread_life_cycle(
+        self, spy_run, thread_controller, background_thread_with_controller, mocker
     ) -> None:
-        """Test that the is_running returns True when
-        `controller_command_handler.manage_loop()` is True."""
-        _ = mocker.patch.object(
-            background_thread_with_controller._controller_command_handler,
-            "manage_loop",
-            return_value=True,
-        )
+        assert background_thread_with_controller.is_alive() is False
+        assert (
+            background_thread_with_controller.is_running() is True
+        )  # at instantiation, this is True
 
+        timer = threading.Timer(0.1, thread_controller.shutdown)
+        start = perf_counter()
+        background_thread_with_controller.start()
+        timer.start()
+
+        assert background_thread_with_controller.is_alive() is True
         assert background_thread_with_controller.is_running() is True
 
-    def test_is_running_when_manage_loop_false(
-        self, background_thread_with_controller, mocker
-    ) -> None:
-        """Test that the is_running returns False when
-        `controller_command_handler.manage_loop()` is False."""
-        _ = mocker.patch.object(
-            background_thread_with_controller._controller_command_handler,
-            "manage_loop",
-            return_value=False,
-        )
+        background_thread_with_controller.join()
 
-        assert background_thread_with_controller.is_running() is False
+        assert 0.1 < perf_counter() - start < 0.2
+        assert background_thread_with_controller.is_alive() is False
+        assert (
+            background_thread_with_controller.is_running() is False
+        )  # This is False since thread_controller.shutdown() was called
+
+        # Because we set the spy on ValidBackgroundThread.run before instantiation,
+        # the spy is attached to the unbound method. When the method is later called on an instance,
+        # the instance (self) is automatically passed as the first argument.
+        # Therefore, we must assert that run() was called with background_thread_with_controller as its argument.
+        spy_run.assert_called_once_with(background_thread_with_controller)
 
     def test_on_exception(self, background_thread, mocker) -> None:
         """Test that the on_exception method changes thread status."""
