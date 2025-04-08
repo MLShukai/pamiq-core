@@ -154,7 +154,7 @@ class TestBackgroundThread:
     @pytest.fixture
     def read_only_controller(self, thread_controller) -> ReadOnlyController:
         """Fixture to create a read-only controller."""
-        return ReadOnlyController(thread_controller)
+        return thread_controller.read_only
 
     @pytest.fixture
     def controller_command_handler(
