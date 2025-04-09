@@ -35,7 +35,7 @@ class TestInferenceThread:
     def inference_thread(self, mock_interaction) -> InferenceThread:
         """Fixture providing an InferenceThread instance with a mock
         interaction."""
-        return InferenceThread(mock_interaction)
+        return InferenceThread(mock_interaction, log_tick_time_statistics_interval=0.05)
 
     @pytest.fixture
     def inference_thread_with_controller(
@@ -84,19 +84,19 @@ class TestInferenceThread:
         mock_interaction.on_resumed.assert_called_once()
 
     def test_log_tick_time_statistics(
-        self, thread_controller: ThreadController, mock_interaction, caplog
+        self,
+        thread_controller: ThreadController,
+        inference_thread: InferenceThread,
+        caplog,
     ) -> None:
         """Test that log tick time statistics."""
 
-        thread = InferenceThread(
-            mock_interaction, log_tick_time_statistics_interval=0.05
-        )
-        thread.attach_controller(thread_controller.read_only)
+        inference_thread.attach_controller(thread_controller.read_only)
 
-        thread.start()
+        inference_thread.start()
         time.sleep(0.07)
         thread_controller.shutdown()
-        thread.join()
+        inference_thread.join()
 
         check_log_message(
             r"Step time: (\d+\.\d+e[+-]\d+) ± (\d+\.\d+e[+-]\d+) \[s\] in (\d+) steps\.",
