@@ -52,20 +52,13 @@ class InferenceThread(BackgroundThread):
 
     @override
     def on_start(self) -> None:
-        """Execute setup procedures when the thread starts.
-
-        Calls the interaction's setup method to initialize the agent-
-        environment loop.
-        """
+        """Execute setup procedures when the thread starts."""
         super().on_start()
         self._interaction.setup()
 
     @override
     def on_tick(self) -> None:
-        """Execute a single step of the interaction loop.
-
-        Called repeatedly during the thread's main execution loop.
-        """
+        """Execute a single step of the interaction loop."""
         super().on_tick()
         self._interaction.step()
 
@@ -76,30 +69,18 @@ class InferenceThread(BackgroundThread):
 
     @override
     def on_finally(self) -> None:
-        """Execute teardown procedures when the thread is about to exit.
-
-        Ensures the interaction is properly cleaned up even if the
-        thread exits unexpectedly.
-        """
+        """Execute teardown procedures when the thread is about to exit."""
         super().on_finally()
         self._interaction.teardown()
 
     @override
     def on_paused(self) -> None:
-        """Handle thread pause event.
-
-        Propagates the pause event to the interaction to ensure
-        coordinated pausing.
-        """
+        """Handle thread pause event."""
         super().on_paused()
         self._interaction.on_paused()
 
     @override
     def on_resumed(self) -> None:
-        """Handle thread resume event.
-
-        Propagates the resume event to the interaction to ensure
-        coordinated resuming.
-        """
+        """Handle thread resume event."""
         super().on_resumed()
         self._interaction.on_resumed()
