@@ -1,4 +1,5 @@
 import platform
+import re
 from pathlib import Path
 
 import pytest
@@ -25,7 +26,7 @@ def check_log_message(
     """Check if the expected log message is in the log messages.
 
     Args:
-        expected_log_message: expected log message.
+        expected_log_message: expected log message pattern string
         log_level: log level of the expected log message.
         caplog: caplog fixture.
 
@@ -41,4 +42,6 @@ def check_log_message(
         # if no log_level is specified, then check all log messages
         error_level_log_messages = [record.message for record in caplog.records]
 
-    assert any(expected_log_message in message for message in error_level_log_messages)
+    assert any(
+        re.match(expected_log_message, message) for message in error_level_log_messages
+    )

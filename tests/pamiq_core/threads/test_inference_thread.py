@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -8,6 +10,7 @@ from pamiq_core.threads import (
     ThreadTypes,
 )
 from pamiq_core.threads.inference_thread import InferenceThread
+from tests.helpers import check_log_message
 
 
 class TestInferenceThread:
@@ -79,3 +82,24 @@ class TestInferenceThread:
         """Test that on_resumed calls interaction.on_resumed()."""
         inference_thread.on_resumed()
         mock_interaction.on_resumed.assert_called_once()
+
+    def test_log_tick_time_statistics(
+        self, thread_controller: ThreadController, mock_interaction, caplog
+    ) -> None:
+        """Test that log tick time statistics."""
+
+        thread = InferenceThread(
+            mock_interaction, log_tick_time_statistics_interval=0.05
+        )
+        thread.attach_controller(thread_controller.read_only)
+
+        thread.start()
+        time.sleep(0.07)
+        thread_controller.shutdown()
+        thread.join()
+
+        check_log_message(
+            r"Step time: (\d+\.\d+e[+-]\d+) ± (\d+\.\d+e[+-]\d+) \[s\] in (\d+) steps\.",
+            "INFO",
+            caplog,
+        )
