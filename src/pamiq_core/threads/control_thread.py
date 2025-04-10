@@ -2,6 +2,8 @@ import math
 from typing import override
 
 from pamiq_core import time
+from pamiq_core.state_persistence import StateStore
+from pamiq_core.utils.schedulers import TimeIntervalScheduler
 
 from .base import Thread
 from .thread_control import (
@@ -20,6 +22,8 @@ class ControlThread(Thread):
 
     def __init__(
         self,
+        state_store: StateStore,
+        save_state_interval: float = math.inf,
         timeout_for_all_threads_pause: float = 60.0,
         max_attempts_to_pause_all_threads: int = 3,
         max_uptime: float = math.inf,
@@ -27,6 +31,8 @@ class ControlThread(Thread):
         """Initialize the control thread.
 
         Args:
+            state_store: Store for saving and loading system state.
+            save_state_interval: Interval in seconds between automatic state saves.
             timeout_for_all_threads_pause: Maximum time in seconds to wait for
                 all threads to pause before timing out a pause attempt.
             max_attempts_to_pause_all_threads: Maximum number of retry attempts
@@ -35,6 +41,11 @@ class ControlThread(Thread):
                 automatic shutdown. Default is infinity (no time limit).
         """
         super().__init__()
+
+        self._state_store = state_store
+        self._save_state_scheduler = TimeIntervalScheduler(
+            save_state_interval, self.save_state
+        )
 
         self._timeout_for_all_threads_pause = timeout_for_all_threads_pause
         self._max_attempts_to_pause_all_threads = max_attempts_to_pause_all_threads
@@ -122,6 +133,26 @@ class ControlThread(Thread):
         self._controller.shutdown()
         self._running = False
 
+    def save_state(self) -> None:
+        """Save the current state of the system.
+
+        This method temporarily pauses all threads if they are not
+        already paused, saves the system state using the state store,
+        and then resumes threads if they were not paused initially.
+
+        If the method fails to pause the threads, the state saving
+        operation will be aborted with a log message.
+        """
+
+        already_paused = self._controller.is_pause()
+        if not self.try_pause():
+            self._logger.info("Failed to pause. Aborting saving a state.")
+            return
+        saved_path = self._state_store.save_state()
+        self._logger.info(f"Saved a state to '{saved_path}'")
+        if not already_paused:
+            self.resume()
+
     @property
     def is_max_uptime_reached(self) -> bool:
         """Check if the system has exceeded its maximum allowed uptime.
@@ -163,6 +194,8 @@ class ControlThread(Thread):
         initiates shutdown if needed.
         """
         super().on_tick()
+        self._save_state_scheduler.update()
+
         if self._thread_statuses_monitor.check_exception_raised():
             self._logger.error(
                 "An exception occurred. The system will terminate immediately."
