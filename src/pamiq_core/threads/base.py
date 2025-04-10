@@ -3,7 +3,6 @@ import threading
 from typing import ClassVar, override
 
 from pamiq_core import time
-from pamiq_core.state_persistence import PersistentStateMixin
 from pamiq_core.utils.reflection import get_class_module_path
 
 from .thread_control import (
@@ -16,7 +15,7 @@ from .thread_control import (
 from .thread_types import ThreadTypes
 
 
-class Thread(PersistentStateMixin, ThreadEventMixin):
+class Thread(ThreadEventMixin):
     """Base class for all threads.
 
     This class provides a common interface for all threads in the system.
