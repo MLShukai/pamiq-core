@@ -57,17 +57,6 @@ class TestControlThread:
         }
 
     @pytest.fixture
-    def thread_statuses_already_paused(self) -> dict[ThreadTypes, ReadOnlyThreadStatus]:
-        it = ThreadStatus()
-        it.pause()
-        tt = ThreadStatus()
-        tt.pause()
-        return {
-            ThreadTypes.INFERENCE: it.read_only,
-            ThreadTypes.TRAINING: tt.read_only,
-        }
-
-    @pytest.fixture
     def control_thread_with_statuses(
         self,
         control_thread: ControlThread,
@@ -338,21 +327,22 @@ class TestControlThread:
 
     def test_save_state_success(
         self,
-        control_thread: ControlThread,
-        thread_statuses_already_paused,
+        control_thread_with_statuses: ControlThread,
         mock_state_store,
         caplog: pytest.LogCaptureFixture,
+        mocker: MockerFixture,
     ) -> None:
         """Test save_state method when try_pause succeeds."""
         # Mock try_pause to return True (success)
-        control_thread.attach_thread_statuses(thread_statuses_already_paused)
-
+        mocker.patch.object(
+            ThreadStatusesMonitor, "wait_for_all_threads_pause", return_value=True
+        )
         # Mock Path object that save_state returns
         mock_path = Path("/test/path")
         mock_state_store.save_state.return_value = mock_path
 
         # Call the method under test
-        control_thread.save_state()
+        control_thread_with_statuses.save_state()
 
         # Verify state_store.save_state was called
         mock_state_store.save_state.assert_called_once()
@@ -366,16 +356,18 @@ class TestControlThread:
 
     def test_save_state_pause_failure(
         self,
-        control_thread: ControlThread,
-        thread_statuses,
+        control_thread_with_statuses: ControlThread,
         mock_state_store,
         caplog: pytest.LogCaptureFixture,
+        mocker: MockerFixture,
     ) -> None:
         """Test save_state method when try_pause fails."""
-        control_thread.attach_thread_statuses(thread_statuses)
-
+        # Mock try_pause to return False (failure)
+        mocker.patch.object(
+            ThreadStatusesMonitor, "wait_for_all_threads_pause", return_value=False
+        )
         # Call the method under test
-        control_thread.save_state()
+        control_thread_with_statuses.save_state()
 
         # Verify state_store.save_state was not called
         mock_state_store.save_state.assert_not_called()
@@ -389,54 +381,56 @@ class TestControlThread:
 
     def test_save_state_already_paused(
         self,
-        control_thread: ControlThread,
-        thread_statuses_already_paused,
+        control_thread_with_statuses: ControlThread,
         mock_state_store,
         mocker: MockerFixture,
     ) -> None:
         """Test save_state method when system is already paused."""
-        control_thread.attach_thread_statuses(thread_statuses_already_paused)
-        # Setup controller to be in paused state
-        control_thread.try_pause()
 
-        # Mock resume method to check it's not called
-        mock_resume = mocker.spy(control_thread, "resume")
+        # Mock try_pause to return True (success)
+        mocker.patch.object(
+            ThreadStatusesMonitor, "wait_for_all_threads_pause", return_value=True
+        )
+        # Setup controller to be in paused state
+        control_thread_with_statuses.try_pause()
+        assert control_thread_with_statuses.controller.is_pause()
 
         # Call the method under test
-        control_thread.save_state()
+        control_thread_with_statuses.save_state()
 
         # Verify state_store.save_state was called
         mock_state_store.save_state.assert_called_once()
 
         # Verify resume was not called since system was already paused
-        mock_resume.assert_not_called()
+        assert control_thread_with_statuses.controller.is_pause()
 
     def test_save_state_not_already_paused(
         self,
-        control_thread: ControlThread,
-        thread_statuses_already_paused,
+        control_thread_with_statuses: ControlThread,
         mock_state_store,
         mocker: MockerFixture,
     ) -> None:
         """Test save_state method when system is not already paused."""
-        control_thread.attach_thread_statuses(thread_statuses_already_paused)
+
+        # Mock try_pause to return True (success)
+        mocker.patch.object(
+            ThreadStatusesMonitor, "wait_for_all_threads_pause", return_value=True
+        )
 
         # Mock resume method to check it's called
-        mock_resume = mocker.spy(control_thread, "resume")
+        assert control_thread_with_statuses.controller.is_resume()
 
         # Call the method under test
-        control_thread.save_state()
+        control_thread_with_statuses.save_state()
 
         # Verify state_store.save_state was called
         mock_state_store.save_state.assert_called_once()
 
         # Verify resume was called since system was not already paused
-        mock_resume.assert_called_once()
+        assert control_thread_with_statuses.controller.is_resume()
 
     def test_scheduler_triggers_save_state(
-        self,
-        thread_statuses_already_paused,
-        mock_state_store,
+        self, thread_statuses, mock_state_store, mocker: MockerFixture
     ) -> None:
         """Test that scheduler triggers save_state at specified intervals."""
         # Create a thread with very short save_state_interval
@@ -444,8 +438,12 @@ class TestControlThread:
         thread = ControlThread(
             state_store=mock_state_store, save_state_interval=save_interval
         )
-        thread.attach_thread_statuses(thread_statuses_already_paused)
+        thread.attach_thread_statuses(thread_statuses)
 
+        # Mock try_pause to return True (success)
+        mocker.patch.object(
+            ThreadStatusesMonitor, "wait_for_all_threads_pause", return_value=True
+        )
         # First tick initializes the scheduler's time
         thread.on_tick()
 
