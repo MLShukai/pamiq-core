@@ -310,7 +310,7 @@ class TestControlThread:
         assert 0.1 < time.perf_counter() - start < 0.2
 
         check_log_message(
-            "Maxmum uptime is set to 0.1 [secs]. (actually 0.1 [secs] in time scale x1.0)",
+            r"Maxmum uptime is set to 0.1 \[secs\]. \(actually 0.1 \[secs\] in time scale x1.0\)",
             "INFO",
             caplog,
         )
