@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -295,3 +297,21 @@ class TestControlThread:
 
         # Verify time was resumed
         mock_time_resume.assert_called_once()
+
+    def test_shutdown_by_max_uptime_reached(
+        self, thread_statuses, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Test that shutdown by max uptime reached."""
+        thread = ControlThread(max_uptime=0.1)
+        thread.attach_thread_statuses(thread_statuses)
+        start = time.perf_counter()
+        thread.run()
+
+        assert 0.1 < time.perf_counter() - start < 0.2
+
+        check_log_message(
+            "Maxmum uptime is set to 0.1 [secs]. (actually 0.1 [secs] in time scale x1.0)",
+            "INFO",
+            caplog,
+        )
+        check_log_message("Max uptime reached.", "INFO", caplog)

@@ -1,3 +1,4 @@
+import math
 from typing import override
 
 from pamiq_core import time
@@ -21,6 +22,7 @@ class ControlThread(Thread):
         self,
         timeout_for_all_threads_pause: float = 60.0,
         max_attempts_to_pause_all_threads: int = 3,
+        max_uptime: float = math.inf,
     ) -> None:
         """Initialize the control thread.
 
@@ -29,11 +31,16 @@ class ControlThread(Thread):
                 all threads to pause before timing out a pause attempt.
             max_attempts_to_pause_all_threads: Maximum number of retry attempts
                 when pausing threads fails.
+            max_uptime: Maximum time in seconds the system is allowed to run before
+                automatic shutdown. Default is infinity (no time limit).
         """
         super().__init__()
 
         self._timeout_for_all_threads_pause = timeout_for_all_threads_pause
         self._max_attempts_to_pause_all_threads = max_attempts_to_pause_all_threads
+        self._max_uptime = max_uptime
+        self._system_start_time = -math.inf
+
         self._controller = ThreadController()
         self._running = True
 
@@ -115,6 +122,16 @@ class ControlThread(Thread):
         self._controller.shutdown()
         self._running = False
 
+    @property
+    def is_max_uptime_reached(self) -> bool:
+        """Check if the system has exceeded its maximum allowed uptime.
+
+        Returns:
+            True if the system has been running longer than the configured max_uptime,
+            False otherwise.
+        """
+        return time.time() - self._system_start_time > self._max_uptime
+
     @override
     def is_running(self) -> bool:
         """Check if the control thread should continue running.
@@ -123,6 +140,20 @@ class ControlThread(Thread):
             True if the thread should continue running, False otherwise.
         """
         return self._running
+
+    @override
+    def on_start(self) -> None:
+        """Initialize the control thread's start time.
+
+        Records the system start time to enable max uptime tracking.
+        """
+        super().on_start()
+        self._system_start_time = time.time()
+        self._logger.info(
+            f"Maxmum uptime is set to {self._max_uptime:.1f} [secs]. "
+            f"(actually {self._max_uptime / time.get_time_scale():.1f} [secs] "
+            f"in time scale x{time.get_time_scale():.1f})"
+        )
 
     @override
     def on_tick(self) -> None:
@@ -136,6 +167,10 @@ class ControlThread(Thread):
             self._logger.error(
                 "An exception occurred. The system will terminate immediately."
             )
+            self.shutdown()
+
+        if self.is_max_uptime_reached:
+            self._logger.info("Max uptime reached.")
             self.shutdown()
 
     @override
