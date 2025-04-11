@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 from pytest_mock import MockerFixture
 
+from pamiq_core.console import ControlCommands
 from pamiq_core.state_persistence import StateStore
 from pamiq_core.threads import (
-    ControlThread,
     ReadOnlyController,
     ReadOnlyThreadStatus,
     ThreadController,
@@ -14,6 +14,7 @@ from pamiq_core.threads import (
     ThreadStatusesMonitor,
     ThreadTypes,
 )
+from pamiq_core.threads.control_thread import ControlThread
 from tests.helpers import check_log_message
 
 
@@ -26,7 +27,17 @@ class TestControlThread:
         return mocker.Mock(StateStore)
 
     @pytest.fixture
-    def control_thread(self, mock_state_store) -> ControlThread:
+    def mock_web_api_handler(self, mocker: MockerFixture):
+        """Fixture providing a mock WebApiHandler."""
+        mock_web_api_handler_cls = mocker.patch(
+            "pamiq_core.threads.control_thread.WebApiHandler", autospec=True
+        )
+        instance = mock_web_api_handler_cls.return_value
+        instance.has_commands.return_value = False
+        return instance
+
+    @pytest.fixture
+    def control_thread(self, mock_state_store, mock_web_api_handler) -> ControlThread:
         """Fixture for a basic ControlThread instance."""
         return ControlThread(
             state_store=mock_state_store,
@@ -65,6 +76,13 @@ class TestControlThread:
         """Fixture for a ControlThread with attached thread statuses."""
         control_thread.attach_thread_statuses(thread_statuses)
         return control_thread
+
+    @pytest.fixture
+    def control_thread_started(
+        self, control_thread_with_statuses: ControlThread
+    ) -> ControlThread:
+        control_thread_with_statuses.on_start()
+        return control_thread_with_statuses
 
     def test_init_default_state(self, control_thread: ControlThread) -> None:
         """Test that ControlThread initializes with the correct default
@@ -219,7 +237,7 @@ class TestControlThread:
         check_log_message("Shutting down...", "INFO", caplog)
 
     def test_on_tick_with_no_exceptions(
-        self, control_thread_with_statuses: ControlThread, mocker: MockerFixture
+        self, control_thread_started: ControlThread, mocker: MockerFixture
     ) -> None:
         """Test on_tick when no exceptions are detected."""
         # Mock check_exception_raised to return False
@@ -228,20 +246,20 @@ class TestControlThread:
         )
 
         # Spy on shutdown
-        spy_shutdown = mocker.spy(control_thread_with_statuses, "shutdown")
+        spy_shutdown = mocker.spy(control_thread_started, "shutdown")
 
         # Call on_tick
-        control_thread_with_statuses.on_tick()
+        control_thread_started.on_tick()
 
         # Verify shutdown was not called
         spy_shutdown.assert_not_called()
 
         # Verify thread still running
-        assert control_thread_with_statuses.is_running() is True
+        assert control_thread_started.is_running() is True
 
     def test_on_tick_with_exceptions(
         self,
-        control_thread_with_statuses: ControlThread,
+        control_thread_started: ControlThread,
         mocker: MockerFixture,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
@@ -252,13 +270,13 @@ class TestControlThread:
         )
 
         # Call on_tick
-        control_thread_with_statuses.on_tick()
+        control_thread_started.on_tick()
 
         # Verify thread is no longer running
-        assert control_thread_with_statuses.is_running() is False
+        assert control_thread_started.is_running() is False
 
         # Verify controller is in shutdown state
-        assert control_thread_with_statuses.controller.is_shutdown() is True
+        assert control_thread_started.controller.is_shutdown() is True
 
         # Verify log messages
         check_log_message(
@@ -439,6 +457,7 @@ class TestControlThread:
             state_store=mock_state_store, save_state_interval=save_interval
         )
         thread.attach_thread_statuses(thread_statuses)
+        thread.on_start()
 
         # Mock try_pause to return True (success)
         mocker.patch.object(
@@ -455,3 +474,51 @@ class TestControlThread:
 
         # Verify save_state was called
         mock_state_store.save_state.assert_called()
+
+    def test_on_tick_processes_web_api_commands(
+        self,
+        control_thread_with_statuses: ControlThread,
+        mock_web_api_handler,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test that on_tick processes Web API commands correctly after
+        initialization."""
+        # Mock WebApiHandler class and its instance methods
+        mock_web_api_handler.has_commands.side_effect = [
+            True,
+            True,
+            True,
+            True,
+            True,
+            False,
+        ]
+        mock_web_api_handler.receive_command.side_effect = [
+            ControlCommands.PAUSE,
+            ControlCommands.RESUME,
+            ControlCommands.SAVE_STATE,
+            ControlCommands.SHUTDOWN,
+            ControlCommands.SAVE_STATE,  # Not called
+        ]
+
+        # Spy on control thread methods that should be called by command processing
+        spy_try_pause = mocker.spy(control_thread_with_statuses, "try_pause")
+        spy_resume = mocker.spy(control_thread_with_statuses, "resume")
+        spy_save_state = mocker.spy(control_thread_with_statuses, "save_state")
+        spy_shutdown = mocker.spy(control_thread_with_statuses, "shutdown")
+
+        # Initialize WebApiHandler by calling on_start
+        control_thread_with_statuses.on_start()
+
+        # Verify WebApiHandler was initialized
+        mock_web_api_handler.run_in_background.assert_called_once()
+
+        # Process commands by calling on_tick
+        control_thread_with_statuses.on_tick()
+
+        # Verify all expected methods were called
+        assert mock_web_api_handler.has_commands.call_count >= 1
+        assert mock_web_api_handler.receive_command.call_count == 4
+        spy_try_pause.assert_called()
+        spy_resume.assert_called_once()
+        spy_save_state.assert_called_once()
+        spy_shutdown.assert_called_once()
