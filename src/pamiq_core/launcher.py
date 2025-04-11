@@ -117,7 +117,6 @@ def launch(
         state_store.load_state(config.saved_state_path)
 
     # Initialize threads
-    logger.info("Initializing system threads")
     control_thread = ControlThread(
         state_store,
         save_state_interval=config.save_state_interval,
