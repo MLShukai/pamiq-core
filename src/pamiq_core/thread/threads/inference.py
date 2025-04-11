@@ -5,8 +5,8 @@ from pamiq_core import time
 from pamiq_core.interaction import Interaction
 from pamiq_core.utils.schedulers import TimeIntervalScheduler
 
+from ..thread_types import ThreadTypes
 from .base import BackgroundThread
-from .thread_types import ThreadTypes
 
 
 class InferenceThread(BackgroundThread):

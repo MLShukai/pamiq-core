@@ -9,7 +9,7 @@ from pamiq_core.thread import (
     ThreadController,
     ThreadTypes,
 )
-from pamiq_core.thread.inference_thread import InferenceThread
+from pamiq_core.thread.threads.inference import InferenceThread
 from tests.helpers import check_log_message
 
 

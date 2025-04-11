@@ -1,6 +1,6 @@
 import pytest
 
-from pamiq_core.thread.training_thread import TrainingThread
+from pamiq_core.thread.threads.training import TrainingThread
 from pamiq_core.trainer import Trainer, TrainersDict
 from tests.helpers import check_log_message
 

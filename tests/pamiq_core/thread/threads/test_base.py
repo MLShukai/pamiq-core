@@ -5,14 +5,13 @@ from unittest.mock import MagicMock, call
 import pytest
 
 from pamiq_core.thread import (
-    BackgroundThread,
     ControllerCommandHandler,
     ReadOnlyController,
     ReadOnlyThreadStatus,
-    Thread,
     ThreadController,
     ThreadTypes,
 )
+from pamiq_core.thread.threads.base import BackgroundThread, Thread
 from pamiq_core.time import perf_counter
 from tests.helpers import check_log_message
 
