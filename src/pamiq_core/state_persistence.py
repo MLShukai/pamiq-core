@@ -30,7 +30,9 @@ class StateStore:
     """
 
     def __init__(
-        self, states_dir: Path, state_name_format: str = "%Y-%m-%d_%H-%M-%S,%f.state"
+        self,
+        states_dir: str | Path,
+        state_name_format: str = "%Y-%m-%d_%H-%M-%S,%f.state",
     ) -> None:
         """
         Args:
