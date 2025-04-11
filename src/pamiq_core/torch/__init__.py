@@ -14,10 +14,12 @@ from .model import (
     default_infer_procedure,
     get_device,
 )
+from .trainer import TorchTrainer
 
 __all__ = [
     "TorchInferenceModel",
     "TorchTrainingModel",
     "default_infer_procedure",
     "get_device",
+    "TorchTrainer",
 ]
