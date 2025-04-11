@@ -4,12 +4,12 @@ import pytest
 from pytest_mock import MockerFixture
 
 from pamiq_core.interaction import Interaction
-from pamiq_core.threads import (
+from pamiq_core.thread import (
     ReadOnlyController,
     ThreadController,
     ThreadTypes,
 )
-from pamiq_core.threads.inference_thread import InferenceThread
+from pamiq_core.thread.inference_thread import InferenceThread
 from tests.helpers import check_log_message
 
 

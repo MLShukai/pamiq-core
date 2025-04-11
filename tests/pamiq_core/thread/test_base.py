@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from pamiq_core.threads import (
+from pamiq_core.thread import (
     BackgroundThread,
     ControllerCommandHandler,
     ReadOnlyController,

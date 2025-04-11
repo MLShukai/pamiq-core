@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 
 from .event_mixin import InteractionEventMixin
 

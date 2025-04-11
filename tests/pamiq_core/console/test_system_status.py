@@ -4,7 +4,7 @@ from pamiq_core.console.system_status import (
     SystemStatus,
     SystemStatusProvider,
 )
-from pamiq_core.threads import (
+from pamiq_core.thread import (
     ThreadController,
     ThreadStatus,
     ThreadStatusesMonitor,

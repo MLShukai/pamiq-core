@@ -4,7 +4,7 @@ from typing import Any
 from pamiq_core.data import DataCollector, DataCollectorsDict
 from pamiq_core.model import InferenceModel, InferenceModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 
 from .event_mixin import InteractionEventMixin
 
