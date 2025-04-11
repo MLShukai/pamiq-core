@@ -1,5 +1,4 @@
 from .base import BackgroundThread, Thread
-from .control_thread import ControlThread
 from .thread_control import (
     ControllerCommandHandler,
     ReadOnlyController,
@@ -24,5 +23,4 @@ __all__ = [
     "ReadOnlyThreadStatus",
     "ThreadStatusesMonitor",
     "ThreadEventMixin",
-    "ControlThread",
 ]

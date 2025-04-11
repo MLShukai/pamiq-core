@@ -2,6 +2,7 @@ import math
 from typing import override
 
 from pamiq_core import time
+from pamiq_core.console import ControlCommands, SystemStatusProvider, WebApiHandler
 from pamiq_core.state_persistence import StateStore
 from pamiq_core.utils.schedulers import TimeIntervalScheduler
 
@@ -27,6 +28,8 @@ class ControlThread(Thread):
         timeout_for_all_threads_pause: float = 60.0,
         max_attempts_to_pause_all_threads: int = 3,
         max_uptime: float = math.inf,
+        web_api_address: tuple[str, int] = ("localhost", 8391),
+        web_api_command_queue_size: int = 1,
     ) -> None:
         """Initialize the control thread.
 
@@ -39,6 +42,10 @@ class ControlThread(Thread):
                 when pausing threads fails.
             max_uptime: Maximum time in seconds the system is allowed to run before
                 automatic shutdown. Default is infinity (no time limit).
+            web_api_address: Tuple of (host, port) specifying where the Web API
+                should listen for commands.
+            web_api_command_queue_size: Maximum number of commands that can be
+                queued from the Web API.
         """
         super().__init__()
 
@@ -51,6 +58,9 @@ class ControlThread(Thread):
         self._max_attempts_to_pause_all_threads = max_attempts_to_pause_all_threads
         self._max_uptime = max_uptime
         self._system_start_time = -math.inf
+
+        self._web_api_address = web_api_address
+        self._web_api_command_queue_size = web_api_command_queue_size
 
         self._controller = ThreadController()
         self._running = True
@@ -163,6 +173,24 @@ class ControlThread(Thread):
         """
         return time.time() - self._system_start_time > self._max_uptime
 
+    def process_received_web_api_commands(self) -> None:
+        """Process any pending commands received from the Web API.
+
+        Retrieves and processes all available commands from the Web API
+        handler.
+        """
+        while self._web_api_handler.has_commands():
+            match self._web_api_handler.receive_command():
+                case ControlCommands.PAUSE:
+                    self.try_pause()
+                case ControlCommands.RESUME:
+                    self.resume()
+                case ControlCommands.SHUTDOWN:
+                    self.shutdown()
+                    return
+                case ControlCommands.SAVE_STATE:
+                    self.save_state()
+
     @override
     def is_running(self) -> bool:
         """Check if the control thread should continue running.
@@ -176,7 +204,8 @@ class ControlThread(Thread):
     def on_start(self) -> None:
         """Initialize the control thread's start time.
 
-        Records the system start time to enable max uptime tracking.
+        Records the system start time to enable max uptime tracking and
+        initializes the web api handler.
         """
         super().on_start()
         self._system_start_time = time.time()
@@ -185,6 +214,16 @@ class ControlThread(Thread):
             f"(actually {self._max_uptime / time.get_time_scale():.1f} [secs] "
             f"in time scale x{time.get_time_scale():.1f})"
         )
+
+        self._web_api_handler = WebApiHandler(
+            system_status=SystemStatusProvider(
+                self.controller, self._thread_statuses_monitor
+            ),
+            host=self._web_api_address[0],
+            port=self._web_api_address[1],
+            max_queue_size=self._web_api_command_queue_size,
+        )
+        self._web_api_handler.run_in_background()
 
     @override
     def on_tick(self) -> None:
@@ -195,6 +234,8 @@ class ControlThread(Thread):
         """
         super().on_tick()
         self._save_state_scheduler.update()
+
+        self.process_received_web_api_commands()
 
         if self._thread_statuses_monitor.check_exception_raised():
             self._logger.error(
