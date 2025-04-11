@@ -73,7 +73,7 @@ class StateStore:
             state.save_state(state_path / name)
         return state_path
 
-    def load_state(self, state_path: Path) -> None:
+    def load_state(self, state_path: str | Path) -> None:
         """Restores the state from the `state_path` directory.
 
         Args:
@@ -82,6 +82,7 @@ class StateStore:
         Raises:
             FileNotFoundError: If the specified path does not exist
         """
+        state_path = Path(state_path)
         if not state_path.exists():
             raise FileNotFoundError(f"State path: '{state_path}' not found!")
         for name, state in self._registered_states.items():
