@@ -9,6 +9,10 @@ except ModuleNotFoundError:
 
 
 from .model import (
+    LRSchedulersDict,
+    OptimizersDict,
+    OptimizersSetup,
+    StateDict,
     TorchInferenceModel,
     TorchTrainingModel,
     default_infer_procedure,
@@ -17,6 +21,10 @@ from .model import (
 from .trainer import TorchTrainer
 
 __all__ = [
+    "LRSchedulersDict",
+    "OptimizersDict",
+    "OptimizersSetup",
+    "StateDict",
     "TorchInferenceModel",
     "TorchTrainingModel",
     "default_infer_procedure",
