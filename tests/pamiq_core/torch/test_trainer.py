@@ -62,13 +62,13 @@ class TorchTrainerImpl(TorchTrainer):
 
 class TestTorchTrainer:
     @pytest.fixture
-    def training_models(self) -> TorchTrainingModel:
+    def training_models(self, device: torch.device) -> TorchTrainingModel:
         return {
             "model_1": TorchTrainingModel(
                 model=nn.Linear(2, 3),
                 has_inference_model=True,
                 inference_thread_only=False,
-                device=None,
+                device=device,
             ),
         }
 
@@ -78,6 +78,7 @@ class TestTorchTrainer:
         torch_trainer.attach_training_models(training_models)
         return torch_trainer
 
+    @parametrize_device
     def test_setup(self, torch_trainer: TorchTrainer) -> None:
         torch_trainer.setup()
         # Check if the keys are created correctly.
@@ -89,6 +90,7 @@ class TestTorchTrainer:
             torch_trainer._schedulers["scheduler_1"], optim.lr_scheduler.ExponentialLR
         )
 
+    @parametrize_device
     def test_teardown(self, torch_trainer: TorchTrainer) -> None:
         torch_trainer.setup()
         torch_trainer.teardown()
@@ -104,6 +106,7 @@ class TestTorchTrainer:
         scheduler_state = torch_trainer._schedulers["scheduler_1"].state_dict()
         assert are_dict_values_same_entities(kept_scheduler_state, scheduler_state)
 
+    @parametrize_device
     def test_save_and_load_state(
         self,
         torch_trainer: TorchTrainer,
