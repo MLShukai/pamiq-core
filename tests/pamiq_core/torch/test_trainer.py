@@ -53,7 +53,9 @@ class TorchTrainerImpl(TorchTrainer):
 
     @override
     def train(self) -> None:
-        out = self.get_training_model("model_1")(torch.randn(5, 2))
+        model = self.get_training_model("model_1")
+        device = next(model.model.parameters()).device
+        out = model(torch.randn(5, 2).to(device))
         self._optimizers["optimizer_1"].zero_grad()
         out.mean().backward()
         self._optimizers["optimizer_1"].step()
