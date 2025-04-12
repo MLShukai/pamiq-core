@@ -11,13 +11,10 @@ from pathlib import Path
 from typing import Any, override
 
 import torch
-import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 
 from pamiq_core.trainer import Trainer
-
-from .model import TorchTrainingModel
 
 # Type definitions for improved type safety and readability
 type StateDict = dict[str, Any]
@@ -64,7 +61,7 @@ class TorchTrainer(Trainer):
 
         # Containers for optimizer and scheduler instances
         self._optimizers: OptimizersDict = {}
-        self._lr_schedulers: LRSchedulersDict = {}
+        self._schedulers: LRSchedulersDict = {}
 
         # Containers for persistent optimizer and scheduler states
         self._optimizer_states: dict[str, StateDict] = {}
@@ -81,36 +78,6 @@ class TorchTrainer(Trainer):
             - Tuple containing (optimizers dictionary, schedulers dictionary)
         """
         ...
-
-    @override
-    def get_training_model[T: nn.Module](
-        self, name: str, module_cls: type[T] = nn.Module
-    ) -> TorchTrainingModel[T]:
-        """Get a PyTorch training model with type checking.
-
-        Retrieves a TorchTrainingModel by name and validates that it contains
-        a model of the expected type.
-
-        Args:
-            name: Name of the model to retrieve
-            module_cls: Expected module class type
-
-        Returns:
-            TorchTrainingModel containing the requested model
-
-        Raises:
-            ValueError: If the model is not a TorchTrainingModel or doesn't match the expected type
-        """
-        training_model = super().get_training_model(name)
-        if not isinstance(training_model, TorchTrainingModel):
-            raise ValueError(f"Model {name} is not a TorchTrainingModel")
-
-        if not isinstance(training_model.model, module_cls):
-            raise ValueError(
-                f"Model {name} is not an instance of {module_cls.__name__}"
-            )
-
-        return training_model
 
     @override
     def setup(self) -> None:
@@ -143,14 +110,14 @@ class TorchTrainer(Trainer):
 
         # Reset existing optimizer and scheduler collections
         self._optimizers.clear()
-        self._lr_schedulers.clear()
+        self._schedulers.clear()
 
         # Process configuration based on return type
         if isinstance(optimizer_config, tuple) and len(optimizer_config) == 2:
             # Configuration includes both optimizers and schedulers
             optimizers, schedulers = optimizer_config
             self._optimizers.update(optimizers)
-            self._lr_schedulers.update(schedulers)
+            self._schedulers.update(schedulers)
         else:
             # Configuration includes only optimizers
             self._optimizers.update(optimizer_config)
@@ -161,7 +128,7 @@ class TorchTrainer(Trainer):
 
         # Restore scheduler states if available
         for name, state in self._scheduler_states.items():
-            self._lr_schedulers[name].load_state_dict(state)
+            self._schedulers[name].load_state_dict(state)
 
     def _save_optimizer_and_scheduler_states(self) -> None:
         """Save the current states of optimizers and schedulers.
@@ -178,7 +145,7 @@ class TorchTrainer(Trainer):
             self._optimizer_states[name] = optimizer.state_dict().copy()
 
         # Save current scheduler states
-        for name, scheduler in self._lr_schedulers.items():
+        for name, scheduler in self._schedulers.items():
             self._scheduler_states[name] = scheduler.state_dict().copy()
 
     @override
