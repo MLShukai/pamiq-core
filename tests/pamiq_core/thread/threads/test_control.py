@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from pamiq_core.console import ControlCommands
 from pamiq_core.state_persistence import StateStore
-from pamiq_core.threads import (
+from pamiq_core.thread import (
     ReadOnlyController,
     ReadOnlyThreadStatus,
     ThreadController,
@@ -14,7 +14,7 @@ from pamiq_core.threads import (
     ThreadStatusesMonitor,
     ThreadTypes,
 )
-from pamiq_core.threads.control_thread import ControlThread
+from pamiq_core.thread.threads.control import ControlThread
 from tests.helpers import check_log_message
 
 
@@ -30,7 +30,7 @@ class TestControlThread:
     def mock_web_api_handler(self, mocker: MockerFixture):
         """Fixture providing a mock WebApiHandler."""
         mock_web_api_handler_cls = mocker.patch(
-            "pamiq_core.threads.control_thread.WebApiHandler", autospec=True
+            "pamiq_core.thread.threads.control.WebApiHandler", autospec=True
         )
         instance = mock_web_api_handler_cls.return_value
         instance.has_commands.return_value = False

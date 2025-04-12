@@ -9,9 +9,7 @@ from .data import DataBuffer, DataUsersDict
 from .interaction import Interaction
 from .model import TrainingModel, TrainingModelsDict
 from .state_persistence import StateStore
-from .threads.control_thread import ControlThread
-from .threads.inference_thread import InferenceThread
-from .threads.training_thread import TrainingThread
+from .thread.threads import ControlThread, InferenceThread, TrainingThread
 from .trainer import Trainer, TrainersDict
 
 

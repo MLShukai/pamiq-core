@@ -4,8 +4,8 @@ from typing import override
 from pamiq_core import time
 from pamiq_core.trainer import Trainer, TrainersDict
 
+from ..thread_types import ThreadTypes
 from .base import BackgroundThread
-from .thread_types import ThreadTypes
 
 
 class TrainingThread(BackgroundThread):

@@ -7,7 +7,7 @@ from pamiq_core.interaction.env import Environment
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
 from pamiq_core.interaction.modular_env import Actuator, Sensor
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 
 
 class Wrapper[T, W](ABC, InteractionEventMixin, PersistentStateMixin, ThreadEventMixin):

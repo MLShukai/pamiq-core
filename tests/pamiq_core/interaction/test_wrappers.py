@@ -13,7 +13,7 @@ from pamiq_core.interaction.wrappers import (
     Wrapper,
 )
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 
 
 class WrapperImpl(Wrapper[int, str]):

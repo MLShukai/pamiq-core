@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Self, override
 
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 
 from .agent import Agent
 from .env import Environment
