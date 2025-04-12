@@ -2,6 +2,15 @@ from typing import Any
 
 
 def are_dict_values_same_entities(x: Any, y: Any) -> bool:
+    """Check if two dicts values are same pointers recursively.
+
+    Args:
+        x: Directory
+        y: Directory
+
+    Returns:
+        Whether all dict values have same pointers.
+    """
     if isinstance(x, dict) and isinstance(y, dict):
         if x.keys() != y.keys():
             return False
