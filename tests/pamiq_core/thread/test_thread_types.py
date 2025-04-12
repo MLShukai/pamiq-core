@@ -1,4 +1,4 @@
-from pamiq_core.threads import ThreadTypes
+from pamiq_core.thread import ThreadTypes
 
 
 def test_thread_types() -> None:

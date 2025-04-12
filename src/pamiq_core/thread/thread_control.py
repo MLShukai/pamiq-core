@@ -5,7 +5,7 @@ import threading
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 
-from pamiq_core.threads.thread_types import ThreadTypes
+from pamiq_core.thread.thread_types import ThreadTypes
 from pamiq_core.utils.reflection import get_class_module_path
 
 type OnPausedCallback = Callable[[], None]

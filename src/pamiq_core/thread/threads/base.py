@@ -5,14 +5,14 @@ from typing import ClassVar, override
 from pamiq_core import time
 from pamiq_core.utils.reflection import get_class_module_path
 
-from .thread_control import (
+from ..thread_control import (
     ControllerCommandHandler,
     ReadOnlyController,
     ReadOnlyThreadStatus,
     ThreadEventMixin,
     ThreadStatus,
 )
-from .thread_types import ThreadTypes
+from ..thread_types import ThreadTypes
 
 
 class Thread(ThreadEventMixin):

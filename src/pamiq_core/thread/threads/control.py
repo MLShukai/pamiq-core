@@ -6,14 +6,14 @@ from pamiq_core.console import ControlCommands, SystemStatusProvider, WebApiHand
 from pamiq_core.state_persistence import StateStore
 from pamiq_core.utils.schedulers import TimeIntervalScheduler
 
-from .base import Thread
-from .thread_control import (
+from ..thread_control import (
     ReadOnlyController,
     ReadOnlyThreadStatus,
     ThreadController,
     ThreadStatusesMonitor,
 )
-from .thread_types import ThreadTypes
+from ..thread_types import ThreadTypes
+from .base import Thread
 
 
 class ControlThread(Thread):

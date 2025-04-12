@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum, auto
 
-from pamiq_core.threads import ReadOnlyController, ThreadStatusesMonitor
+from pamiq_core.thread import ReadOnlyController, ThreadStatusesMonitor
 
 
 class SystemStatus(Enum):

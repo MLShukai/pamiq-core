@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from pamiq_core.threads import (
+from pamiq_core.thread import (
     ControllerCommandHandler,
     ReadOnlyController,
     ReadOnlyThreadStatus,

@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import InferenceModel, TrainingModel, TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 from pamiq_core.trainer import Trainer
 
 

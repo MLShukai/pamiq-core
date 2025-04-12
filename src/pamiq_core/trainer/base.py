@@ -6,7 +6,7 @@ from pamiq_core import time
 from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import TrainingModel, TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 
 
 class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):

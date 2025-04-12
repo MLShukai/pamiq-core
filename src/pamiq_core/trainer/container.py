@@ -5,7 +5,7 @@ from typing import override
 from pamiq_core.data import DataUsersDict
 from pamiq_core.model import TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 from pamiq_core.trainer import Trainer
 
 
