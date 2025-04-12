@@ -57,7 +57,9 @@ class TorchTrainer(Trainer):
             min_new_data_count: Minimum number of new data points required since last training.
         """
         super().__init__(
-            training_condition_data_user, min_buffer_size, min_new_data_count
+            training_condition_data_user,
+            min_buffer_size,
+            min_new_data_count,
         )
 
         # Containers for optimizer and scheduler instances
