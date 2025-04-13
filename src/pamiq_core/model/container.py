@@ -80,7 +80,7 @@ class TrainingModelsDict(UserDict[str, TrainingModel[Any]], PersistentStateMixin
         Args:
             path: Directory path where the states should be saved
         """
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         for name, model in self.data.items():
             model.save_state(path / name)
 

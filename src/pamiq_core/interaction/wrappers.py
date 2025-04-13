@@ -152,7 +152,7 @@ class EnvironmentWrapper[ObsType, WrappedObsType, ActType, WrappedActType](
         Args:
             path: Directory path where to save the state.
         """
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         self.env.save_state(path / "env")
         self._obs_wrapper.save_state(path / "obs_wrapper")
         self._act_wrapper.save_state(path / "act_wrapper")
@@ -232,7 +232,7 @@ class SensorWrapper[T, W](Sensor[W]):
         Args:
             path: Directory path where to save the state.
         """
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         self.sensor.save_state(path / "sensor")
         self._wrapper.save_state(path / "wrapper")
 
@@ -308,7 +308,7 @@ class ActuatorWrapper[T, W](Actuator[W]):
         Args:
             path: Directory path where to save the state.
         """
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         self.actuator.save_state(path / "actuator")
         self._wrapper.save_state(path / "wrapper")
 

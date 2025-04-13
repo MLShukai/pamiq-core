@@ -75,7 +75,7 @@ class Interaction[ObsType, ActType](
         Args:
             path: Directory path where to save the interaction state.
         """
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         self.agent.save_state(path / "agent")
         self.environment.save_state(path / "environment")
 

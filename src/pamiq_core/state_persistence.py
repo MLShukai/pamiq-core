@@ -66,7 +66,7 @@ class StateStore:
             FileExistsError: If the directory (`states_path`) already exists (This only occurs if multiple attempts to create directories are at the same time)
         """
         state_path = self.states_dir / datetime.now().strftime(self.state_name_format)
-        state_path.mkdir()
+        state_path.mkdir(exist_ok=True)
         for name, state in self._registered_states.items():
             state.save_state(state_path / name)
         return state_path

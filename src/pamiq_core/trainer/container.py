@@ -33,7 +33,7 @@ class TrainersDict(OrderedDict[str, Trainer], PersistentStateMixin, ThreadEventM
     @override
     def save_state(self, path: Path) -> None:
         """Save states of each trainer to the path."""
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         for name, trainer in self.items():
             trainer.save_state(path / name)
 

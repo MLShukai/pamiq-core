@@ -84,7 +84,7 @@ class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
         Args:
             path: Directory path where the states should be saved
         """
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         for name, user in self.items():
             user.save_state(path / name)
 

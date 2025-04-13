@@ -111,7 +111,7 @@ class ModularEnvironment[ObsType, ActType](Environment[ObsType, ActType]):
         Args:
             path: Directory path where to save the environment state.
         """
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         self.sensor.save_state(path / "sensor")
         self.actuator.save_state(path / "actuator")
 

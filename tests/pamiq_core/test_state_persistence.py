@@ -60,10 +60,6 @@ class TestStateStore:
         mock_state_1.save_state.assert_called_once_with(state_path / "mock_state_1")
         mock_state_2.save_state.assert_called_once_with(state_path / "mock_state_2")
 
-        # expect error in `Path.mkdir`:
-        with pytest.raises(FileExistsError):
-            store.save_state()
-
     def test_load_state(self, tmp_path, mocker):
         # prepare mock objects
         mock_state_1 = mocker.Mock(spec=PersistentStateMixin)

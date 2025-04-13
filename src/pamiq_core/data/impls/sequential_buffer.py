@@ -79,7 +79,7 @@ class SequentialBuffer[T](DataBuffer[T]):
         Args:
             path: Directory path where to save the buffer state
         """
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         for name, queue in self._queues_dict.items():
             with open(path / f"{name}.pkl", "wb") as f:
                 pickle.dump(queue, f)

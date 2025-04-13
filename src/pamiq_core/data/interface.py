@@ -142,7 +142,7 @@ class DataUser[T](PersistentStateMixin):
             path: Directory path where the state should be saved
         """
         self.update()
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         self._buffer.save_state(path / "buffer")
         with open(path / "timestamps.pkl", "wb") as f:
             pickle.dump(self._timestamps, f)

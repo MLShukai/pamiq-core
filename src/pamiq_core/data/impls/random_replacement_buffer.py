@@ -115,7 +115,7 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
         Args:
             path: Directory path where to save the buffer state.
         """
-        path.mkdir()
+        path.mkdir(exist_ok=True)
         for name, data in self._lists_dict.items():
             with open(path / f"{name}.pkl", "wb") as f:
                 pickle.dump(data, f)
