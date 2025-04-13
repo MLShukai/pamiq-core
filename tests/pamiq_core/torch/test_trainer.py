@@ -7,6 +7,7 @@ import pytest
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from pytest_mock import MockerFixture
 
 from pamiq_core.model import InferenceModel, TrainingModel
 from pamiq_core.torch import (
@@ -64,7 +65,9 @@ class TorchTrainerImpl(TorchTrainer):
 
 class TestTorchTrainer:
     @pytest.fixture
-    def training_models(self, device: torch.device) -> TorchTrainingModel:
+    def training_models(
+        self, device: torch.device, mocker: MockerFixture
+    ) -> TorchTrainingModel:
         return {
             "model_1": TorchTrainingModel(
                 model=nn.Linear(2, 3),
@@ -72,6 +75,7 @@ class TestTorchTrainer:
                 inference_thread_only=False,
                 device=device,
             ),
+            "model_2": mocker.Mock(TrainingModel),
         }
 
     @pytest.fixture
@@ -79,6 +83,16 @@ class TestTorchTrainer:
         torch_trainer = TorchTrainerImpl()
         torch_trainer.attach_training_models(training_models)
         return torch_trainer
+
+    @parametrize_device
+    def test_get_training_model(self, torch_trainer: TorchTrainer) -> None:
+        # check if the TorchTrainingModel can be got correctly.
+        assert isinstance(
+            torch_trainer.get_training_model("model_1"), TorchTrainingModel
+        )
+        # check if the error rises correctly when not TorchTrainingModel.
+        with pytest.raises(ValueError):
+            torch_trainer.get_training_model("model_2")
 
     @parametrize_device
     def test_setup(self, torch_trainer: TorchTrainer) -> None:
