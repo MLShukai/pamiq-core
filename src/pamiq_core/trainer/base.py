@@ -155,7 +155,7 @@ class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
         Args:
             path: Directory path where to save the trainer state.
         """
-        path.mkdir(exist_ok=True)
+        path.mkdir()
         (path / "previous_training_time").write_text(
             str(self._previous_training_time), encoding="utf-8"
         )
