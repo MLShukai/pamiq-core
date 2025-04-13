@@ -117,10 +117,11 @@ class TestTorchTrainer:
         torch_trainer.setup()
         torch_trainer.teardown()
         # define path
-        torch_trainer.save_state(tmp_path)
+        test_path = tmp_path / "test/"
+        torch_trainer.save_state(test_path)
         # check if file saved
-        assert (tmp_path / "optimizer_1.optim.pt").is_file()
-        assert (tmp_path / "scheduler_1.lrsch.pt").is_file()
+        assert (test_path / "optimizer_1.optim.pt").is_file()
+        assert (test_path / "scheduler_1.lrsch.pt").is_file()
         # keep states for comparison below.
         saved_optim_params = copy.deepcopy(torch_trainer._optimizer_states)
         saved_lrsch_params = copy.deepcopy(torch_trainer._scheduler_states)
@@ -132,7 +133,7 @@ class TestTorchTrainer:
         assert not torch_trainer._optimizer_states == saved_optim_params
         assert not torch_trainer._scheduler_states == saved_lrsch_params
         # check if load can be performed correctly.
-        torch_trainer.load_state(tmp_path)
+        torch_trainer.load_state(test_path)
         loaded_optim_params = torch_trainer._optimizer_states
         loaded_lrsch_params = torch_trainer._scheduler_states
         assert loaded_optim_params == saved_optim_params

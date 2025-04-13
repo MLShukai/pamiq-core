@@ -158,7 +158,6 @@ class TorchTrainer(Trainer):
             path: Directory path where state should be saved
         """
         super().save_state(path)
-        path.mkdir(exist_ok=True)
 
         # Save optimizer states to disk
         for name, optimizer_state in self._optimizer_states.items():
