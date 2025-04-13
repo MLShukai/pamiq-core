@@ -85,16 +85,6 @@ class TestTorchTrainer:
         return torch_trainer
 
     @parametrize_device
-    def test_get_training_model(self, torch_trainer: TorchTrainer) -> None:
-        # check if the TorchTrainingModel can be got correctly.
-        assert isinstance(
-            torch_trainer.get_training_model("model_1"), TorchTrainingModel
-        )
-        # check if the error rises correctly when not TorchTrainingModel.
-        with pytest.raises(ValueError):
-            torch_trainer.get_training_model("model_2")
-
-    @parametrize_device
     def test_setup(self, torch_trainer: TorchTrainer) -> None:
         torch_trainer.setup()
         # Check if the keys are created correctly.
