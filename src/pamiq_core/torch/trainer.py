@@ -187,6 +187,8 @@ class TorchTrainer(Trainer):
         """
         super().save_state(path)
 
+        # Keep the state of the optimizer or LR scheduler within the `teardown` method.
+
         # Save optimizer states to disk
         for name, optimizer_state in self.optimizer_states.items():
             torch.save(optimizer_state, path / f"{name}.optim.pt")  # pyright: ignore[reportUnknownMemberType]
@@ -222,3 +224,5 @@ class TorchTrainer(Trainer):
         for scheduler_path in path.glob("*.lrsch.pt"):
             name = scheduler_path.name.replace(".lrsch.pt", "")
             self.lr_scheduler_states[name] = torch.load(scheduler_path)  # pyright: ignore[reportUnknownMemberType]
+
+        # Load the state into the optimizer and LR scheduler within the `setup` method.
