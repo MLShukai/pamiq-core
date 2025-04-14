@@ -187,7 +187,7 @@ class TorchTrainer(Trainer):
         """
         super().save_state(path)
 
-        # Keep the state of the optimizer or LR scheduler within the `teardown` method.
+         # Before this method performed, the state of the optimizer or LR scheduler have already been kept by the `teardown` method.
 
         # Save optimizer states to disk
         for name, optimizer_state in self.optimizer_states.items():
