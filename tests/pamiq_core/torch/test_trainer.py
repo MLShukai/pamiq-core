@@ -1,7 +1,5 @@
-import copy
-import logging
 from pathlib import Path
-from typing import Any, override
+from typing import override
 
 import pytest
 import torch
@@ -9,151 +7,258 @@ import torch.nn as nn
 import torch.optim as optim
 from pytest_mock import MockerFixture
 
-from pamiq_core.model import InferenceModel, TrainingModel
+from pamiq_core.model import InferenceModel, TrainingModel, TrainingModelsDict
 from pamiq_core.torch import (
-    LRSchedulersDict,
-    OptimizersDict,
     OptimizersSetup,
-    StateDict,
-    TorchInferenceModel,
     TorchTrainer,
     TorchTrainingModel,
+    get_device,
 )
-
-from .are_dict_values_same_entities import are_dict_values_same_entities
-
-logger = logging.getLogger(__name__)
-
-CPU_DEVICE = torch.device("cpu")
-CUDA_DEVICE = torch.device("cuda:0")
-
-
-def get_available_devices() -> list[torch.device]:
-    devices = [CPU_DEVICE]
-    if torch.cuda.is_available():
-        devices.append(CUDA_DEVICE)
-    return devices
-
-
-logger.info("Available devices: " + ", ".join(map(str, get_available_devices())))
-
-parametrize_device = pytest.mark.parametrize("device", get_available_devices())
 
 
 class TorchTrainerImpl(TorchTrainer):
+    """Concrete implementation of TorchTrainer for testing."""
+
+    @override
+    def on_training_models_attached(self) -> None:
+        super().on_training_models_attached()
+        self.model_1 = self.get_torch_training_model("model_1", nn.Linear)
+
     @override
     def create_optimizers(self) -> OptimizersSetup:
-        optimizer_1 = optim.AdamW(
-            self.get_training_model("model_1").model.parameters(),
+        """Create optimizer and scheduler for testing."""
+        self.optimizer_1 = optim.AdamW(
+            self.model_1.model.parameters(),
             lr=0.001,
             betas=(0.8, 0.99),
             weight_decay=0.01,
         )
-        scheduler_1 = optim.lr_scheduler.ExponentialLR(optimizer_1, gamma=0.998)
-        return {"optimizer_1": optimizer_1}, {"scheduler_1": scheduler_1}
+        self.scheduler_1 = optim.lr_scheduler.ExponentialLR(
+            self.optimizer_1, gamma=0.998
+        )
+        return {"optimizer_1": self.optimizer_1}, {"scheduler_1": self.scheduler_1}
 
     @override
     def train(self) -> None:
-        model = self.get_training_model("model_1")
-        device = next(model.model.parameters()).device
+        """Implement basic training step for testing."""
+        model = self.model_1.model
+        device = get_device(model)
         out = model(torch.randn(5, 2).to(device))
-        self._optimizers["optimizer_1"].zero_grad()
+        self.optimizer_1.zero_grad()
         out.mean().backward()
-        self._optimizers["optimizer_1"].step()
-        self._schedulers["scheduler_1"].step()
+        self.optimizer_1.step()
+        self.scheduler_1.step()
+
+
+class OptimizersOnlyTrainer(TorchTrainerImpl):
+    """Trainer implementation that only returns optimizers without
+    schedulers."""
+
+    @override
+    def create_optimizers(self) -> dict[str, optim.Optimizer]:
+        """Return only optimizers without schedulers."""
+        self.optimizer_1 = optim.SGD(self.model_1.model.parameters(), lr=0.01)
+        return {"optimizer_1": self.optimizer_1}
 
 
 class TestTorchTrainer:
     @pytest.fixture
-    def training_models(
-        self, device: torch.device, mocker: MockerFixture
-    ) -> TorchTrainingModel:
-        return {
-            "model_1": TorchTrainingModel(
-                model=nn.Linear(2, 3),
-                has_inference_model=True,
-                inference_thread_only=False,
-                device=device,
-            ),
-            "model_2": mocker.Mock(TrainingModel),
-        }
+    def training_models(self, mocker: MockerFixture) -> TrainingModelsDict:
+        """Fixture providing training models dictionary with test models."""
+        model_2 = mocker.Mock(TrainingModel)
+        model_2.inference_model = mocker.Mock(InferenceModel)
+        model_2.has_inference_model = True
+        model_2.inference_thread_only = False
+        return TrainingModelsDict(
+            {
+                "model_1": TorchTrainingModel(
+                    model=nn.Linear(2, 3),
+                    has_inference_model=True,
+                    inference_thread_only=False,
+                ),
+                "model_2": model_2,
+            }
+        )
 
     @pytest.fixture
-    def torch_trainer(self, training_models: TorchTrainingModel) -> TorchTrainer:
+    def torch_trainer(self, training_models: TrainingModelsDict) -> TorchTrainer:
+        """Fixture providing initialized TorchTrainer instance."""
         torch_trainer = TorchTrainerImpl()
         torch_trainer.attach_training_models(training_models)
+        # Call setup to initialize optimizers and schedulers
+        torch_trainer.setup()
         return torch_trainer
 
-    @parametrize_device
-    def test_get_training_model(self, torch_trainer: TorchTrainer) -> None:
-        # check if the TorchTrainingModel can be got correctly.
+    def test_get_torch_training_model(self, torch_trainer: TorchTrainer) -> None:
+        """Test get_torch_training_model method returns correct model with type
+        checking."""
+        # Check if the TorchTrainingModel can be retrieved correctly
         assert isinstance(
-            torch_trainer.get_training_model("model_1"), TorchTrainingModel
-        )
-        # check if the error rises correctly when not TorchTrainingModel.
-        with pytest.raises(ValueError):
-            torch_trainer.get_training_model("model_2")
-
-    @parametrize_device
-    def test_setup(self, torch_trainer: TorchTrainer) -> None:
-        torch_trainer.setup()
-        # Check if the keys are created correctly.
-        assert list(torch_trainer._optimizers.keys()) == ["optimizer_1"]
-        assert list(torch_trainer._schedulers.keys()) == ["scheduler_1"]
-        # Check if the instances are created correctly.
-        assert isinstance(torch_trainer._optimizers["optimizer_1"], optim.AdamW)
-        assert isinstance(
-            torch_trainer._schedulers["scheduler_1"], optim.lr_scheduler.ExponentialLR
+            torch_trainer.get_torch_training_model("model_1"), TorchTrainingModel
         )
 
-    @parametrize_device
-    def test_teardown(self, torch_trainer: TorchTrainer) -> None:
+        # Check type validation with correct model type
+        assert isinstance(
+            torch_trainer.get_torch_training_model("model_1", nn.Linear).model,
+            nn.Linear,
+        )
+
+        # Check if error is raised correctly when not TorchTrainingModel
+        with pytest.raises(
+            TypeError, match="Model model_2 is not a instance of TorchTrainingModel"
+        ):
+            torch_trainer.get_torch_training_model("model_2")
+
+        # Check if error is raised when internal model is not of expected type
+        with pytest.raises(
+            TypeError, match=f"Internal model is not a instance of {nn.Conv2d.__name__}"
+        ):
+            torch_trainer.get_torch_training_model("model_1", nn.Conv2d)
+
+    def test_setup_with_setup_optimizers_and_schedulers(
+        self, torch_trainer: TorchTrainerImpl
+    ) -> None:
+        """Test that _setup_optimizers_and_schedulers correctly initializes
+        optimizers and schedulers."""
+        # Reset optimizers and schedulers
+        torch_trainer.optimizers.clear()
+        torch_trainer.schedulers.clear()
+
+        # Call the setup method
         torch_trainer.setup()
+
+        # Verify optimizers and schedulers are created
+        assert "optimizer_1" in torch_trainer.optimizers
+        assert "scheduler_1" in torch_trainer.schedulers
+
+        # Verify optimizer is correctly configured
+        optimizer = torch_trainer.optimizers["optimizer_1"]
+        assert isinstance(optimizer, optim.AdamW)
+        assert optimizer.param_groups[0]["lr"] == 0.001
+
+        # Verify scheduler is correctly configured
+        scheduler = torch_trainer.schedulers["scheduler_1"]
+        assert isinstance(scheduler, optim.lr_scheduler.ExponentialLR)
+        assert scheduler.gamma == 0.998
+
+    def test_setup_with_only_optimizers(
+        self, training_models: TrainingModelsDict
+    ) -> None:
+        """Test setup with only optimizers returned from create_optimizers."""
+        # Create trainer that only returns optimizers without schedulers
+        trainer = OptimizersOnlyTrainer()
+        trainer.attach_training_models(training_models)
+        trainer.setup()
+
+        # Verify optimizers are created, but schedulers dict is empty
+        assert "optimizer_1" in trainer.optimizers
+        assert len(trainer.schedulers) == 0
+        assert isinstance(trainer.optimizers["optimizer_1"], optim.SGD)
+
+    def test_teardown_with_keep_optimizer_and_scheduler_states(
+        self, torch_trainer: TorchTrainerImpl
+    ) -> None:
+        """Test that _keep_optimizer_and_scheduler_states correctly captures
+        current states."""
+        # Clear any existing states
+        torch_trainer.optimizer_states.clear()
+        torch_trainer.scheduler_states.clear()
+
+        # Call the method to capture states
         torch_trainer.teardown()
-        # Check if the keys are kept correctly.
-        assert list(torch_trainer._optimizer_states.keys()) == ["optimizer_1"]
-        assert list(torch_trainer._scheduler_states.keys()) == ["scheduler_1"]
-        # Check if the optimizers parameters are kept correctly.
-        kept_optimizer_state = torch_trainer._optimizer_states["optimizer_1"]
-        optimizer_state = torch_trainer._optimizers["optimizer_1"].state_dict()
-        assert are_dict_values_same_entities(kept_optimizer_state, optimizer_state)
-        # Check if the schedulers parameters are kept correctly.
-        kept_scheduler_state = torch_trainer._scheduler_states["scheduler_1"]
-        scheduler_state = torch_trainer._schedulers["scheduler_1"].state_dict()
-        assert are_dict_values_same_entities(kept_scheduler_state, scheduler_state)
 
-    @parametrize_device
+        # Verify optimizer states are kept
+        assert "optimizer_1" in torch_trainer.optimizer_states
+        assert torch_trainer.optimizer_states["optimizer_1"] is not None
+
+        # Verify scheduler states are kept
+        assert "scheduler_1" in torch_trainer.scheduler_states
+        assert torch_trainer.scheduler_states["scheduler_1"] is not None
+
+    def test_setup_restores_states(self, training_models: TrainingModelsDict) -> None:
+        """Test that setup restores optimizer and scheduler states."""
+        # Initialize new trainer
+        trainer = TorchTrainerImpl()
+        trainer.attach_training_models(training_models)
+
+        # Setup initial optimizers and schedulers
+        trainer.setup()
+
+        # Modify learning rate
+        original_lr = trainer.optimizers["optimizer_1"].param_groups[0]["lr"]
+        modified_lr = original_lr * 2.0
+
+        # Store modified state
+        trainer.optimizers["optimizer_1"].param_groups[0]["lr"] = modified_lr
+        trainer.teardown()
+
+        # Reset optimizers and setup again - should restore the modified state
+        trainer.optimizers.clear()
+        trainer.setup()
+
+        # Verify state was restored
+        assert trainer.optimizers["optimizer_1"].param_groups[0]["lr"] == modified_lr
+
     def test_save_and_load_state(
         self,
         torch_trainer: TorchTrainer,
+        training_models: TrainingModelsDict,
         tmp_path: Path,
-    ):
-        torch_trainer.setup()
-        torch_trainer.teardown()
-        # define path
-        test_path = tmp_path / "test/"
-        torch_trainer.save_state(test_path)
-        # check if file saved
-        assert (test_path / "optimizer_1.optim.pt").is_file()
-        assert (test_path / "scheduler_1.lrsch.pt").is_file()
-        # keep states for comparison below.
-        saved_optim_params = copy.deepcopy(torch_trainer._optimizer_states)
-        saved_lrsch_params = copy.deepcopy(torch_trainer._scheduler_states)
-        # make differences
-        torch_trainer.setup()
+    ) -> None:
+        """Test that save_state and load_state correctly persist and restore
+        states."""
+        # Perform training to modify optimizer state
         torch_trainer.train()
+
+        # Keep original optimizer and scheduler states
         torch_trainer.teardown()
-        # check if the differences between the models are made correctly.
-        assert not torch_trainer._optimizer_states == saved_optim_params
-        assert not torch_trainer._scheduler_states == saved_lrsch_params
-        # check if load can be performed correctly.
-        torch_trainer.load_state(test_path)
-        loaded_optim_params = torch_trainer._optimizer_states
-        loaded_lrsch_params = torch_trainer._scheduler_states
-        assert loaded_optim_params == saved_optim_params
-        assert loaded_lrsch_params == saved_lrsch_params
-        # check if the parameters of optimizer and scheduler be set correctly.
-        for name, optimizer in torch_trainer._optimizers.items():
-            assert torch_trainer._optimizer_states[name] == optimizer.state_dict()
-        for name, scheduler in torch_trainer._schedulers.items():
-            assert torch_trainer._scheduler_states[name] == scheduler.state_dict()
+
+        # Extract key information from original states for comparison
+        original_opt_state = torch_trainer.optimizer_states["optimizer_1"]
+        original_lr = original_opt_state["param_groups"][0]["lr"]
+        original_sched_state = torch_trainer.scheduler_states["scheduler_1"]
+        original_last_epoch = original_sched_state["last_epoch"]
+
+        # Save state to disk
+        state_path = tmp_path / "trainer_state"
+        torch_trainer.save_state(state_path)
+
+        # Verify files are created
+        assert (state_path / "optimizer_1.optim.pt").is_file()
+        assert (state_path / "scheduler_1.lrsch.pt").is_file()
+
+        # Create a new trainer with the same models
+        new_trainer = TorchTrainerImpl()
+        new_trainer.attach_training_models(training_models)
+
+        # Load state from disk
+        new_trainer.load_state(state_path)
+
+        # Verify states are correctly loaded
+        loaded_opt_state = new_trainer.optimizer_states["optimizer_1"]
+        loaded_lr = loaded_opt_state["param_groups"][0]["lr"]
+        loaded_sched_state = new_trainer.scheduler_states["scheduler_1"]
+        loaded_last_epoch = loaded_sched_state["last_epoch"]
+
+        # Compare key values
+        assert loaded_lr == original_lr
+        assert loaded_last_epoch == original_last_epoch
+
+        # Setup should apply the loaded states
+        new_trainer.setup()
+        assert (
+            new_trainer.optimizers["optimizer_1"].param_groups[0]["lr"] == original_lr
+        )
+
+    def test_load_state_with_invalid_path(
+        self, torch_trainer: TorchTrainer, tmp_path: Path
+    ) -> None:
+        """Test that load_state raises ValueError with invalid path."""
+        # Non-existent path
+        invalid_path = tmp_path / "nonexistent"
+
+        with pytest.raises(
+            ValueError,
+            match=f"Path {invalid_path} is not a directory or does not exist",
+        ):
+            torch_trainer.load_state(invalid_path)

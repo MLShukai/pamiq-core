@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, cast, override
 
 import torch
+import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 
@@ -61,39 +62,39 @@ class TorchTrainer(Trainer):
         )
 
         # Containers for optimizer and scheduler instances
-        self._optimizers: OptimizersDict = {}
-        self._schedulers: LRSchedulersDict = {}
+        self.optimizers: OptimizersDict = {}
+        self.schedulers: LRSchedulersDict = {}
 
         # Containers for persistent optimizer and scheduler states
-        self._optimizer_states: dict[str, StateDict] = {}
-        self._scheduler_states: dict[str, StateDict] = {}
+        self.optimizer_states: dict[str, StateDict] = {}
+        self.scheduler_states: dict[str, StateDict] = {}
 
-    def _keep_optimizer_and_scheduler_states(self) -> None:
-        """Keep the current states of optimizers and schedulers.
+    def get_torch_training_model[T: nn.Module](
+        self, name: str, module_cls: type[T] = nn.Module
+    ) -> TorchTrainingModel[T]:
+        """Get a TorchTrainingModel with type checking. Retrieves a PyTorch
+        model training model by name and validates internal model type.
 
-        Captures and stores the state dictionaries of all active
-        optimizers and schedulers for future restoration.
+        Args:
+            name: Name of the model to retrieve.
+            module_cls: Expected internal module class.
+
+        Returns:
+            An instance of TorchTrainingModel with specified model type.
+        Raises:
+            TypeError: If the model is not a TorchTrainingModel or internal model is not specified module class.
         """
-        # Clear previous kept states
-        self._optimizer_states.clear()
-        self._scheduler_states.clear()
+        training_model = self.get_training_model(name)
+        if not isinstance(training_model, TorchTrainingModel):
+            raise TypeError(f"Model {name} is not a instance of TorchTrainingModel")
 
-        # Keep current optimizer states
-        for name, optimizer in self._optimizers.items():
-            self._optimizer_states[name] = optimizer.state_dict().copy()
+        training_model = cast(TorchTrainingModel[T], training_model)
 
-        # Keep current scheduler states
-        for name, scheduler in self._schedulers.items():
-            self._scheduler_states[name] = scheduler.state_dict().copy()
-
-    def _restore_optimizer_and_scheduler(self) -> None:
-        """Restore states of optimizers and schedulers from kept states."""
-        # Restore optimizer states if available
-        for name, state in self._optimizer_states.items():
-            self._optimizers[name].load_state_dict(state)
-        # Restore scheduler states if available
-        for name, state in self._scheduler_states.items():
-            self._schedulers[name].load_state_dict(state)
+        if not isinstance(training_model.model, module_cls):
+            raise TypeError(
+                f"Internal model is not a instance of {module_cls.__name__}"
+            )
+        return training_model
 
     @abstractmethod
     def create_optimizers(self) -> OptimizersSetup:
@@ -107,25 +108,52 @@ class TorchTrainer(Trainer):
         """
         ...
 
-    @override
-    def get_training_model(self, name: str) -> TorchTrainingModel[Any]:
-        """Get a TorchTrainingModel with type checking.
+    def _setup_optimizers_and_schedulers(self) -> None:
+        """Setup optimizers and schedulers from configuration.
 
-        Retrieves a PyTorch model training_model by name and validates it's type.
-
-        Args:
-            name: Name of the model to retrieve.
-
-        Returns:
-            TorchTrainingModel.
-
-        Raises:
-            ValueError: If the model is not a TorchTrainingModel.
+        Creates optimizer and scheduler instances based on the configuration
+        provided by `create_optimizers`.
         """
-        training_model = super().get_training_model(name)
-        if not isinstance(training_model, TorchTrainingModel):
-            raise ValueError(f"Model {name} is not a TorchTrainingModel")
-        return cast(TorchTrainingModel[Any], training_model)
+        optimizer_config = self.create_optimizers()
+
+        # Reset existing optimizer and scheduler collections
+        self.optimizers.clear()
+        self.schedulers.clear()
+
+        # Process configuration based on return type
+        if isinstance(optimizer_config, tuple):
+            # Configuration includes both optimizers and schedulers
+            optimizers, schedulers = optimizer_config
+            self.optimizers.update(optimizers)
+            self.schedulers.update(schedulers)
+        else:
+            # Configuration includes only optimizers
+            self.optimizers.update(optimizer_config)
+
+        # Restore optimizer states if available
+        for name, state in self.optimizer_states.items():
+            self.optimizers[name].load_state_dict(state)
+        # Restore scheduler states if available
+        for name, state in self.scheduler_states.items():
+            self.schedulers[name].load_state_dict(state)
+
+    def _keep_optimizer_and_scheduler_states(self) -> None:
+        """Keep the current states of optimizers and schedulers.
+
+        Captures and stores the state dictionaries of all active
+        optimizers and schedulers for future restoration.
+        """
+        # Clear previous kept states
+        self.optimizer_states.clear()
+        self.scheduler_states.clear()
+
+        # Keep current optimizer states
+        for name, optimizer in self.optimizers.items():
+            self.optimizer_states[name] = optimizer.state_dict().copy()
+
+        # Keep current scheduler states
+        for name, scheduler in self.schedulers.items():
+            self.scheduler_states[name] = scheduler.state_dict().copy()
 
     @override
     def setup(self) -> None:
@@ -136,30 +164,6 @@ class TorchTrainer(Trainer):
         """
         super().setup()
         self._setup_optimizers_and_schedulers()
-
-    def _setup_optimizers_and_schedulers(self) -> None:
-        """Setup optimizers and schedulers from configuration.
-
-        Creates optimizer and scheduler instances based on the configuration
-        provided by `create_optimizers`.
-        """
-        optimizer_config = self.create_optimizers()
-
-        # Reset existing optimizer and scheduler collections
-        self._optimizers.clear()
-        self._schedulers.clear()
-
-        # Process configuration based on return type
-        if isinstance(optimizer_config, tuple) and len(optimizer_config) == 2:
-            # Configuration includes both optimizers and schedulers
-            optimizers, schedulers = optimizer_config
-            self._optimizers.update(optimizers)
-            self._schedulers.update(schedulers)
-        else:
-            # Configuration includes only optimizers
-            self._optimizers.update(optimizer_config)
-
-        self._restore_optimizer_and_scheduler()
 
     @override
     def teardown(self) -> None:
@@ -184,11 +188,11 @@ class TorchTrainer(Trainer):
         super().save_state(path)
 
         # Save optimizer states to disk
-        for name, optimizer_state in self._optimizer_states.items():
+        for name, optimizer_state in self.optimizer_states.items():
             torch.save(optimizer_state, path / f"{name}.optim.pt")  # pyright: ignore[reportUnknownMemberType]
 
         # Save scheduler states to disk
-        for name, scheduler_state in self._scheduler_states.items():
+        for name, scheduler_state in self.scheduler_states.items():
             torch.save(scheduler_state, path / f"{name}.lrsch.pt")  # pyright: ignore[reportUnknownMemberType]
 
     @override
@@ -212,11 +216,9 @@ class TorchTrainer(Trainer):
         # Load optimizer states from disk
         for optimizer_path in path.glob("*.optim.pt"):
             name = optimizer_path.name.replace(".optim.pt", "")
-            self._optimizer_states[name] = torch.load(optimizer_path)  # pyright: ignore[reportUnknownMemberType]
+            self.optimizer_states[name] = torch.load(optimizer_path)  # pyright: ignore[reportUnknownMemberType]
 
         # Load scheduler states from disk
         for scheduler_path in path.glob("*.lrsch.pt"):
             name = scheduler_path.name.replace(".lrsch.pt", "")
-            self._scheduler_states[name] = torch.load(scheduler_path)  # pyright: ignore[reportUnknownMemberType]
-
-        self._restore_optimizer_and_scheduler()
+            self.scheduler_states[name] = torch.load(scheduler_path)  # pyright: ignore[reportUnknownMemberType]
