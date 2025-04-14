@@ -30,7 +30,9 @@ class StateStore:
     """
 
     def __init__(
-        self, states_dir: Path, state_name_format: str = "%Y-%m-%d_%H-%M-%S,%f.state"
+        self,
+        states_dir: str | Path,
+        state_name_format: str = "%Y-%m-%d_%H-%M-%S,%f.state",
     ) -> None:
         """
         Args:
@@ -71,7 +73,7 @@ class StateStore:
             state.save_state(state_path / name)
         return state_path
 
-    def load_state(self, state_path: Path) -> None:
+    def load_state(self, state_path: str | Path) -> None:
         """Restores the state from the `state_path` directory.
 
         Args:
@@ -80,6 +82,7 @@ class StateStore:
         Raises:
             FileNotFoundError: If the specified path does not exist
         """
+        state_path = Path(state_path)
         if not state_path.exists():
             raise FileNotFoundError(f"State path: '{state_path}' not found!")
         for name, state in self._registered_states.items():

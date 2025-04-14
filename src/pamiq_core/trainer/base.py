@@ -6,7 +6,7 @@ from pamiq_core import time
 from pamiq_core.data import DataUser, DataUsersDict
 from pamiq_core.model import TrainingModel, TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 
 
 class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
@@ -138,15 +138,20 @@ class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
         """Teardown procedure after training."""
         pass
 
-    def run(self) -> None:
-        """Runs the training process if the trainer is trainable."""
+    def run(self) -> bool:
+        """Runs the training process if the trainer is trainable.
+
+        Returns:
+            bool: True if training was executed, False if skipped due to conditions not met.
+        """
         if not self.is_trainable():
-            return
+            return False
 
         self.setup()
         self.train()
         self.sync_models()
         self.teardown()
+        return True
 
     @override
     def save_state(self, path: Path) -> None:

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import override
 
 from pamiq_core.state_persistence import PersistentStateMixin
-from pamiq_core.threads import ThreadEventMixin
+from pamiq_core.thread import ThreadEventMixin
 
 from .env import Environment
 from .event_mixin import InteractionEventMixin
