@@ -11,9 +11,11 @@ from pathlib import Path
 from typing import Any, override
 
 import torch
+import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 
+from pamiq_core.torch import TorchTrainingModel
 from pamiq_core.trainer import Trainer
 
 # Type definitions for improved type safety and readability
@@ -105,6 +107,37 @@ class TorchTrainer(Trainer):
             - Tuple containing (optimizers dictionary, schedulers dictionary)
         """
         ...
+
+    @override
+    def get_training_model[T: nn.Module](
+        self, name: str, module_cls: type[T] = nn.Module
+    ) -> TorchTrainingModel[T]:
+        """Get a PyTorch training model with type checking.
+
+        Retrieves a PyTorch model training_model by name and validates that it contains
+        a model of the expected type.
+
+        Args:
+            name: Name of the model to retrieve
+            module_cls: Expected module class type
+
+        Returns:
+            TorchTrainingModel containing the requested model
+
+        Raises:
+            ValueError: If the model is not a TorchTrainingModel or doesn't match the expected type
+        """
+        training_model = super().get_training_model(name)
+        if not isinstance(training_model, TorchTrainingModel):
+            raise ValueError(f"Model {name} is not a TorchTrainingModel")
+
+        model = training_model.model
+        if not isinstance(model, module_cls):
+            raise ValueError(
+                f"Model {name} is not an instance of {module_cls.__name__}"
+            )
+
+        return training_model
 
     @override
     def setup(self) -> None:
