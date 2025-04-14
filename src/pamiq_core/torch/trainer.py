@@ -67,6 +67,33 @@ class TorchTrainer(Trainer):
         self._optimizer_states: dict[str, StateDict] = {}
         self._scheduler_states: dict[str, StateDict] = {}
 
+    def _keep_optimizer_and_scheduler_states(self) -> None:
+        """Keep the current states of optimizers and schedulers.
+
+        Captures and stores the state dictionaries of all active
+        optimizers and schedulers for future restoration.
+        """
+        # Clear previous kept states
+        self._optimizer_states.clear()
+        self._scheduler_states.clear()
+
+        # Keep current optimizer states
+        for name, optimizer in self._optimizers.items():
+            self._optimizer_states[name] = optimizer.state_dict().copy()
+
+        # Keep current scheduler states
+        for name, scheduler in self._schedulers.items():
+            self._scheduler_states[name] = scheduler.state_dict().copy()
+
+    def _restore_optimizer_and_scheduler(self) -> None:
+        """Restore states of optimizers and schedulers from kept states."""
+        # Restore optimizer states if available
+        for name, state in self._optimizer_states.items():
+            self._optimizers[name].load_state_dict(state)
+        # Restore scheduler states if available
+        for name, state in self._scheduler_states.items():
+            self._schedulers[name].load_state_dict(state)
+
     @abstractmethod
     def create_optimizers(self) -> OptimizersSetup:
         """Create and return optimizers and optional schedulers for training.
@@ -88,16 +115,6 @@ class TorchTrainer(Trainer):
         """
         super().setup()
         self._setup_optimizers_and_schedulers()
-
-    @override
-    def teardown(self) -> None:
-        """Clean up after training.
-
-        Keeps the current state of optimizers and schedulers before
-        cleanup.
-        """
-        super().teardown()
-        self._keep_optimizer_and_scheduler_states()
 
     def _setup_optimizers_and_schedulers(self) -> None:
         """Setup optimizers and schedulers from configuration.
@@ -121,31 +138,17 @@ class TorchTrainer(Trainer):
             # Configuration includes only optimizers
             self._optimizers.update(optimizer_config)
 
-        # Restore optimizer states if available
-        for name, state in self._optimizer_states.items():
-            self._optimizers[name].load_state_dict(state)
+        self._restore_optimizer_and_scheduler()
 
-        # Restore scheduler states if available
-        for name, state in self._scheduler_states.items():
-            self._schedulers[name].load_state_dict(state)
+    @override
+    def teardown(self) -> None:
+        """Clean up after training.
 
-    def _keep_optimizer_and_scheduler_states(self) -> None:
-        """Keep the current states of optimizers and schedulers.
-
-        Captures and stores the state dictionaries of all active
-        optimizers and schedulers for future restoration.
+        Keeps the current state of optimizers and schedulers before
+        cleanup.
         """
-        # Clear previous kept states
-        self._optimizer_states.clear()
-        self._scheduler_states.clear()
-
-        # Keep current optimizer states
-        for name, optimizer in self._optimizers.items():
-            self._optimizer_states[name] = optimizer.state_dict().copy()
-
-        # Keep current scheduler states
-        for name, scheduler in self._schedulers.items():
-            self._scheduler_states[name] = scheduler.state_dict().copy()
+        super().teardown()
+        self._keep_optimizer_and_scheduler_states()
 
     @override
     def save_state(self, path: Path) -> None:
@@ -194,3 +197,5 @@ class TorchTrainer(Trainer):
         for scheduler_path in path.glob("*.lrsch.pt"):
             name = scheduler_path.name.replace(".lrsch.pt", "")
             self._scheduler_states[name] = torch.load(scheduler_path)  # pyright: ignore[reportUnknownMemberType]
+
+        self._restore_optimizer_and_scheduler()

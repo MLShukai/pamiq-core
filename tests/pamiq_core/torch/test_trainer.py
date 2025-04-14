@@ -142,3 +142,8 @@ class TestTorchTrainer:
         loaded_lrsch_params = torch_trainer._scheduler_states
         assert loaded_optim_params == saved_optim_params
         assert loaded_lrsch_params == saved_lrsch_params
+        # check if the parameters of optimizer and scheduler be set correctly.
+        for name, optimizer in torch_trainer._optimizers.items():
+            assert torch_trainer._optimizer_states[name] == optimizer.state_dict()
+        for name, scheduler in torch_trainer._schedulers.items():
+            assert torch_trainer._scheduler_states[name] == scheduler.state_dict()
