@@ -63,11 +63,11 @@ class TorchTrainer(Trainer):
 
         # Containers for optimizer and scheduler instances
         self.optimizers: OptimizersDict = {}
-        self.schedulers: LRSchedulersDict = {}
+        self.lr_schedulers: LRSchedulersDict = {}
 
         # Containers for persistent optimizer and scheduler states
         self.optimizer_states: dict[str, StateDict] = {}
-        self.scheduler_states: dict[str, StateDict] = {}
+        self.lr_scheduler_states: dict[str, StateDict] = {}
 
     def get_torch_training_model[T: nn.Module](
         self, name: str, module_cls: type[T] = nn.Module
@@ -118,14 +118,14 @@ class TorchTrainer(Trainer):
 
         # Reset existing optimizer and scheduler collections
         self.optimizers.clear()
-        self.schedulers.clear()
+        self.lr_schedulers.clear()
 
         # Process configuration based on return type
         if isinstance(optimizer_config, tuple):
             # Configuration includes both optimizers and schedulers
             optimizers, schedulers = optimizer_config
             self.optimizers.update(optimizers)
-            self.schedulers.update(schedulers)
+            self.lr_schedulers.update(schedulers)
         else:
             # Configuration includes only optimizers
             self.optimizers.update(optimizer_config)
@@ -134,8 +134,8 @@ class TorchTrainer(Trainer):
         for name, state in self.optimizer_states.items():
             self.optimizers[name].load_state_dict(state)
         # Restore scheduler states if available
-        for name, state in self.scheduler_states.items():
-            self.schedulers[name].load_state_dict(state)
+        for name, state in self.lr_scheduler_states.items():
+            self.lr_schedulers[name].load_state_dict(state)
 
     def _keep_optimizer_and_scheduler_states(self) -> None:
         """Keep the current states of optimizers and schedulers.
@@ -145,15 +145,15 @@ class TorchTrainer(Trainer):
         """
         # Clear previous kept states
         self.optimizer_states.clear()
-        self.scheduler_states.clear()
+        self.lr_scheduler_states.clear()
 
         # Keep current optimizer states
         for name, optimizer in self.optimizers.items():
             self.optimizer_states[name] = optimizer.state_dict().copy()
 
         # Keep current scheduler states
-        for name, scheduler in self.schedulers.items():
-            self.scheduler_states[name] = scheduler.state_dict().copy()
+        for name, scheduler in self.lr_schedulers.items():
+            self.lr_scheduler_states[name] = scheduler.state_dict().copy()
 
     @override
     def setup(self) -> None:
@@ -192,7 +192,7 @@ class TorchTrainer(Trainer):
             torch.save(optimizer_state, path / f"{name}.optim.pt")  # pyright: ignore[reportUnknownMemberType]
 
         # Save scheduler states to disk
-        for name, scheduler_state in self.scheduler_states.items():
+        for name, scheduler_state in self.lr_scheduler_states.items():
             torch.save(scheduler_state, path / f"{name}.lrsch.pt")  # pyright: ignore[reportUnknownMemberType]
 
     @override
@@ -221,4 +221,4 @@ class TorchTrainer(Trainer):
         # Load scheduler states from disk
         for scheduler_path in path.glob("*.lrsch.pt"):
             name = scheduler_path.name.replace(".lrsch.pt", "")
-            self.scheduler_states[name] = torch.load(scheduler_path)  # pyright: ignore[reportUnknownMemberType]
+            self.lr_scheduler_states[name] = torch.load(scheduler_path)  # pyright: ignore[reportUnknownMemberType]

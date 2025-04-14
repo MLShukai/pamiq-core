@@ -52,11 +52,11 @@ class TorchTrainerImpl(TorchTrainer):
 
 class OptimizersOnlyTrainer(TorchTrainerImpl):
     """Trainer implementation that only returns optimizers without
-    schedulers."""
+    lr_schedulers."""
 
     @override
     def create_optimizers(self) -> dict[str, optim.Optimizer]:
-        """Return only optimizers without schedulers."""
+        """Return only optimizers without lr_schedulers."""
         self.optimizer_1 = optim.SGD(self.model_1.model.parameters(), lr=0.01)
         return {"optimizer_1": self.optimizer_1}
 
@@ -85,7 +85,7 @@ class TestTorchTrainer:
         """Fixture providing initialized TorchTrainer instance."""
         torch_trainer = TorchTrainerImpl()
         torch_trainer.attach_training_models(training_models)
-        # Call setup to initialize optimizers and schedulers
+        # Call setup to initialize optimizers and lr_schedulers
         torch_trainer.setup()
         return torch_trainer
 
@@ -119,17 +119,17 @@ class TestTorchTrainer:
         self, torch_trainer: TorchTrainerImpl
     ) -> None:
         """Test that _setup_optimizers_and_schedulers correctly initializes
-        optimizers and schedulers."""
-        # Reset optimizers and schedulers
+        optimizers and lr_schedulers."""
+        # Reset optimizers and lr_schedulers
         torch_trainer.optimizers.clear()
-        torch_trainer.schedulers.clear()
+        torch_trainer.lr_schedulers.clear()
 
         # Call the setup method
         torch_trainer.setup()
 
-        # Verify optimizers and schedulers are created
+        # Verify optimizers and lr_schedulers are created
         assert "optimizer_1" in torch_trainer.optimizers
-        assert "scheduler_1" in torch_trainer.schedulers
+        assert "scheduler_1" in torch_trainer.lr_schedulers
 
         # Verify optimizer is correctly configured
         optimizer = torch_trainer.optimizers["optimizer_1"]
@@ -137,7 +137,7 @@ class TestTorchTrainer:
         assert optimizer.param_groups[0]["lr"] == 0.001
 
         # Verify scheduler is correctly configured
-        scheduler = torch_trainer.schedulers["scheduler_1"]
+        scheduler = torch_trainer.lr_schedulers["scheduler_1"]
         assert isinstance(scheduler, optim.lr_scheduler.ExponentialLR)
         assert scheduler.gamma == 0.998
 
@@ -145,14 +145,14 @@ class TestTorchTrainer:
         self, training_models: TrainingModelsDict
     ) -> None:
         """Test setup with only optimizers returned from create_optimizers."""
-        # Create trainer that only returns optimizers without schedulers
+        # Create trainer that only returns optimizers without lr_schedulers
         trainer = OptimizersOnlyTrainer()
         trainer.attach_training_models(training_models)
         trainer.setup()
 
-        # Verify optimizers are created, but schedulers dict is empty
+        # Verify optimizers are created, but lr_schedulers dict is empty
         assert "optimizer_1" in trainer.optimizers
-        assert len(trainer.schedulers) == 0
+        assert len(trainer.lr_schedulers) == 0
         assert isinstance(trainer.optimizers["optimizer_1"], optim.SGD)
 
     def test_teardown_with_keep_optimizer_and_scheduler_states(
@@ -162,7 +162,7 @@ class TestTorchTrainer:
         current states."""
         # Clear any existing states
         torch_trainer.optimizer_states.clear()
-        torch_trainer.scheduler_states.clear()
+        torch_trainer.lr_scheduler_states.clear()
 
         # Call the method to capture states
         torch_trainer.teardown()
@@ -172,8 +172,8 @@ class TestTorchTrainer:
         assert torch_trainer.optimizer_states["optimizer_1"] is not None
 
         # Verify scheduler states are kept
-        assert "scheduler_1" in torch_trainer.scheduler_states
-        assert torch_trainer.scheduler_states["scheduler_1"] is not None
+        assert "scheduler_1" in torch_trainer.lr_scheduler_states
+        assert torch_trainer.lr_scheduler_states["scheduler_1"] is not None
 
     def test_setup_restores_states(self, training_models: TrainingModelsDict) -> None:
         """Test that setup restores optimizer and scheduler states."""
@@ -181,7 +181,7 @@ class TestTorchTrainer:
         trainer = TorchTrainerImpl()
         trainer.attach_training_models(training_models)
 
-        # Setup initial optimizers and schedulers
+        # Setup initial optimizers and lr_schedulers
         trainer.setup()
 
         # Modify learning rate
@@ -216,7 +216,7 @@ class TestTorchTrainer:
         # Extract key information from original states for comparison
         original_opt_state = torch_trainer.optimizer_states["optimizer_1"]
         original_lr = original_opt_state["param_groups"][0]["lr"]
-        original_sched_state = torch_trainer.scheduler_states["scheduler_1"]
+        original_sched_state = torch_trainer.lr_scheduler_states["scheduler_1"]
         original_last_epoch = original_sched_state["last_epoch"]
 
         # Save state to disk
@@ -237,7 +237,7 @@ class TestTorchTrainer:
         # Verify states are correctly loaded
         loaded_opt_state = new_trainer.optimizer_states["optimizer_1"]
         loaded_lr = loaded_opt_state["param_groups"][0]["lr"]
-        loaded_sched_state = new_trainer.scheduler_states["scheduler_1"]
+        loaded_sched_state = new_trainer.lr_scheduler_states["scheduler_1"]
         loaded_last_epoch = loaded_sched_state["last_epoch"]
 
         # Compare key values
