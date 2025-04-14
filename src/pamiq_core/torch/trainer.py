@@ -130,13 +130,6 @@ class TorchTrainer(Trainer):
         training_model = super().get_training_model(name)
         if not isinstance(training_model, TorchTrainingModel):
             raise ValueError(f"Model {name} is not a TorchTrainingModel")
-
-        model = training_model.model
-        if not isinstance(model, module_cls):
-            raise ValueError(
-                f"Model {name} is not an instance of {module_cls.__name__}"
-            )
-
         return cast(TorchTrainingModel[T], training_model)
 
     @override
