@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any, cast, override
 
 import torch
-import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 
@@ -109,28 +108,24 @@ class TorchTrainer(Trainer):
         ...
 
     @override
-    def get_training_model[T: nn.Module](
-        self, name: str, module_cls: type[T] = nn.Module
-    ) -> TorchTrainingModel[T]:
-        """Get a PyTorch training model with type checking.
+    def get_training_model(self, name: str) -> TorchTrainingModel[Any]:
+        """Get a TorchTrainingModel with type checking.
 
-        Retrieves a PyTorch model training_model by name and validates that it contains
-        a model of the expected type.
+        Retrieves a PyTorch model training_model by name and validates it's type.
 
         Args:
-            name: Name of the model to retrieve
-            module_cls: Expected module class type
+            name: Name of the model to retrieve.
 
         Returns:
-            TorchTrainingModel containing the requested model
+            TorchTrainingModel.
 
         Raises:
-            ValueError: If the model is not a TorchTrainingModel or doesn't match the expected type
+            ValueError: If the model is not a TorchTrainingModel.
         """
         training_model = super().get_training_model(name)
         if not isinstance(training_model, TorchTrainingModel):
             raise ValueError(f"Model {name} is not a TorchTrainingModel")
-        return cast(TorchTrainingModel[T], training_model)
+        return cast(TorchTrainingModel[Any], training_model)
 
     @override
     def setup(self) -> None:
