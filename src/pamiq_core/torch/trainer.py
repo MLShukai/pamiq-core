@@ -225,4 +225,4 @@ class TorchTrainer(Trainer):
             name = scheduler_path.name.replace(".lrsch.pt", "")
             self.lr_scheduler_states[name] = torch.load(scheduler_path)  # pyright: ignore[reportUnknownMemberType]
 
-        # Load the state into the optimizer and LR scheduler within the `setup` method.
+        # After This method performed, load the state into the optimizer and LR scheduler by the `setup` method.
