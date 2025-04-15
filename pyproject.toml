@@ -1,7 +1,7 @@
 [project]
 name = "pamiq-core"
 version = "0.0.3"
-description = "The core package for creating autonomous machine intelligence"
+description = "Framework for building AI agents with real-time adaptive learning capabilities."
 license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.12"
@@ -29,6 +29,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 
 [project.urls]
@@ -70,7 +71,7 @@ filterwarnings = [
   "ignore::DeprecationWarning",
   "ignore::UserWarning",
 ]
-log_cli = "True"
+log_cli = true
 log_level = "INFO"
 
 minversion = "6.0"

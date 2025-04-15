@@ -92,9 +92,6 @@ def launch(
     if not isinstance(config, LaunchConfig):
         config = LaunchConfig(**config)
 
-    logger.info(f"Setting time scale to {config.time_scale}")
-    time.set_time_scale(config.time_scale)
-
     # Initialize system components with proper containers
     training_models = TrainingModelsDict(models)
     data_users = DataUsersDict.from_data_buffers(data)
@@ -154,7 +151,11 @@ def launch(
     logger.info("Launching AMI system...")
 
     try:
+        logger.info(f"Setting time scale to {config.time_scale}")
+        time.set_time_scale(config.time_scale)
+
         states_keeper.start()
+
         inference_thread.start()
         training_thread.start()
         control_thread.run()  # Blocking until shutdown or KeyboardInterrupt
@@ -166,6 +167,7 @@ def launch(
     finally:
         inference_thread.join()
         training_thread.join()
+        time.set_time_scale(1.0)  # Fix time scale.
 
         logger.info("Saving final system state")
         state_path = state_store.save_state()
