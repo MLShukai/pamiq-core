@@ -1,7 +1,7 @@
 [project]
 name = "pamiq-core"
 version = "0.0.3"
-description = "The core package for creating autonomous machine intelligence"
+description = "Framework for building autonomous AI agents with real-time adaptive learning capabilities."
 license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.12"
