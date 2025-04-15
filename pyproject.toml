@@ -70,7 +70,7 @@ filterwarnings = [
   "ignore::DeprecationWarning",
   "ignore::UserWarning",
 ]
-log_cli = "True"
+log_cli = true
 log_level = "INFO"
 
 minversion = "6.0"
