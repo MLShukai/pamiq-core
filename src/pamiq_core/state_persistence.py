@@ -203,8 +203,6 @@ class LatestStatesKeeper:
 
         except Exception as e:
             self._logger.error(f"Error in background cleanup: {e}")
-        except KeyboardInterrupt:
-            pass
 
     def cleanup(self) -> list[Path]:
         """Clean up old state directories, keeping only the most recent ones.
