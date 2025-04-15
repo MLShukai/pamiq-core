@@ -1,14 +1,18 @@
+import time
 from datetime import datetime
 from pathlib import Path
 
 import pytest
+from pytest_mock import MockerFixture
 
 from pamiq_core.state_persistence import (
+    LatestStatesKeeper,
     PersistentStateMixin,
     StateStore,
     load_pickle,
     save_pickle,
 )
+from tests.helpers import check_log_message
 
 
 class TestStateStore:
@@ -122,3 +126,120 @@ class TestPickleFunctions:
         """Test loading from non-existent path raises FileNotFoundError."""
         with pytest.raises(FileNotFoundError):
             load_pickle(tmp_path / "non_existent_file.pkl")
+
+
+class TestLatestStatesKeeper:
+    """Test suite for LatestStatesKeeper class."""
+
+    @pytest.fixture
+    def states_dir(self, tmp_path: Path) -> Path:
+        """Create a temporary directory for test state directories."""
+        return tmp_path / "states"
+
+    @pytest.fixture
+    def setup_test_states(self, states_dir: Path) -> list[Path]:
+        """Set up test state directories with different modification times."""
+        states_dir.mkdir(exist_ok=True)
+
+        # Create test state directories
+        state_dirs = []
+        for i in range(5):
+            state_path = states_dir / f"test_{i}.state"
+            state_path.mkdir()
+            # Create a file to make directory non-empty
+            (state_path / "test_file.txt").write_text(f"Test content {i}")
+            state_dirs.append(state_path)
+            # Sleep briefly to ensure different modification times
+            time.sleep(0.01)
+
+        return state_dirs
+
+    def test_init_creates_dir_if_not_exists(self, tmp_path: Path) -> None:
+        """Test that init creates directory if it doesn't exist."""
+        states_dir = tmp_path / "nonexistent"
+        LatestStatesKeeper(states_dir)
+
+        assert states_dir.exists()
+        assert states_dir.is_dir()
+
+    def test_init_with_negative_max_keep(self, states_dir: Path) -> None:
+        """Test that init raises ValueError with negative max_keep."""
+        with pytest.raises(ValueError, match="max_keep must be larger than 0"):
+            LatestStatesKeeper(states_dir, max_keep=-1)
+
+    def test_cleanup_removes_oldest_directories(
+        self, states_dir: Path, setup_test_states: list[Path]
+    ) -> None:
+        """Test that cleanup removes the oldest directories."""
+        keeper = LatestStatesKeeper(states_dir, max_keep=3)
+
+        # Get before state
+        state_dirs_before = list(states_dir.glob("*.state"))
+        assert len(state_dirs_before) == 5
+
+        # Clean up
+        removed = keeper.cleanup()
+
+        # Get after state
+        state_dirs_after = list(states_dir.glob("*.state"))
+
+        # Verify
+        assert len(state_dirs_after) == 3
+        assert len(removed) == 2
+
+        # Verify the oldest were removed (first two created)
+        assert setup_test_states[0] in removed
+        assert setup_test_states[1] in removed
+
+        # Verify the newest remain
+        assert setup_test_states[2] in state_dirs_after
+        assert setup_test_states[3] in state_dirs_after
+        assert setup_test_states[4] in state_dirs_after
+
+    def test_cleanup_with_max_keep_zero(
+        self, states_dir: Path, setup_test_states: list[Path]
+    ) -> None:
+        """Test that cleanup removes all directories when max_keep is zero."""
+        keeper = LatestStatesKeeper(states_dir, max_keep=0)
+        removed = keeper.cleanup()
+
+        # All directories should be removed
+        assert len(removed) == 5
+        assert len(list(states_dir.glob("*.state"))) == 0
+
+    def test_start_and_stop_background_thread(
+        self, states_dir: Path, mocker: MockerFixture, caplog
+    ) -> None:
+        """Test that background thread starts and stops correctly."""
+        # Mock the _cleanup method to avoid actual execution
+        mock_cleanup = mocker.patch.object(LatestStatesKeeper, "cleanup")
+
+        # Create keeper
+        keeper = LatestStatesKeeper(states_dir)
+
+        # Start the keeper in background
+        keeper.start(background=True)
+
+        time.sleep(0.2)
+        # Stop the keeper
+        keeper.stop()
+
+        mock_cleanup.assert_called_with()
+        assert mock_cleanup.call_count > 1
+        check_log_message(
+            "Started background state cleanup thread. Max keep: 10", "INFO", caplog
+        )
+
+    def test_start_foreground(self, states_dir: Path, mocker: MockerFixture) -> None:
+        """Test that start in foreground directly calls cleanup."""
+        # Mock the _cleanup method
+        mock_cleanup = mocker.patch.object(LatestStatesKeeper, "_cleanup")
+
+        # Create keeper
+        keeper = LatestStatesKeeper(states_dir)
+
+        # Start in foreground
+        keeper.start(background=False)
+
+        # Verify cleanup was called directly
+        mock_cleanup.assert_called_once()
