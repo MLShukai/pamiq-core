@@ -148,8 +148,6 @@ class LatestStatesKeeper:
             state_name_pattern: Pattern to match state directories.
             max_keep: Maximum number of state directories to keep.
         """
-        if max_keep < 0:
-            raise ValueError("max_keep must be larger than 0.")
 
         self.states_dir = Path(states_dir)
         self.state_name_pattern = state_name_pattern
@@ -214,6 +212,9 @@ class LatestStatesKeeper:
         Returns:
             List of removed state directory paths.
         """
+        if self.max_keep < 0:
+            return []
+
         # Get all state directories matching the pattern
         state_dirs = list(self.states_dir.glob(self.state_name_pattern))
 

@@ -162,11 +162,6 @@ class TestLatestStatesKeeper:
         assert states_dir.exists()
         assert states_dir.is_dir()
 
-    def test_init_with_negative_max_keep(self, states_dir: Path) -> None:
-        """Test that init raises ValueError with negative max_keep."""
-        with pytest.raises(ValueError, match="max_keep must be larger than 0"):
-            LatestStatesKeeper(states_dir, max_keep=-1)
-
     def test_cleanup_removes_oldest_directories(
         self, states_dir: Path, setup_test_states: list[Path]
     ) -> None:
@@ -199,13 +194,24 @@ class TestLatestStatesKeeper:
     def test_cleanup_with_max_keep_zero(
         self, states_dir: Path, setup_test_states: list[Path]
     ) -> None:
-        """Test that cleanup removes all directories when max_keep is zero."""
+        """Test that cleanup all when max_keep is negative."""
         keeper = LatestStatesKeeper(states_dir, max_keep=0)
         removed = keeper.cleanup()
 
         # All directories should be removed
         assert len(removed) == 5
         assert len(list(states_dir.glob("*.state"))) == 0
+
+    def test_cleanup_with_max_keep_negative(
+        self, states_dir: Path, setup_test_states: list[Path]
+    ) -> None:
+        """Test that cleanup do nothing when max_keep is negative."""
+        keeper = LatestStatesKeeper(states_dir, max_keep=-1)
+        removed = keeper.cleanup()
+
+        # All directories should exists.
+        assert len(removed) == 0
+        assert len(list(states_dir.glob("*.state"))) == 5
 
     def test_start_and_stop_background_thread(
         self, states_dir: Path, mocker: MockerFixture, caplog
