@@ -2,7 +2,7 @@ name: Test on GPU
 
 on:
   pull_request:
-    branches: [main, released]
+    branches: [main, stable]
     paths:
       - ".github/workflows/test-on-gpu.yml"
       - "src/pamiq_core/torch/**"

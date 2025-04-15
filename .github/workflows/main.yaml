@@ -2,9 +2,9 @@ name: Main workflow
 
 on:
   push:
-    branches: [main, released]
+    branches: [main, stable]
   pull_request:
-    branches: [main, released]
+    branches: [main, stable]
 
 env:
   PYTHON_VERSION: "3.12"
