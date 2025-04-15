@@ -2,7 +2,6 @@ import logging
 import pickle
 import shutil
 import threading
-import time  # can not use pamiq_core.time because circular import problem.
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -152,8 +151,8 @@ class LatestStatesKeeper:
         self.states_dir = Path(states_dir)
         self.state_name_pattern = state_name_pattern
         self.max_keep = max_keep
-        self._running = False
         self._thread = None
+        self._shutdown_event = threading.Event()
 
         from pamiq_core.utils.reflection import (
             get_class_module_path,  # Avoid circular import problem.
@@ -173,10 +172,10 @@ class LatestStatesKeeper:
         Args:
             background: Whether to run in background thread.
         """
-        if self._running:
-            return
-        self._running = True
         if background:
+            if self._thread is not None:
+                return
+            self._shutdown_event.clear()
             self._thread = threading.Thread(target=self._cleanup)
             self._thread.start()
             self._logger.info(
@@ -187,20 +186,18 @@ class LatestStatesKeeper:
 
     def stop(self) -> None:
         """Stop the background cleanup thread if running."""
-        if self._running:
-            self._running = False
-            if self._thread and self._thread.is_alive():
-                self._thread.join(timeout=1.0)
+        if self._thread is not None:
+            self._shutdown_event.set()
+            self._thread.join()
             self._logger.info("Stopped background state cleanup thread")
+            self._thread = None
 
     def _cleanup(self) -> None:
         """Background thread function that periodically cleans up states."""
 
         try:
-            while self._running:
+            while not self._shutdown_event.wait(60):  # Check every 1 minutes
                 self.cleanup()
-                time.sleep(0.1)  # Check every 0.1 seconds
-
         except Exception as e:
             self._logger.error(f"Error in background cleanup: {e}")
 
