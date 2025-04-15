@@ -14,7 +14,6 @@
 - ⚡ **Real-time Adaptation**: Continuously update models during operation
 - 🧵 **Thread-safe Design**: Robust synchronization mechanisms for parameter sharing and data transfers.
 - 🔌 **Modular Components**: Easy-to-extend agent, environment, and model interfaces
-- 🧩 **Flexible Integration**: Compatible with PyTorch and other ML backends
 - 🛠️ **Comprehensive Tools**: Built-in state persistence, time control, and monitoring
 
 ## 📋 Requirements
