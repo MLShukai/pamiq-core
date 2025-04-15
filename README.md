@@ -1,4 +1,4 @@
-# 💠 pamiq-core
+# pamiq-core
 
 [![PyPI version](https://img.shields.io/pypi/v/pamiq-core.svg)](https://pypi.org/project/pamiq-core/)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
