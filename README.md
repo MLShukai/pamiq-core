@@ -6,7 +6,7 @@
 [![Document Style](https://img.shields.io/badge/%20docstyle-google-3666d6.svg)](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings)
 [![Lint & Format / Tests / Type Check](https://github.com/MLShukai/pamiq-core/actions/workflows/main.yaml/badge.svg)](https://github.com/MLShukai/pamiq-core/actions/workflows/main.yaml)
 
-**pamiq-core** is a framework for building autonomous AI agents with real-time adaptive learning capabilities. Developed for P-AMI\<Q>, it enables concurrent inference and learning, allowing agents to adapt continuously during interaction with their environment.
+**pamiq-core** is a framework for building AI agents. Developed for P-AMI\<Q>, it enables train and inference in parallel, allowing agents to adapt continuously during interaction with their environment.
 
 ## ✨ Features
 
