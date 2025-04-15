@@ -11,7 +11,7 @@
 ## ✨ Features
 
 - 🔄 **Parallel Architecture**: Simultaneous inference and training in separate threads
-- ⚡ **Real-time Adaptation**: Continuously update models during operation
+- ⚡ **Real-time Adaptation**: Continuously update models during interaction
 - 🧵 **Thread-safe Design**: Robust synchronization mechanisms for parameter sharing and data transfers.
 - 🔌 **Modular Components**: Easy-to-extend agent, environment, and model interfaces
 - 🛠️ **Comprehensive Tools**: Built-in state persistence, time control, and monitoring
