@@ -12,7 +12,7 @@
 
 - 🔄 **Parallel Architecture**: Simultaneous inference and training in separate threads
 - ⚡ **Real-time Adaptation**: Continuously update models during interaction
-- 🧵 **Thread-safe Design**: Robust synchronization mechanisms for parameter sharing and data transfers.
+- 🧵 **Thread-safe Design**: Robust synchronization mechanisms for parameter sharing and data transfers
 - 🔌 **Modular Components**: Easy-to-extend agent, environment, and model interfaces
 - 🛠️ **Comprehensive Tools**: Built-in state persistence, time control, and monitoring
 
@@ -78,10 +78,10 @@ For comprehensive API documentation and detailed tutorials, please visit the [do
 
 ![PAMIQ System Architecture](docs/images/system-architecture.png)
 
-pamiq-core implements a unique architecture that enables true autonomous intelligence:
+pamiq-core implements a unique architecture that enables autonomous intelligence:
 
 1. **Concurrent Threads**: Separate threads for control, inference, and training
-2. **Shared Parameter Space**: Thread-safe model parameter synchronization
+2. **Parameter Sharing**: Thread-safe model parameter synchronization
 3. **Experience Collection**: Automatic buffering of data from environments, such as images and audio.
 4. **Continuous Learning**: Training models while simultaneously using them for decision making
 5. **State Persistence**: Saving and loading system state for resumable operation
