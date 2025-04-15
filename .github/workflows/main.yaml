@@ -110,6 +110,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          slug: MLShukai/pamiq-core
 
   run_type-check:
     runs-on: ubuntu-24.04
