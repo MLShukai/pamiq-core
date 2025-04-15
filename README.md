@@ -82,7 +82,7 @@ pamiq-core implements a unique architecture that enables true autonomous intelli
 
 1. **Concurrent Threads**: Separate threads for control, inference, and training
 2. **Shared Parameter Space**: Thread-safe model parameter synchronization
-3. **Experience Collection**: Automatic buffering of interaction data
+3. **Experience Collection**: Automatic buffering of data from environments, such as images and audio.
 4. **Continuous Learning**: Training models while simultaneously using them for decision making
 5. **State Persistence**: Saving and loading system state for resumable operation
 
