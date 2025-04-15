@@ -59,7 +59,7 @@ jobs:
           key: uv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
 
       - name: Install dependencies
-        run: make venv
+        run: uv sync --all-extras
 
       - name: Check installed packages
         run: |
@@ -93,7 +93,7 @@ jobs:
           key: uv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
 
       - name: Install dependencies
-        run: make venv
+        run: uv sync --all-extras
 
       - name: Check installed packages
         run: |
