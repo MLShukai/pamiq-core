@@ -31,6 +31,7 @@ class LaunchConfig:
             Older state directories beyond this number will be automatically removed.
             Use -1 to disable this feature (no automatic removal).
         state_name_pattern: Glob pattern to identify state directories for management.
+        states_cleanup_interval: Interval in seconds between automatic state cleanup.
         timeout_for_all_threads_pause: Maximum time in seconds to wait for all
             threads to pause before timing out.
         max_attempts_to_pause_all_threads: Maximum number of retry attempts
@@ -50,6 +51,7 @@ class LaunchConfig:
     save_state_interval: float = float("inf")
     max_keep_states: int = -1
     state_name_pattern: str = "*.state"
+    states_cleanup_interval: float = 60.0
     timeout_for_all_threads_pause: float = 60.0
     max_attempts_to_pause_all_threads: int = 3
     max_uptime: float = float("inf")
@@ -116,6 +118,7 @@ def launch(
         states_dir=config.states_dir,
         state_name_pattern=config.state_name_pattern,
         max_keep=config.max_keep_states,
+        cleanup_interval=config.states_cleanup_interval,
     )
 
     # Load state if specified

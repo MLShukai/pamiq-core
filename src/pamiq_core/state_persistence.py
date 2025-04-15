@@ -139,6 +139,7 @@ class LatestStatesKeeper:
         states_dir: str | Path,
         state_name_pattern: str = "*.state",
         max_keep: int = 10,
+        cleanup_interval: float = 60.0,
     ) -> None:
         """Initialize the state keeper.
 
@@ -146,11 +147,17 @@ class LatestStatesKeeper:
             states_dir: Directory where states are stored.
             state_name_pattern: Pattern to match state directories.
             max_keep: Maximum number of state directories to keep.
-        """
+            cleanup_interval: Interval for executing cleanup process.
 
+        Raises:
+            ValueError: If cleanup interval is negative.
+        """
+        if cleanup_interval < 0.0:
+            raise ValueError("cleanup_interval must be positive value.")
         self.states_dir = Path(states_dir)
         self.state_name_pattern = state_name_pattern
         self.max_keep = max_keep
+        self._cleanup_interval = cleanup_interval
         self._thread = None
         self._shutdown_event = threading.Event()
 
@@ -196,7 +203,9 @@ class LatestStatesKeeper:
         """Background thread function that periodically cleans up states."""
 
         try:
-            while not self._shutdown_event.wait(60):  # Check every 1 minutes
+            while not self._shutdown_event.wait(
+                self._cleanup_interval
+            ):  # Check every 1 minutes
                 self.cleanup()
         except Exception as e:
             self._logger.error(f"Error in background cleanup: {e}")

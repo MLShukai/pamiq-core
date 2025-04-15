@@ -123,7 +123,10 @@ class TestLaunch:
         mock_trainer.run.assert_called()
 
         mock_states_keeper_cls.assert_called_once_with(
-            states_dir=state_dir, state_name_pattern="*.state", max_keep=-1
+            states_dir=state_dir,
+            state_name_pattern="*.state",
+            max_keep=-1,
+            cleanup_interval=60.0,
         )
         mock_states_keeper = mock_states_keeper_cls.return_value
         mock_states_keeper.start.assert_called_once_with()

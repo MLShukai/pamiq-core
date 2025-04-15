@@ -1,4 +1,3 @@
-import threading
 import time
 from datetime import datetime
 from pathlib import Path
@@ -221,12 +220,8 @@ class TestLatestStatesKeeper:
         # Mock the cleanup method to avoid actual execution
         mock_cleanup = mocker.patch.object(LatestStatesKeeper, "cleanup")
 
-        # Mock the threading.Event
-        mock_event_wait = mocker.patch.object(threading.Event, "wait")
-        mock_event_wait.side_effect = [False, False, False, True]
-
         # Create keeper
-        keeper = LatestStatesKeeper(states_dir)
+        keeper = LatestStatesKeeper(states_dir, cleanup_interval=0.001)
 
         # Start the keeper in background
         keeper.start(background=True)
@@ -240,7 +235,6 @@ class TestLatestStatesKeeper:
         check_log_message(
             "Started background state cleanup thread. Max keep: 10", "INFO", caplog
         )
-        mock_event_wait.assert_called_with(60)
 
     def test_start_foreground(self, states_dir: Path, mocker: MockerFixture) -> None:
         """Test that start in foreground directly calls cleanup."""
