@@ -5,7 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pamiq-core"
+    "pamiq-core",
+    "torch>=2.6.0",
 ]
 
 [tool.uv.sources]
