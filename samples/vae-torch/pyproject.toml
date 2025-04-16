@@ -1,0 +1,19 @@
+[project]
+name = "vae-torch"
+version = "0.1.0"
+description = "Sample vae project of pamiq-core with pytorch."
+readme = "README.md"
+authors = [
+    { name = "Geson-anko", email = "59220704+Geson-anko@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pamiq-core",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+pamiq-core = { path = "../../" }
