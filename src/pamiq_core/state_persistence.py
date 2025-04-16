@@ -1,4 +1,7 @@
+import logging
 import pickle
+import shutil
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -121,3 +124,113 @@ def load_pickle(path: Path | str) -> Any:
     """
     with open(path, "rb") as f:
         return pickle.load(f)
+
+
+class LatestStatesKeeper:
+    """Keeps a fixed number of state directories by removing older ones.
+
+    This class monitors and manages the number of state directories in a
+    specified path, ensuring only the most recent ones (up to max_keep)
+    are retained, preventing disk space exhaustion.
+    """
+
+    def __init__(
+        self,
+        states_dir: str | Path,
+        state_name_pattern: str = "*.state",
+        max_keep: int = 10,
+        cleanup_interval: float = 60.0,
+    ) -> None:
+        """Initialize the state keeper.
+
+        Args:
+            states_dir: Directory where states are stored.
+            state_name_pattern: Pattern to match state directories.
+            max_keep: Maximum number of state directories to keep.
+            cleanup_interval: Interval for executing cleanup process.
+
+        Raises:
+            ValueError: If cleanup interval is negative.
+        """
+        if cleanup_interval < 0.0:
+            raise ValueError("cleanup_interval must be positive value.")
+        self.states_dir = Path(states_dir)
+        self.state_name_pattern = state_name_pattern
+        self.max_keep = max_keep
+        self._cleanup_interval = cleanup_interval
+        self._thread = None
+        self._shutdown_event = threading.Event()
+
+        from pamiq_core.utils.reflection import (
+            get_class_module_path,  # Avoid circular import problem.
+        )
+
+        self._logger = logging.getLogger(get_class_module_path(self.__class__))
+
+        if not self.states_dir.exists():
+            self._logger.warning(
+                f"States directory {self.states_dir} does not exist. Creating it."
+            )
+            self.states_dir.mkdir(parents=True, exist_ok=True)
+
+    def start(self, background: bool = True) -> None:
+        """Start the background cleanup thread if not already running.
+
+        Args:
+            background: Whether to run in background thread.
+        """
+        if background:
+            if self._thread is not None:
+                return
+            self._shutdown_event.clear()
+            self._thread = threading.Thread(target=self._cleanup)
+            self._thread.start()
+            self._logger.info(
+                f"Started background state cleanup thread. Max keep: {self.max_keep}"
+            )
+        else:
+            self._cleanup()
+
+    def stop(self) -> None:
+        """Stop the background cleanup thread if running."""
+        if self._thread is not None:
+            self._shutdown_event.set()
+            self._thread.join()
+            self._logger.info("Stopped background state cleanup thread")
+            self._thread = None
+
+    def _cleanup(self) -> None:
+        """Background thread function that periodically cleans up states."""
+
+        try:
+            while not self._shutdown_event.wait(
+                self._cleanup_interval
+            ):  # Check every 1 minutes
+                self.cleanup()
+        except Exception as e:
+            self._logger.error(f"Error in background cleanup: {e}")
+
+    def cleanup(self) -> list[Path]:
+        """Clean up old state directories, keeping only the most recent ones.
+
+        Returns:
+            List of removed state directory paths.
+        """
+        if self.max_keep < 0:
+            return []
+
+        # Get all state directories matching the pattern
+        state_dirs = list(self.states_dir.glob(self.state_name_pattern))
+
+        # Sort by modification time (newest first)
+        state_dirs.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+
+        # Keep only max_keep number of directories
+        dirs_to_remove = state_dirs[self.max_keep :]
+
+        removed_dirs: list[Path] = []
+        for dir_path in dirs_to_remove:
+            shutil.rmtree(dir_path)
+            removed_dirs.append(dir_path)
+            self._logger.info(f"Removed old state directory: {dir_path}")
+        return removed_dirs
