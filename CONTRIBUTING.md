@@ -157,9 +157,7 @@ This project follows Python coding conventions primarily based on [PEP 8](https:
 | Variable      | All lowercase with underscores            | `my_favorite_instance` |
 | Constant      | All uppercase with underscores            | `MY_FAVORITE_CONST`    |
 
-### 🔍 Project-Specific Conventions
-
-#### Variable Abbreviations
+### Variable Abbreviations
 
 Full names (non-abbreviated forms) should be used for variable names in principle. However, abbreviations are allowed in the following cases:
 
@@ -197,9 +195,9 @@ For consistency across the codebase, use these standard abbreviations:
   - Example: `buffers.py` - contains multiple buffer implementations
   - Example: `buffer.py` - contains only a single buffer implementation or related functions
 
-#### Import Rules
+### Import Rules
 
-**Absolute vs. Relative Imports**
+#### Absolute vs. Relative Imports
 
 - **Use relative imports** when:
 
@@ -223,13 +221,13 @@ For consistency across the codebase, use these standard abbreviations:
 
 **NOTE**: When in doubt, choose absolute imports. Relative imports are recommended only for tightly coupled module groups.
 
-**Import Restrictions**
+#### Import Restrictions
 
 - Wildcard imports (`from module import *`) are **prohibited**
   - They may contaminate the module namespace
   - Instead, explicitly import what you need
 
-#### Documentation
+### Documentation
 
 Follow [Google style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) for documentation:
 
