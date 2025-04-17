@@ -1,0 +1,13 @@
+[project]
+name = "vae-torch"
+version = "0.1.0"
+description = "Sample VAE project of pamiq-core with pytorch backend"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pamiq-core",
+    "torch>=2.6.0",
+]
+
+[tool.uv.sources]
+pamiq-core = { path = "../../" }
