@@ -199,7 +199,7 @@ For consistency across the codebase, use these standard abbreviations:
 
 #### Import Rules
 
-##### Absolute vs. Relative Imports
+**Absolute vs. Relative Imports**
 
 - **Use relative imports** when:
 
@@ -223,7 +223,7 @@ For consistency across the codebase, use these standard abbreviations:
 
 **NOTE**: When in doubt, choose absolute imports. Relative imports are recommended only for tightly coupled module groups.
 
-##### Import Restrictions
+**Import Restrictions**
 
 - Wildcard imports (`from module import *`) are **prohibited**
   - They may contaminate the module namespace
