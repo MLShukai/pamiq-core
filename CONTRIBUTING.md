@@ -157,7 +157,7 @@ This project follows Python coding conventions primarily based on [PEP 8](https:
 | Variable      | All lowercase with underscores            | `my_favorite_instance` |
 | Constant      | All uppercase with underscores            | `MY_FAVORITE_CONST`    |
 
-### Variable Abbreviations
+### 📝 Variable Abbreviations
 
 Full names (non-abbreviated forms) should be used for variable names in principle. However, abbreviations are allowed in the following cases:
 
@@ -227,7 +227,7 @@ For consistency across the codebase, use these standard abbreviations:
   - They may contaminate the module namespace
   - Instead, explicitly import what you need
 
-### Documentation
+### 📝 Documentation
 
 Follow [Google style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) for documentation:
 
