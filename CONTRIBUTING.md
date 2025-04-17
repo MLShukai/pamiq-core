@@ -243,3 +243,26 @@ gitGraph
     checkout main
     merge stable
 ```
+
+## 📦 Release Management
+
+### 📋 Release Process
+
+- Tags are issued when merging to the `stable` branch
+  - Tag name format: version `x.x.x`
+
+### 🔢 Versioning
+
+We follow Semantic Versioning (`MAJOR.MINOR.PATCH`):
+
+- MAJOR: Significant feature releases
+- MINOR: Small feature additions
+- PATCH: Bug fixes after release
+
+#### ⏱️ Version Update Timing
+
+- When merging `release/*` branches:
+  - New features: MINOR update (1.1.0 → 1.2.0)
+  - Major changes: MAJOR update (1.1.0 → 2.0.0)
+- When merging `hotfix/*` branches:
+  - PATCH update (1.1.0 → 1.1.1)
