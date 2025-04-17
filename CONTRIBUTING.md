@@ -83,7 +83,6 @@ The development container includes the following environment:
 - Package manager ([**uv**](https://docs.astral.sh/uv/))
 - Git for version control
 - Development dependency packages
-- Automatic virtual environment activation (`source .venv/bin/activate`)
 
 ## 🔄 Development Workflow
 
