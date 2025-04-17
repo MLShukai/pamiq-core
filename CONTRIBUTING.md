@@ -138,3 +138,108 @@ make docker-down-volume
 5. Submit a Pull Request with a clear explanation of your changes
 
 If you have questions or issues, please create an Issue in the GitHub repository.
+
+## 🌲 Git Branch Management
+
+We use a modified version of [Git-Flow](https://nvie.com/posts/a-successful-git-branching-model/) tailored to our project's needs.
+
+### 📌 Core Branches
+
+These are permanent branches in the repository that are never deleted. Direct pushing to these branches is prohibited; changes are only accepted through pull requests.
+
+#### 🎯 main
+
+- The primary development branch
+- Always maintained in the latest state
+- Integrates changes from `feature/*` and `fix/*` branches
+
+#### 🚀 stable
+
+- Maintains the stable version of the source code after release
+- Accepts merges from `release/*` or `hotfix/*` branches with tag issuance
+- After tag issuance, merges back to the `main` branch
+
+### 🛠️ Working Branches
+
+These are temporary branches created for feature development or bug fixes.
+
+#### ⚡ Basic Rules
+
+- Branch naming format:
+  - With an ISSUE: `<branch type>/#<issue number>/<name>`
+    - Example 1: `feature/#123/timer-module`
+    - Example 2: `fix/#321/timer-accuracy`
+  - Without an issue (for very small tasks): `<branch type>/YYYYMMDD/<feature name>`
+    - Example 1: `docs/20240101/fix-readme-typo`
+    - Example 2: `hotfix/20240302/security-check`
+- Generally branch from `main` and merge back to `main`
+
+**NOTE: `release/*` branches do not follow these rules**
+
+#### ✨ feature
+
+- Branches for adding new functionality
+
+#### 🐛 fix
+
+- Branches for fixing bugs during development
+
+#### 🔧 refactor
+
+- Branches for internal changes that don't affect published functionality
+
+#### 📚 docs
+
+- Branches for adding or updating documentation
+
+#### 📦 release
+
+- Branches for release preparation
+- **Branch naming format: `release/<version>`**
+  - Example: `release/1.2` (without patch version)
+- Branch from `main` and merge to `stable`
+- Only for minor release-related fixes
+- Version number updates:
+  - New features: Minor version update (1.1 → 1.2)
+  - Breaking changes: Major version update (1.1 → 2.0)
+
+#### 🚑 hotfix
+
+- Branches for urgent bug fixes
+- **Branch from `stable` and merge to `stable`**
+- After fixes, update patch version (1.1.0 → 1.1.1)
+
+### 🔄 Branch Flow
+
+```mermaid
+gitGraph
+    commit
+    branch stable order: 2
+    checkout main
+    commit
+    branch "feature/#123/time-module" order: 4
+    commit
+    commit
+    checkout main
+    merge "feature/#123/time-module"
+    commit
+    branch "fix/20230121/set-limit" order: 3
+    commit
+    checkout main
+    merge "fix/20230121/set-limit"
+    commit
+    branch "release/1.0" order: 2
+    checkout "release/1.0"
+    commit
+    checkout stable
+    merge "release/1.0" tag: "1.0.0"
+    checkout main
+    merge stable
+    checkout stable
+    branch "hotfix/20230302/value-error" order: 1
+    commit
+    checkout stable
+    merge "hotfix/20230302/value-error" tag: "1.0.1"
+    checkout main
+    merge stable
+```
