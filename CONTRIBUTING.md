@@ -138,5 +138,3 @@ make docker-down-volume
 5. Submit a Pull Request with a clear explanation of your changes
 
 If you have questions or issues, please create an Issue in the GitHub repository.
-
-[For more detailed development information, please refer to the Wiki.](https://github.com/MLShukai/pamiq-core/wiki)
