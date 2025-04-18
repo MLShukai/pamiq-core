@@ -184,8 +184,6 @@ For training deep learning models, PAMIQ-Core provides specialized trainer class
 
 For more details on using PyTorch with PAMIQ-Core, see the [PyTorch Integration Guide](./torch.md).
 
-______________________________________________________________________
-
 ## API Reference
 
-::: pamiq_core.trainer.Trainer
+More details, Checkout to the [API Reference](../api/trainer.md)
