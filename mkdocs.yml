@@ -7,6 +7,18 @@ repo_name: MLShukai/pamiq-core
 # Theme configuration
 theme:
   name: material
+
+  features:
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.top
+    - navigation.sections
+    - navigation.indexes
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.tabs.link
+
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -22,15 +34,7 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-  features:
-    - navigation.tracking
-    - navigation.sections
-    - navigation.indexes
-    - navigation.top
-    - search.highlight
-    - search.share
-    - content.code.copy
-    - content.tabs.link
+
   icon:
     repo: fontawesome/brands/github
 
