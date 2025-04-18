@@ -79,6 +79,7 @@ nav:
     - Model: user-guide/model.md
     - Data: user-guide/data.md
     - Trainer: user-guide/trainer.md
+    - Torch🔥: user-guide/torch.md
 
 # Customization
 extra:
