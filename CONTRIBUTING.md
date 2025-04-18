@@ -139,6 +139,6 @@ make docker-down-volume
 
 If you have questions or issues, please create an Issue in the GitHub repository.
 
-## 🪮 Code Style
+## 🪮 Coding Conventions
 
 Checkout to [**CODING_CONVENTIONS.md**](./CODING_CONVENTIONS.md)
