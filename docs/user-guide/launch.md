@@ -76,10 +76,4 @@ launch(
 
 ## API Reference
 
-### LaunchConfig
-
-::: pamiq_core.launcher.LaunchConfig
-
-### launch function
-
-::: pamiq_core.launcher.launch
+More details, Checkout to the [API Reference](../api/launch.md)
