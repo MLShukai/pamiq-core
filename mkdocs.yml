@@ -80,6 +80,7 @@ nav:
     - Data: user-guide/data.md
     - Trainer: user-guide/trainer.md
     - Torch🔥: user-guide/torch.md
+    - State Persistence: user-guide/state_persistence.md
 
 # Customization
 extra:
