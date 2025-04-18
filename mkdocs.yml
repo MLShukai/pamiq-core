@@ -75,6 +75,7 @@ nav:
   - Home: index.md
   - User Guide:
     - Launch: user-guide/launch.md
+    - Interaction: user-guide/interaction.md
 
 # Customization
 extra:
