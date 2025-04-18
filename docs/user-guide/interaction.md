@@ -249,11 +249,6 @@ def on_resumed(self) -> None:
 
 These event hooks enable proper lifecycle management and allow components to respond to system state changes.
 
-______________________________________________________________________
-
 ## API Reference
 
-::: pamiq_core.interaction.Agent
-::: pamiq_core.interaction.Environment
-::: pamiq_core.interaction.modular_env
-::: pamiq_core.interaction.wrappers
+More details, Checkout to the [API Reference](../api/interaction.md)
