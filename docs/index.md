@@ -17,3 +17,4 @@ pip install pamiq-core[torch]
 ## Documentation
 
 - [**User Guide**](./user-guide/index.md): Describes information for working with PAMIQ-Core.
+- [**API Reference**](./api/index.md)
