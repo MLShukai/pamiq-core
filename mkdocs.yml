@@ -76,6 +76,7 @@ nav:
   - User Guide:
     - Launch: user-guide/launch.md
     - Interaction: user-guide/interaction.md
+    - Model: user-guide/model.md
 
 # Customization
 extra:
