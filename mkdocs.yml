@@ -74,6 +74,7 @@ plugins:
 nav:
   - Home: index.md
   - User Guide:
+    - Overview: user-guide/index.md
     - Launch: user-guide/launch.md
     - Interaction: user-guide/interaction.md
     - Model: user-guide/model.md
