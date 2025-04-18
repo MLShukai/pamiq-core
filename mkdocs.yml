@@ -91,6 +91,7 @@ nav:
     - Data: api/data.md
     - Trainer: api/trainer.md
     - Torch🔥: api/torch.md
+    - State Persistence: api/state_persistence.md
 
 # Customization
 extra:

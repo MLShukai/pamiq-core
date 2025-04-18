@@ -148,10 +148,6 @@ The state persistence system is designed to be thread-safe:
 
 These safety features ensure that states are saved and loaded correctly even in multi-threaded environments.
 
-______________________________________________________________________
-
 ## API Reference
 
-::: pamiq_core.state_persistence.PersistentStateMixin
-::: pamiq_core.state_persistence.StateStore
-::: pamiq_core.state_persistence.LatestStatesKeeper
+More details, Checkout to the [API Reference](../api/state_persistence.md)
