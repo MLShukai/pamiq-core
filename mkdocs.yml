@@ -90,6 +90,7 @@ nav:
     - Model: api/model.md
     - Data: api/data.md
     - Trainer: api/trainer.md
+    - Torch🔥: api/torch.md
 
 # Customization
 extra:
