@@ -78,6 +78,7 @@ nav:
     - Interaction: user-guide/interaction.md
     - Model: user-guide/model.md
     - Data: user-guide/data.md
+    - Trainer: user-guide/trainer.md
 
 # Customization
 extra:
