@@ -70,7 +70,7 @@ repos:
 
   # Markdown formatting
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.18
+    rev: 0.7.22
     hooks:
       - id: mdformat
         args: ["--number"]
@@ -78,6 +78,7 @@ repos:
           - mdformat-gfm
           - mdformat-tables
           - mdformat_frontmatter
+          - "mdformat-mkdocs[recommended]"
 
   # Spell checking
   - repo: https://github.com/codespell-project/codespell
