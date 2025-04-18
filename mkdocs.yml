@@ -73,6 +73,8 @@ plugins:
 # Navigation structure
 nav:
   - Home: index.md
+  - User Guide:
+    - Launch: user-guide/launch.md
 
 # Customization
 extra:
