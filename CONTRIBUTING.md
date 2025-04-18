@@ -141,4 +141,4 @@ If you have questions or issues, please create an Issue in the GitHub repository
 
 ## 🪮 Code Style
 
-Checkout to [**CODE_STYLE.md**](./CODE_STYLE.md)
+Checkout to [**CODING_CONVENTIONS.md**](./CODING_CONVENTIONS.md)
