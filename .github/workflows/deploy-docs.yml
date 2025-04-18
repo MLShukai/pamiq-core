@@ -1,0 +1,34 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [main, stable]  # メインブランチとstableブランチへのプッシュでデプロイ
+    paths:
+      - 'docs/**'             # docsディレクトリの変更があった場合のみ実行
+      - 'mkdocs.yml'          # mkdocs設定の変更があった場合も実行
+      - '.github/workflows/deploy-docs.yml'  # ワークフロー自体の変更でも実行
+
+env:
+  PYTHON_VERSION: "3.12"
+  UV_VERSION: "0.5.10"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 全履歴を取得して正しいバージョン情報を得る
+
+      - name: Set up Python
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Deploy documentation
+        run: uv run mkdocs gh-deploy --force
