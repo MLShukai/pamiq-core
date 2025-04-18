@@ -1,6 +1,6 @@
 # Model
 
-The model module in PAMIQ-Core defines the interfaces for inference and training models, providing a framework for managing model synchronization in a multi-threaded environment. This allows inference to run continuously while training occurs in the background.
+The `model` module in PAMIQ-Core defines the interfaces for inference and training models, providing a framework for managing model synchronization in a multi-threaded environment. This allows inference to run continuously while training occurs in the background.
 
 ## Basic Concepts
 
