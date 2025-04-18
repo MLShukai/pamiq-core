@@ -100,13 +100,13 @@ The `TrainingModel` class takes two important configuration parameters:
 
 - **has_inference_model** (default: `True`): Determines whether the training model creates and manages an associated inference model.
 
-  - When `True`: The model will create an inference model that can be used in the inference thread
-  - When `False`: No inference model is created, and the model can only be used for training
+    - When `True`: The model will create an inference model that can be used in the inference thread
+    - When `False`: No inference model is created, and the model can only be used for training
 
 - **inference_thread_only** (default: `False`): Determines how the model is used in the thread architecture.
 
-  - When `True`: The model is used only in the inference thread and not modified by training. This is useful for pre-trained models that don't need to be updated.
-  - When `False`: The model is used for both training and inference, with parameters synchronized between threads.
+    - When `True`: The model is used only in the inference thread and not modified by training. This is useful for pre-trained models that don't need to be updated.
+    - When `False`: The model is used for both training and inference, with parameters synchronized between threads.
 
 These two parameters cannot be set to `has_inference_model=False` and `inference_thread_only=True` simultaneously, as this would create a model that can't be used in either thread.
 

@@ -8,12 +8,12 @@ PyTorch integration in PAMIQ-Core includes specialized implementations of:
 
 - **Model Classes**:
 
-  - `TorchInferenceModel`: Wrapper for PyTorch models in the inference thread
-  - `TorchTrainingModel`: Wrapper for PyTorch models in the training thread
+    - `TorchInferenceModel`: Wrapper for PyTorch models in the inference thread
+    - `TorchTrainingModel`: Wrapper for PyTorch models in the training thread
 
 - **Trainer Class**:
 
-  - `TorchTrainer`: Base class for implementing PyTorch training algorithms
+    - `TorchTrainer`: Base class for implementing PyTorch training algorithms
 
 These components handle thread-safe model synchronization, optimizer management, and state persistence for PyTorch models.
 
@@ -127,8 +127,8 @@ When using PyTorch models in PAMIQ-Core, be aware of the following:
 
 1. **Model State Management**: Since the models are swapped during synchronization, any state stored inside the model (like buffers or running statistics) will also be swapped. This means:
 
-   - Do not store transient state in the model that shouldn't be shared between threads
-   - Be cautious with models that maintain internal state beyond parameters
+    - Do not store transient state in the model that shouldn't be shared between threads
+    - Be cautious with models that maintain internal state beyond parameters
 
 2. **Device Management**: Models are automatically moved to the specified device, but input tensors in custom code must be moved explicitly
 
