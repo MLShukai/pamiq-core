@@ -81,6 +81,7 @@ nav:
     - Trainer: user-guide/trainer.md
     - Torch🔥: user-guide/torch.md
     - State Persistence: user-guide/state_persistence.md
+    - Schedulers: user-guide/schedulers.md
 
 # Customization
 extra:
