@@ -41,14 +41,11 @@ run: format test type ## Run all workflow.
 
 # Documentation targets to add to your Makefile
 
-docs-deps: ## Install documentation dependencies
-	uv pip install -r docs/requirements-docs.txt
-
-docs-build: docs-deps ## Build documentation
+docs-build: ## Build documentation
 	uv run mkdocs build
 
-docs-serve: docs-deps ## Serve documentation locally
+docs-serve: ## Serve documentation locally
 	uv run mkdocs serve
 
-docs-deploy: docs-deps ## Deploy documentation to GitHub Pages
+docs-deploy: ## Deploy documentation to GitHub Pages
 	uv run mkdocs gh-deploy --force
