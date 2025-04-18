@@ -225,13 +225,4 @@ ______________________________________________________________________
 
 ## API Reference
 
-### Core Data Classes
-
-::: pamiq_core.data.DataBuffer
-::: pamiq_core.data.DataCollector
-::: pamiq_core.data.DataUser
-
-### Built-in Implementations
-
-::: pamiq_core.data.impls.SequentialBuffer
-::: pamiq_core.data.impls.RandomReplacementBuffer
+More details, Checkout to the [API Reference](../api/data.md)
