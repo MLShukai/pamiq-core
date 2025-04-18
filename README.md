@@ -51,8 +51,8 @@ launch(
     trainers=your_trainers,
     config=LaunchConfig(
         web_api_address=("localhost", 8391),
-        max_uptime=300.0  # 5 minutes
-    )
+        max_uptime=300.0,  # 5 minutes
+    ),
 )
 ```
 
@@ -72,7 +72,7 @@ pamiq-console --host 192.168.1.100 --port 8391
 
 ## 📚 Documentation
 
-For comprehensive API documentation and detailed tutorials, please visit the [documentation website](https://pamiq-core.readthedocs.io/) \[Coming Soon\].
+For comprehensive API documentation and detailed tutorials, please visit the [documentation website](https://pamiq-core.readthedocs.io/) [Coming Soon].
 
 ## 🧩 Architecture
 

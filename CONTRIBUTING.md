@@ -10,59 +10,59 @@ PAMIQ Core への貢献に興味を持っていただき、ありがとうござ
 
 - 🐳 **Docker (Docker Compose)**
 
-  - Docker Desktop: <https://www.docker.com/ja-jp/get-started/>
-  - Docker Engine (Linux 限定): <https://docs.docker.com/engine/install/>
-  - 確認コマンド:
-    ```sh
-    docker version && docker compose version
-    ```
+    - Docker Desktop: <https://www.docker.com/ja-jp/get-started/>
+    - Docker Engine (Linux 限定): <https://docs.docker.com/engine/install/>
+    - 確認コマンド:
+        ```sh
+        docker version && docker compose version
+        ```
 
 - 🔨 **make**
 
-  - Windows: [`scoop`](https://scoop.sh)か[`chocolate`](https://chocolatey.org)でインストール
-  - macOS: 事前にインストール済み
-  - Linux: ディストリビューションのパッケージマネージャーを使用（例：Ubuntu の場合 `sudo apt install make`）
-  - 確認コマンド:
-    ```sh
-    make -v
-    ```
+    - Windows: [`scoop`](https://scoop.sh)か[`chocolate`](https://chocolatey.org)でインストール
+    - macOS: 事前にインストール済み
+    - Linux: ディストリビューションのパッケージマネージャーを使用（例：Ubuntu の場合 `sudo apt install make`）
+    - 確認コマンド:
+        ```sh
+        make -v
+        ```
 
 - 🌲 **git**
 
-  - ダウンロード: <https://git-scm.com/downloads>
-  - 確認コマンド:
-    ```sh
-    git -v
-    ```
+    - ダウンロード: <https://git-scm.com/downloads>
+    - 確認コマンド:
+        ```sh
+        git -v
+        ```
 
 ## 🚀 開発環境の構築
 
 1. リポジトリのセットアップ
 
-   ```sh
-   git clone https://github.com/MLShukai/pamiq-core.git
-   cd pamiq-core
-   ```
+    ```sh
+    git clone https://github.com/MLShukai/pamiq-core.git
+    cd pamiq-core
+    ```
 
 2. Docker環境の構築
 
-   ```sh
-   # イメージのビルド
-   make docker-build
+    ```sh
+    # イメージのビルド
+    make docker-build
 
-   # コンテナの起動
-   make docker-up
+    # コンテナの起動
+    make docker-up
 
-   # コンテナへの接続
-   make docker-attach
-   ```
+    # コンテナへの接続
+    make docker-attach
+    ```
 
 3. Gitの初期設定
 
-   ```sh
-   git config user.name <あなたのGitHubユーザー名>
-   git config user.email <あなたのGitHubメールアドレス>
-   ```
+    ```sh
+    git config user.name <あなたのGitHubユーザー名>
+    git config user.email <あなたのGitHubメールアドレス>
+    ```
 
 ## 💻 開発環境の設定
 
@@ -127,9 +127,9 @@ make docker-down-volume
 2. 変更を加える
 3. 新機能のテストを記述
 4. PRを送る前に全ワークフローを実行：
-   ```shell
-   make run
-   ```
+    ```shell
+    make run
+    ```
 5. 変更内容を明確に説明したPull Requestを提出
 
 質問や問題がある場合は、GitHubリポジトリでIssueを作成してください。
