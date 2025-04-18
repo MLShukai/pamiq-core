@@ -72,7 +72,7 @@ pamiq-console --host 192.168.1.100 --port 8391
 
 ## 📚 Documentation
 
-For comprehensive API documentation and detailed tutorials, please visit the [documentation website](https://pamiq-core.readthedocs.io/) [Coming Soon].
+For comprehensive API documentation and detailed tutorials, please visit the [documentation website](https://mlshukai.github.io/pamiq-core/).
 
 ## 🧩 Architecture
 
