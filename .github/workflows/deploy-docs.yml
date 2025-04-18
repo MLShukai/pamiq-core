@@ -2,11 +2,12 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: [main, stable]  # メインブランチとstableブランチへのプッシュでデプロイ
+    branches: [main, stable]
     paths:
-      - 'docs/**'             # docsディレクトリの変更があった場合のみ実行
-      - 'mkdocs.yml'          # mkdocs設定の変更があった場合も実行
-      - '.github/workflows/deploy-docs.yml'  # ワークフロー自体の変更でも実行
+      - 'src/**'
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/deploy-docs.yml'
 
 env:
   PYTHON_VERSION: "3.12"
