@@ -141,7 +141,7 @@ If you have questions or issues, please create an Issue in the GitHub repository
 
 ## 🐍 Python Coding Conventions
 
-This project follows Python coding conventions primarily based on [PEP 8](https://peps.python.org/pep-0008/), with some project-specific rules.
+This project follows Python coding conventions based on [PEP 8](https://peps.python.org/pep-0008/), with some project-specific rules.
 
 ### 📝 Naming Conventions
 
