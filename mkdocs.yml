@@ -86,6 +86,7 @@ nav:
     - Schedulers: user-guide/schedulers.md
   - API References:
     - Interaction: api/interaction.md
+    - Model: api/model.md
     - Data: api/data.md
 
 # Customization

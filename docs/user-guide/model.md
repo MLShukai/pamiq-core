@@ -136,9 +136,6 @@ For deep learning models, PAMIQ-Core offers seamless integration with PyTorch th
 
 For more details on using PyTorch with PAMIQ-Core, see the [PyTorch Integration Guide](./torch.md).
 
-______________________________________________________________________
-
 ## API Reference
 
-::: pamiq_core.model.InferenceModel
-::: pamiq_core.model.TrainingModel
+More details, Checkout to the [API Reference](../api/interaction.md)
