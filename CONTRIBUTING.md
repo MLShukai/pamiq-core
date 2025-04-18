@@ -1,137 +1,144 @@
 # Contributing
 
-PAMIQ Core への貢献に興味を持っていただき、ありがとうございます。このガイドでは開発環境のセットアップ方法について説明します。
+Thank you for your interest in contributing to PAMIQ Core. This guide explains how to set up your development environment.
 
-## 📋 前提条件
+## 📋 Prerequisites
 
-以下のツールを事前にインストールしてください:
+Please install the following tools in advance:
 
-### 必須ツール
+### Required Tools
 
 - 🐳 **Docker (Docker Compose)**
 
-    - Docker Desktop: <https://www.docker.com/ja-jp/get-started/>
-    - Docker Engine (Linux 限定): <https://docs.docker.com/engine/install/>
-    - 確認コマンド:
+    - Docker Desktop: <https://www.docker.com/get-started/>
+    - Docker Engine (Linux only): <https://docs.docker.com/engine/install/>
+    - Verification command:
         ```sh
         docker version && docker compose version
         ```
 
 - 🔨 **make**
 
-    - Windows: [`scoop`](https://scoop.sh)か[`chocolate`](https://chocolatey.org)でインストール
-    - macOS: 事前にインストール済み
-    - Linux: ディストリビューションのパッケージマネージャーを使用（例：Ubuntu の場合 `sudo apt install make`）
-    - 確認コマンド:
+    - Windows: Install via [`scoop`](https://scoop.sh) or [`chocolatey`](https://chocolatey.org)
+    - macOS: Pre-installed
+    - Linux: Use your distribution's package manager (e.g., for Ubuntu: `sudo apt install make`)
+    - Verification command:
         ```sh
         make -v
         ```
 
 - 🌲 **git**
 
-    - ダウンロード: <https://git-scm.com/downloads>
-    - 確認コマンド:
+    - Download: <https://git-scm.com/downloads>
+    - Verification command:
         ```sh
         git -v
         ```
 
-## 🚀 開発環境の構築
+## 🚀 Setting Up the Development Environment
 
-1. リポジトリのセットアップ
+1. Repository Setup
+
+    First, fork the repository by clicking the "Fork" button:
+
+    [![Fork Repository](https://img.shields.io/badge/Fork%20Repository-2ea44f?style=for-the-badge)](https://github.com/MLShukai/pamiq-core/fork)
+
+    After fork, clone your repository:
 
     ```sh
-    git clone https://github.com/MLShukai/pamiq-core.git
+    git clone https://github.com/your-name/pamiq-core.git
     cd pamiq-core
     ```
 
-2. Docker環境の構築
+2. Building the Docker Environment
 
     ```sh
-    # イメージのビルド
+    # Build the image
     make docker-build
 
-    # コンテナの起動
+    # Start the container
     make docker-up
 
-    # コンテナへの接続
+    # Connect to the container
     make docker-attach
     ```
 
-3. Gitの初期設定
+3. Git Initial Configuration
 
     ```sh
-    git config user.name <あなたのGitHubユーザー名>
-    git config user.email <あなたのGitHubメールアドレス>
+    git config user.name <your GitHub username>
+    git config user.email <your GitHub email>
     ```
 
-## 💻 開発環境の設定
+## 💻 Development Environment Configuration
 
-### VSCode での開発
+### Development with VSCode
 
-お好みのエディタ（VSCode 推奨）からコンテナにアタッチして開発を行えます。
+You can develop by attaching to the container from your preferred editor (VSCode recommended).
 
-📚 参考: [VSCode Dev Containers 拡張機能でアタッチ](https://code.visualstudio.com/docs/devcontainers/attach-container)
+📚 Reference: [Attach with VSCode Dev Containers extension](https://code.visualstudio.com/docs/devcontainers/attach-container)
 
-開発コンテナには以下の環境が整っています：
+The development container includes the following environment:
 
-- パッケージマネージャー ([**uv**](https://docs.astral.sh/uv/))
-- バージョン管理用のGit
-- 開発の依存関係パッケージ
-- 仮想環境の自動アクティベーション (`source .venv/bin/activate`)
+- Package manager ([**uv**](https://docs.astral.sh/uv/))
+- Git for version control
+- Development dependency packages
 
-## 🔄 開発ワークフロー
+## 🔄 Development Workflow
 
-以下のコマンドで開発を行います：
+Use the following commands for development:
 
 ```sh
-# Python仮想環境の構築
+# Set up Python virtual environment
 make venv
 
-# コードのフォーマットとpre-commitフックの実行
+# Format code and run pre-commit hooks
 make format
 
-# テストの実行
+# Run tests
 make test
 
-# 型チェックの実行
+# Run type checking
 make type
 
-# 全ワークフローの実行（format、test、type）
+# Run the entire workflow (format, test, type)
 make run
 ```
 
-## ⚙️ 環境の管理
+## ⚙️ Environment Management
 
-### コンテナの停止
+### Stopping the Container
 
 ```sh
 make docker-down
 ```
 
-### 開発環境のクリーンアップ
+### Cleaning Up the Development Environment
 
 ```sh
 make clean
 ```
 
-### ⚠️ 完全削除（要注意）
+### ⚠️ Complete Deletion (Use Caution)
 
 ```sh
-# 警告: 全ての作業データが削除されます！
+# Warning: All work data will be deleted!
 make docker-down-volume
 ```
 
-## 🤝 コントリビューションの流れ
+## 🤝 Contribution Flow
 
-1. 機能追加やバグ修正用の新しいブランチを作成
-2. 変更を加える
-3. 新機能のテストを記述
-4. PRを送る前に全ワークフローを実行：
+1. Create a new branch for feature additions or bug fixes
+2. Make your changes
+3. Write tests for new features
+4. Run the entire workflow before sending a PR:
     ```shell
     make run
     ```
-5. 変更内容を明確に説明したPull Requestを提出
+5. Submit a Pull Request with a clear explanation of your changes
 
-質問や問題がある場合は、GitHubリポジトリでIssueを作成してください。
+If you have questions or issues, please create an Issue in the GitHub repository.
 
-[また詳しい開発の情報はWikiを参照してください。](https://github.com/MLShukai/pamiq-core/wiki)
+## 🪮 Code Style
+
+Checkout to [**CODE_STYLE.md**](./CODE_STYLE.md)
