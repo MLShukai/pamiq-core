@@ -22,14 +22,14 @@ Full names (non-abbreviated forms) should be used for variable names in principl
 
 1. **When combined with long compound words**
 
-   - Example: `observation_wrapper` → `obs_wrapper`
-   - Example: `action_transformer` → `act_transformer`
-   - Example: `environment_controller` → `env_controller`
+    - Example: `observation_wrapper` → `obs_wrapper`
+    - Example: `action_transformer` → `act_transformer`
+    - Example: `environment_controller` → `env_controller`
 
 2. **Type parameters**
 
-   - Abbreviations are recommended for type parameters to reduce visual noise
-   - Example: `ObsType`, `ActType`, `EnvType`
+    - Abbreviations are recommended for type parameters to reduce visual noise
+    - Example: `ObsType`, `ActType`, `EnvType`
 
 3. **Module or package names**
 
@@ -45,14 +45,14 @@ For consistency across the codebase, use these standard abbreviations:
 ### Class Naming
 
 - **Do not** use `Base` prefix for abstract base classes.
-  - ❌ `BaseDataBuffer`
-  - ⭕️ `DataBuffer`
+    - ❌ `BaseDataBuffer`
+    - ⭕️ `DataBuffer`
 
 ### Module Naming
 
 - Use plural form for modules containing multiple implementations
-  - Example: `buffers.py` - contains multiple buffer implementations
-  - Example: `buffer.py` - contains only a single buffer implementation or related functions
+    - Example: `buffers.py` - contains multiple buffer implementations
+    - Example: `buffer.py` - contains only a single buffer implementation or related functions
 
 ## Import Rules
 
@@ -60,31 +60,31 @@ For consistency across the codebase, use these standard abbreviations:
 
 - **Use relative imports** when:
 
-  - Referring to modules within the same functional group
-  - Example: Cross-references within a group of buffer implementations
-    ```python
-    # pamiq_core/data/container.py
-    from .buffer import DataBuffer
-    from .interface import DataCollector, DataUser
-    ```
+    - Referring to modules within the same functional group
+    - Example: Cross-references within a group of buffer implementations
+        ```python
+        # pamiq_core/data/container.py
+        from .buffer import DataBuffer
+        from .interface import DataCollector, DataUser
+        ```
 
 - **Use absolute imports** when:
 
-  - Referring between modules implementing different functionalities
-  - Referring to external packages
-  - Referring in modules exposed as top-level API
-    ```python
-    # Can be clearly referenced from any module
-    from pamiq_core import time
-    ```
+    - Referring between modules implementing different functionalities
+    - Referring to external packages
+    - Referring in modules exposed as top-level API
+        ```python
+        # Can be clearly referenced from any module
+        from pamiq_core import time
+        ```
 
 **NOTE**: When in doubt, choose absolute imports. Relative imports are recommended only for tightly coupled module groups.
 
 ### Import Restrictions
 
 - Wildcard imports (`from module import *`) are **prohibited**
-  - They may contaminate the module namespace
-  - Instead, explicitly import what you need
+    - They may contaminate the module namespace
+    - Instead, explicitly import what you need
 
 ## 📝 Documentation
 
