@@ -93,6 +93,7 @@ nav:
     - Torch🔥: api/torch.md
     - State Persistence: api/state_persistence.md
     - Schedulers: api/schedulers.md
+    - Time: api/time.md
 
 # Customization
 extra:
