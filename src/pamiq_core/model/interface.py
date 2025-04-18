@@ -108,6 +108,6 @@ class TrainingModel[T: InferenceModel](ABC, PersistentStateMixin):
         """Copies params of training model to self._inference_model if needed.
 
         Args:
-            InferenceModel to sync.
+            inference_model: InferenceModel to sync.
         """
         ...
