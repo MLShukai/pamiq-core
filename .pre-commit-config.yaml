@@ -78,7 +78,7 @@ repos:
           - mdformat-gfm
           - mdformat-tables
           - mdformat_frontmatter
-          - "mdformat-mkdocs"
+          - mdformat-mkdocs
 
   # Spell checking
   - repo: https://github.com/codespell-project/codespell
