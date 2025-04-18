@@ -1,16 +1,17 @@
-"""P-AMI<Q> Core Time Module.
+"""PAMIQ-Core Time Module.
 
 This module provides a custom implementation of time-related functions with time acceleration and pause/resume features.
 It wraps the standard Python time module and allows for consistent time control across the system.
 
 Key features:
-- Time acceleration: Adjust the speed of time passage in the system.
-- Pause/Resume: Ability to pause and resume the flow of time in the system.
-- Thread-safe: All operations are protected by locks for use in multi-threaded environments.
-- Compatible API: Provides familiar time functions like sleep, time, perf_counter, and monotonic.
-- Original time functions: Provides access to the original time functions with 'fixed_' prefix.
+    - Time acceleration: Adjust the speed of time passage in the system.
+    - Pause/Resume: Ability to pause and resume the flow of time in the system.
+    - Thread-safe: All operations are protected by locks for use in multi-threaded environments.
+    - Compatible API: Provides familiar time functions like sleep, time, perf_counter, and monotonic.
+    - Original time functions: Provides access to the original time functions with 'fixed_' prefix.
 
 Usage:
+    ```py
     from pamiq_core import time
 
     # Get current time (affected by time scale and pause)
@@ -36,6 +37,7 @@ Usage:
 
     # Resume time
     time.resume()
+    ```
 
 Note: This module is designed for use within the system and may not be suitable for general-purpose time management.
 """
