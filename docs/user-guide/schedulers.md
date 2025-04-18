@@ -134,10 +134,6 @@ class MyTrainer(Trainer):
         pass
 ```
 
-______________________________________________________________________
-
 ## API Reference
 
-::: pamiq_core.utils.schedulers.Scheduler
-::: pamiq_core.utils.schedulers.TimeIntervalScheduler
-::: pamiq_core.utils.schedulers.StepIntervalScheduler
+More details, Checkout to the [API Reference](../api/schedulers.md)

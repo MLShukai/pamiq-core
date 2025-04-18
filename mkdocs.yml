@@ -92,6 +92,7 @@ nav:
     - Trainer: api/trainer.md
     - Torch🔥: api/torch.md
     - State Persistence: api/state_persistence.md
+    - Schedulers: api/schedulers.md
 
 # Customization
 extra:
