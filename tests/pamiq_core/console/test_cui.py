@@ -1,10 +1,11 @@
 import json
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
 
-from pamiq_core.console.cui import Console
+from pamiq_core.console.cui import Console, main
 
 
 class TestConsole:
@@ -115,3 +116,15 @@ class TestConsole:
         result = console.postcmd(stop=exit_console, line="")
         assert console.prompt == "ami (test postcmd) > "
         assert result is exit_console  # Return True if cmd loop.
+
+
+def test_main():
+    with (
+        patch("sys.argv", ["pamiq-core", "--host", "test_host.com", "--port", "1938"]),
+        patch("pamiq_core.console.cui.Console") as mock_console_class,
+    ):
+        mock_console = MagicMock()
+        mock_console_class.return_value = mock_console
+        main()
+        mock_console_class.assert_called_once_with("test_host.com", 1938)
+        mock_console.cmdloop.assert_called_once_with()
