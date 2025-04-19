@@ -145,7 +145,7 @@ class TestConsole:
 
 def test_main() -> None:
     with (
-        patch("sys.argv", ["pamiq-core", "--host", "test-host.com", "--port", "1938"]),
+        patch("sys.argv", ["consoletest", "--host", "test-host.com", "--port", "1938"]),
         patch("pamiq_core.console.cui.Console") as mock_console_class,
     ):
         mock_console = MagicMock()
