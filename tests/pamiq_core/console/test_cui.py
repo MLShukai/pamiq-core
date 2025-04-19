@@ -85,12 +85,18 @@ class TestConsole:
             console.do_r("")
             mock_resume.assert_called_once_with("")
 
-    def test_do_shutdown(
+    @pytest.mark.parametrize("users_answer", ["y", "yes"])
+    def test_do_shutdown_yes(
         self,
         console: Console,
         mock_requests: MagicMock,
         capsys: pytest.CaptureFixture[str],
+        monkeypatch: pytest.MonkeyPatch,
+        users_answer: str,
     ) -> None:
+        monkeypatch.setattr(
+            "builtins.input", lambda prompt: users_answer
+        )  # Mock input() to return <users_answer>.
         mock_requests.post.return_value.text = json.dumps(
             {"result": "test do_shutdown"}
         )
@@ -98,7 +104,27 @@ class TestConsole:
         mock_requests.post.assert_called_once_with("http://localhost:8391/api/shutdown")
         captured = capsys.readouterr()
         assert "test do_shutdown" in captured.out
-        assert result is True  # Return True if cmd loop.
+        assert result is True
+
+    @pytest.mark.parametrize("users_answer", ["other_strings"])
+    def test_do_shutdown_no(
+        self,
+        console: Console,
+        mock_requests: MagicMock,
+        capsys: pytest.CaptureFixture[str],
+        monkeypatch: pytest.MonkeyPatch,
+        users_answer: str,
+    ) -> None:
+        monkeypatch.setattr(
+            "builtins.input", lambda prompt: users_answer
+        )  # Mock input() to return <users_answer>.
+        mock_requests.post.return_value.text = json.dumps(
+            {"result": "test do_shutdown"}
+        )
+        result = console.do_shutdown("")
+        captured = capsys.readouterr()
+        assert "Shutdown cancelled" in captured.out
+        assert result is False
 
     def test_do_s_as_alias(self, console: Console, mock_requests: MagicMock) -> None:
         with patch.object(console, "do_shutdown") as mock_shutdown:
@@ -107,7 +133,7 @@ class TestConsole:
 
     def test_do_quit(self, console: Console) -> None:
         result = console.do_quit("")
-        assert result is True  # Return True if cmd loop.
+        assert result is True
 
     def test_do_q_as_alias(self, console: Console) -> None:
         with patch.object(console, "do_quit") as mock_quit:
@@ -140,7 +166,7 @@ class TestConsole:
         mock_requests.get.return_value.text = json.dumps({"status": "test postcmd"})
         result = console.postcmd(stop=exit_console, line="")
         assert console.prompt == "ami (test postcmd) > "
-        assert result is exit_console  # Return True if cmd loop.
+        assert result is exit_console
 
 
 def test_main() -> None:

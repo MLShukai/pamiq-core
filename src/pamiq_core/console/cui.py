@@ -70,9 +70,13 @@ class Console(cmd.Cmd):
 
     def do_shutdown(self, arg: str) -> bool:
         """Shutdown the AMI system."""
-        response = requests.post(f"http://{self._host}:{self._port}/api/shutdown")
-        print(json.loads(response.text)["result"])
-        return True
+        confirm = input("Confirm AMI system shutdown? (y/n): ")
+        if confirm.lower() in ["y", "yes"]:
+            response = requests.post(f"http://{self._host}:{self._port}/api/shutdown")
+            print(json.loads(response.text)["result"])
+            return True
+        print("Shutdown cancelled.")
+        return False
 
     def do_s(self, arg: str) -> bool:
         """Shutdown the AMI system."""
