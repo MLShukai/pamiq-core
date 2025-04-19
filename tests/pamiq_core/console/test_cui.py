@@ -1,5 +1,6 @@
 import json
 import sys
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -10,7 +11,7 @@ from pamiq_core.console.cui import Console, main
 
 class TestConsole:
     @pytest.fixture
-    def mock_requests(self):
+    def mock_requests(self) -> Generator[MagicMock, None, None]:
         # Mock request module imported in pamiq_core/console/cui.py
         with patch("pamiq_core.console.cui.requests") as mock_req:
             # Mock GET response
@@ -24,21 +25,23 @@ class TestConsole:
             yield mock_req
 
     @pytest.fixture
-    def console(self, mock_requests):
+    def console(self, mock_requests: MagicMock) -> Console:
         return Console(host="localhost", port=8391)
 
-    def test_initial_prompt(self, mock_requests):
+    def test_initial_prompt(self, mock_requests: MagicMock) -> None:
         mock_requests.get.return_value.text = json.dumps({"status": "running"})
         console = Console("localhost", 8391)
         assert console.prompt == "ami (running) > "
 
-    def test_initial_prompt_when_offline(self, mock_requests):
+    def test_initial_prompt_when_offline(self, mock_requests: MagicMock) -> None:
         mock_requests.exceptions = requests.exceptions
         mock_requests.get.side_effect = requests.exceptions.ConnectionError()
         console = Console("localhost", 8391)
         assert console.prompt == "ami (offline) > "
 
-    def test_help_command(self, console, capsys):
+    def test_help_command(
+        self, console: Console, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         console.do_help("")
         captured = capsys.readouterr()
         assert "h/help" in captured.out
@@ -48,31 +51,46 @@ class TestConsole:
         assert "s/shutdown" in captured.out
         assert "q/quit" in captured.out
 
-    def test_do_pause(self, console, mock_requests, capsys):
+    def test_do_pause(
+        self,
+        console: Console,
+        mock_requests: MagicMock,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
         mock_requests.post.return_value.text = json.dumps({"result": "test do_pause"})
         console.do_pause("")
         mock_requests.post.assert_called_once_with("http://localhost:8391/api/pause")
         captured = capsys.readouterr()
         assert "test do_pause" in captured.out
 
-    def test_do_p_as_alias(self, console, mock_requests):
+    def test_do_p_as_alias(self, console: Console, mock_requests: MagicMock) -> None:
         with patch.object(console, "do_pause") as mock_pause:
             console.do_p("")
             mock_pause.assert_called_once_with("")
 
-    def test_do_resume(self, console, mock_requests, capsys):
+    def test_do_resume(
+        self,
+        console: Console,
+        mock_requests: MagicMock,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
         mock_requests.post.return_value.text = json.dumps({"result": "test do_resume"})
         console.do_resume("")
         mock_requests.post.assert_called_once_with("http://localhost:8391/api/resume")
         captured = capsys.readouterr()
         assert "test do_resume" in captured.out
 
-    def test_do_r_as_alias(self, console, mock_requests):
+    def test_do_r_as_alias(self, console: Console, mock_requests: MagicMock) -> None:
         with patch.object(console, "do_resume") as mock_resume:
             console.do_r("")
             mock_resume.assert_called_once_with("")
 
-    def test_do_shutdown(self, console, mock_requests, capsys):
+    def test_do_shutdown(
+        self,
+        console: Console,
+        mock_requests: MagicMock,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
         mock_requests.post.return_value.text = json.dumps(
             {"result": "test do_shutdown"}
         )
@@ -82,21 +100,26 @@ class TestConsole:
         assert "test do_shutdown" in captured.out
         assert result is True  # Return True if cmd loop.
 
-    def test_do_s_as_alias(self, console, mock_requests):
+    def test_do_s_as_alias(self, console: Console, mock_requests: MagicMock) -> None:
         with patch.object(console, "do_shutdown") as mock_shutdown:
             console.do_s("")
             mock_shutdown.assert_called_once_with("")
 
-    def test_do_quit(self, console):
+    def test_do_quit(self, console: Console) -> None:
         result = console.do_quit("")
         assert result is True  # Return True if cmd loop.
 
-    def test_do_q_as_alias(self, console):
+    def test_do_q_as_alias(self, console: Console) -> None:
         with patch.object(console, "do_quit") as mock_quit:
             console.do_q("")
             mock_quit.assert_called_once_with("")
 
-    def test_do_ckpt(self, console, mock_requests, capsys):
+    def test_do_ckpt(
+        self,
+        console: Console,
+        mock_requests: MagicMock,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
         mock_requests.post.return_value.text = json.dumps({"result": "test do_ckpt"})
         console.do_ckpt("")
         mock_requests.post.assert_called_once_with(
@@ -105,20 +128,22 @@ class TestConsole:
         captured = capsys.readouterr()
         assert "test do_ckpt" in captured.out
 
-    def test_do_c_as_alias(self, console, mock_requests):
+    def test_do_c_as_alias(self, console: Console, mock_requests: MagicMock) -> None:
         with patch.object(console, "do_ckpt") as mock_ckpt:
             console.do_c("")
             mock_ckpt.assert_called_once_with("")
 
     @pytest.mark.parametrize("exit_console", [True, False])
-    def test_postcmd_updates_status(self, console, mock_requests, exit_console: bool):
+    def test_postcmd_updates_status(
+        self, console: Console, mock_requests: MagicMock, exit_console: bool
+    ) -> None:
         mock_requests.get.return_value.text = json.dumps({"status": "test postcmd"})
         result = console.postcmd(stop=exit_console, line="")
         assert console.prompt == "ami (test postcmd) > "
         assert result is exit_console  # Return True if cmd loop.
 
 
-def test_main():
+def test_main() -> None:
     with (
         patch("sys.argv", ["pamiq-core", "--host", "test-host.com", "--port", "1938"]),
         patch("pamiq_core.console.cui.Console") as mock_console_class,
