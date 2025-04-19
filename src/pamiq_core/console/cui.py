@@ -17,6 +17,18 @@ class Console(cmd.Cmd):
         self._fetch_status()
 
     @override
+    def onecmd(self, line: str) -> bool:
+        # Check command depend on WebAPI
+        cmd_name, _, _ = self.parseline(line)
+        if cmd_name in ["pause", "p", "resume", "r", "ckpt", "c", "shutdown", "s"]:
+            # Check if WebAPI available.
+            if self._fetch_status() == "offline":
+                print(f'Command "{cmd_name}" not executed. Can\'t connect AMI system.')
+                return False
+        # Perform command
+        return super().onecmd(line)
+
+    @override
     def do_help(self, arg: str) -> None:
         """Show all commands and details."""
         # Store methods with the same docstring
@@ -104,14 +116,15 @@ class Console(cmd.Cmd):
         self._fetch_status()
         return stop
 
-    def _fetch_status(self) -> None:
+    def _fetch_status(self) -> str:
         try:
             response = requests.get(f"http://{self._host}:{self._port}/api/status")
         except requests.exceptions.ConnectionError:
             self.prompt = "ami (offline) > "
-            return
+            return "offline"
         status = json.loads(response.text)["status"]
         self.prompt = f"ami ({status}) > "
+        return status
 
 
 def main() -> None:
