@@ -15,15 +15,6 @@ class Console(cmd.Cmd):
         super().__init__()
         self._host = host
         self._port = port
-
-        try:
-            requests.get(f"http://{self._host}:{self._port}/api/status")
-        except requests.exceptions.ConnectionError:
-            print(
-                "Error: Could not connect to the AMI system. Please make sure the AMI system is running and try again."
-            )
-            sys.exit(1)
-
         self._fetch_status()
 
     @override
