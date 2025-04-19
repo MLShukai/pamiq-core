@@ -120,11 +120,11 @@ class TestConsole:
 
 def test_main():
     with (
-        patch("sys.argv", ["pamiq-core", "--host", "test_host.com", "--port", "1938"]),
+        patch("sys.argv", ["pamiq-core", "--host", "test-host.com", "--port", "1938"]),
         patch("pamiq_core.console.cui.Console") as mock_console_class,
     ):
         mock_console = MagicMock()
         mock_console_class.return_value = mock_console
         main()
-        mock_console_class.assert_called_once_with("test_host.com", 1938)
+        mock_console_class.assert_called_once_with("test-host.com", 1938)
         mock_console.cmdloop.assert_called_once_with()
