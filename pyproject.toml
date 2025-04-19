@@ -32,6 +32,9 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
 ]
 
+[project.scripts]
+pamiq-console = "pamiq_core.console.cui:main"
+
 [project.urls]
 Repository = "https://github.com/MLShukai/pamiq-core"
 Issues = "https://github.com/MLShukai/pamiq-core/issues"
