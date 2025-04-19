@@ -26,50 +26,74 @@ class Console(cmd.Cmd):
 
         self._fetch_status()
 
-    def do_pause(self, line: str) -> None:
+    @override
+    def do_help(self, arg: str) -> None:
+        """Show all commands and details."""
+        # Store methods with the same docstring to the same key
+        # groups = {"Doscstring": ["command", "c"]}
+        groups: dict[str, list[str]] = {}
+        for attr in dir(self):
+            if attr.startswith("do_"):
+                cmd_name = attr[3:]
+                method = getattr(self, attr)
+                doc = method.__doc__ or ""
+                doc = doc
+                if doc not in groups:
+                    groups[doc] = []
+                groups[doc].append(cmd_name)
+        # Show details in the format f"{c}/{command} {Docstring}"
+        for doc, cmds in groups.items():
+            cmd_list = "/".join(sorted(cmds, key=len))
+            print(f"{cmd_list:<11} {doc}")
+
+    def do_h(self, arg: str) -> None:
+        """Show all commands and details."""
+        self.do_help(arg)
+
+    def do_pause(self, arg: str) -> None:
         """Pause the AMI system."""
         response = requests.post(f"http://{self._host}:{self._port}/api/pause")
         print(json.loads(response.text)["result"])
 
-    def do_p(self, line: str) -> None:
+    def do_p(self, arg: str) -> None:
         """Pause the AMI system."""
-        return self.do_pause(line)
+        return self.do_pause(arg)
 
-    def do_resume(self, line: str) -> None:
+    def do_resume(self, arg: str) -> None:
         """Resume the AMI system."""
         response = requests.post(f"http://{self._host}:{self._port}/api/resume")
         print(json.loads(response.text)["result"])
 
-    def do_r(self, line: str) -> None:
+    def do_r(self, arg: str) -> None:
         """Resume the AMI system."""
-        return self.do_resume(line)
+        return self.do_resume(arg)
 
-    def do_shutdown(self, line: str) -> bool:
+    def do_shutdown(self, arg: str) -> bool:
         """Shutdown the AMI system."""
         response = requests.post(f"http://{self._host}:{self._port}/api/shutdown")
         print(json.loads(response.text)["result"])
         return True
 
-    def do_quit(self, line: str) -> bool:
+    def do_s(self, arg: str) -> bool:
+        """Shutdown the AMI system."""
+        return self.do_shutdown(arg)
+
+    def do_quit(self, arg: str) -> bool:
         """Exit the console."""
         return True
 
-    def do_q(self, line: str) -> bool:
+    def do_q(self, arg: str) -> bool:
         """Exit the console."""
-        return self.do_quit(line)
+        return self.do_quit(arg)
 
-    def do_exit(self, line: str) -> bool:
-        """Exit the console."""
-        return self.do_quit(line)
-
-    def do_save_checkpoint(self, line: str) -> None:
-        """Saves a checkpoint."""
+    def do_ckpt(self, arg: str) -> None:
+        """Save a checkpoint."""
         response = requests.post(f"http://{self._host}:{self._port}/api/save-state")
         print(json.loads(response.text)["result"])
 
-    def do_ckpt(self, line: str) -> None:
-        """Saves a checkpoint."""
-        return self.do_save_checkpoint(line)
+    def do_c(self, arg: str) -> None:
+        """Save a checkpoint."""
+        self.do_ckpt(arg)
 
     @override
     def postcmd(self, stop: bool, line: str) -> bool:
