@@ -29,7 +29,7 @@ class Console(cmd.Cmd):
     @override
     def do_help(self, arg: str) -> None:
         """Show all commands and details."""
-        # Store methods with the same docstring to the same key
+        # Store methods with the same docstring
         # groups = {"Doscstring": ["command", "c"]}
         groups: dict[str, list[str]] = {}
         for attr in dir(self):
@@ -41,10 +41,20 @@ class Console(cmd.Cmd):
                 if doc not in groups:
                     groups[doc] = []
                 groups[doc].append(cmd_name)
+        # Define showing order
+        _doc_order = [
+            "Show all commands and details.",
+            "Pause the AMI system.",
+            "Resume the AMI system.",
+            "Save a checkpoint.",
+            "Shutdown the AMI system.",
+            "Exit the console.",
+        ]
+        assert set(_doc_order) == set(groups.keys())
         # Show details in the format f"{c}/{command} {Docstring}"
-        for doc, cmds in groups.items():
-            cmd_list = "/".join(sorted(cmds, key=len))
-            print(f"{cmd_list:<11} {doc}")
+        for doc in _doc_order:
+            cmds = "/".join(sorted(groups[doc], key=len))
+            print(f"{cmds:<11} {doc}")
 
     def do_h(self, arg: str) -> None:
         """Show all commands and details."""
