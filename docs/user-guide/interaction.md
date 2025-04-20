@@ -33,6 +33,31 @@ class MyAgent(Agent[list[float], int]):
             return 0
 ```
 
+### Composite Agents
+
+Agents can contain child agents that share the parent's inference models and data collectors. This is useful for building hierarchical decision-making systems or dividing complex agent logic into modular components:
+
+```python
+from pamiq_core import Agent
+
+class MainAgent(Agent[..., ...]):
+    @override
+    def __init__(self) -> None:
+        # Create child agents
+        self.navigation_agent = NavigationAgent()
+        self.perception_agent = PerceptionAgent()
+        self.planning_agent = PlanningAgent()
+
+        # Create parent agent with child agents
+        super().__init__(agents={
+            "navigation": self.navigation_agent,
+            "perception": self.perception_agent,
+            "planning": self.planning_agent
+        })
+```
+
+When models and data collectors are attached to the parent agent, they are automatically propagated to all child agents. State persistence is also handled hierarchically, with each child agent's state being saved and loaded as part of the parent's state.
+
 ### Accessing Inference Models
 
 To access inference models for decision making, override the `on_inference_models_attached` callback:
