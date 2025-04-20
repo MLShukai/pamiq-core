@@ -7,7 +7,7 @@ import requests
 
 
 class Console(cmd.Cmd):
-    intro = 'Welcome to the AMI system console. "help" lists commands.\n'
+    intro = 'Welcome to the PAMIQ console. "help" lists commands.\n'
     prompt: str
 
     def __init__(self, host: str, port: int) -> None:
@@ -82,7 +82,7 @@ class Console(cmd.Cmd):
 
     def do_shutdown(self, arg: str) -> bool:
         """Shutdown the AMI system."""
-        confirm = input("Confirm AMI system shutdown? (y/n): ")
+        confirm = input("Confirm AMI system shutdown? (y/[N]): ")
         if confirm.lower() in ["y", "yes"]:
             response = requests.post(f"http://{self._host}:{self._port}/api/shutdown")
             print(json.loads(response.text)["result"])
