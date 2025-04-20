@@ -229,3 +229,35 @@ class TestAgent:
         save_path = tmp_path / "agent_state"
         agent_attached.save_state(save_path)
         assert not save_path.exists()
+
+    def test_on_paused_propagation(
+        self,
+        parent_agent: AgentImpl,
+        child_agent: ChildAgentImpl,
+        mocker: MockerFixture,
+    ):
+        """Test that on_paused event propagates to child agents."""
+        # Spy on the child's on_paused method
+        spy_child_on_paused = mocker.spy(child_agent, "on_paused")
+
+        # Call on_paused on parent
+        parent_agent.on_paused()
+
+        # Verify child's on_paused was called
+        spy_child_on_paused.assert_called_once_with()
+
+    def test_on_resumed_propagation(
+        self,
+        parent_agent: AgentImpl,
+        child_agent: ChildAgentImpl,
+        mocker: MockerFixture,
+    ):
+        """Test that on_resumed event propagates to child agents."""
+        # Spy on the child's on_resumed method
+        spy_child_on_resumed = mocker.spy(child_agent, "on_resumed")
+
+        # Call on_resumed on parent
+        parent_agent.on_resumed()
+
+        # Verify child's on_resumed was called
+        spy_child_on_resumed.assert_called_once_with()

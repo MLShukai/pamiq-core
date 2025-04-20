@@ -56,7 +56,7 @@ class MainAgent(Agent[..., ...]):
         })
 ```
 
-When models and data collectors are attached to the parent agent, they are automatically propagated to all child agents. State persistence is also handled hierarchically, with each child agent's state being saved and loaded as part of the parent's state.
+When models and data collectors are attached to the parent agent, they are automatically propagated to all child agents. Similarly, system events like pause and resume are also forwarded to all child agents, ensuring consistent state across the hierarchy. State persistence is handled hierarchically as well, with each child agent's state being saved and loaded as part of the parent's state.
 
 ### Accessing Inference Models
 

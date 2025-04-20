@@ -23,8 +23,8 @@ class Agent[ObsType, ActType](
     interface that all agent implementations must follow.
 
     Agents can contain child agents that will inherit the parent's
-    inference models and data collectors. State persistence is also
-    propagated to all child agents.
+    inference models and data collectors. State persistence and Thread
+    Event is also propagated to all child agents.
     """
 
     _inference_models: InferenceModelsDict
@@ -37,8 +37,6 @@ class Agent[ObsType, ActType](
             agents: Optional mapping of names to child agents. Child agents will inherit
                 inference models and data collectors from the parent, and their states
                 will be saved and loaded together with the parent.
-
-                NOTE:
         """
         self._agents: Mapping[str, Agent[Any, Any]] = {}
         if agents is not None:
@@ -159,3 +157,23 @@ class Agent[ObsType, ActType](
         super().load_state(path)
         for name, agent in self._agents.items():
             agent.load_state(path / name)
+
+    @override
+    def on_paused(self) -> None:
+        """Handle system pause event.
+
+        Propagates the pause event to all child agents.
+        """
+        super().on_paused()
+        for agent in self._agents.values():
+            agent.on_paused()
+
+    @override
+    def on_resumed(self) -> None:
+        """Handle system resume event.
+
+        Propagates the resume event to all child agents.
+        """
+        super().on_resumed()
+        for agent in self._agents.values():
+            agent.on_resumed()
