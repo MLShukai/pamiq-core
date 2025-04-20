@@ -7,10 +7,16 @@ import requests
 
 
 class Console(cmd.Cmd):
+    """pamiq-console.
+
+    Users can Control pamiq with CUI interface interactively.
+    """
+
     intro = 'Welcome to the PAMIQ console. "help" lists commands.\n'
     prompt: str
 
     def __init__(self, host: str, port: int) -> None:
+        """Initialize CUI interface."""
         super().__init__()
         self._host = host
         self._port = port
@@ -129,6 +135,7 @@ class Console(cmd.Cmd):
 
 
 def main() -> None:
+    "Entry point of pamiq-console."
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="localhost")
     parser.add_argument("--port", default=8391, type=int)
