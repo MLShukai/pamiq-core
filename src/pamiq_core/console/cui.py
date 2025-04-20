@@ -3,7 +3,7 @@ import cmd
 import json
 from typing import override
 
-import requests
+import httpx
 
 
 class Console(cmd.Cmd):
@@ -71,7 +71,7 @@ class Console(cmd.Cmd):
 
     def do_pause(self, arg: str) -> None:
         """Pause the AMI system."""
-        response = requests.post(f"http://{self._host}:{self._port}/api/pause")
+        response = httpx.post(f"http://{self._host}:{self._port}/api/pause")
         print(json.loads(response.text)["result"])
 
     def do_p(self, arg: str) -> None:
@@ -80,7 +80,7 @@ class Console(cmd.Cmd):
 
     def do_resume(self, arg: str) -> None:
         """Resume the AMI system."""
-        response = requests.post(f"http://{self._host}:{self._port}/api/resume")
+        response = httpx.post(f"http://{self._host}:{self._port}/api/resume")
         print(json.loads(response.text)["result"])
 
     def do_r(self, arg: str) -> None:
@@ -91,7 +91,7 @@ class Console(cmd.Cmd):
         """Shutdown the AMI system."""
         confirm = input("Confirm AMI system shutdown? (y/[N]): ")
         if confirm.lower() in ["y", "yes"]:
-            response = requests.post(f"http://{self._host}:{self._port}/api/shutdown")
+            response = httpx.post(f"http://{self._host}:{self._port}/api/shutdown")
             print(json.loads(response.text)["result"])
             return True
         print("Shutdown cancelled.")
@@ -111,7 +111,7 @@ class Console(cmd.Cmd):
 
     def do_ckpt(self, arg: str) -> None:
         """Save a checkpoint."""
-        response = requests.post(f"http://{self._host}:{self._port}/api/save-state")
+        response = httpx.post(f"http://{self._host}:{self._port}/api/save-state")
         print(json.loads(response.text)["result"])
 
     def do_c(self, arg: str) -> None:
@@ -125,8 +125,8 @@ class Console(cmd.Cmd):
 
     def _fetch_status(self) -> str:
         try:
-            response = requests.get(f"http://{self._host}:{self._port}/api/status")
-        except requests.exceptions.ConnectionError:
+            response = httpx.get(f"http://{self._host}:{self._port}/api/status")
+        except httpx.RequestError:
             self.prompt = "PAMIQ-console (offline) > "
             return "offline"
         status = json.loads(response.text)["status"]
