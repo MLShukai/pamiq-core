@@ -120,10 +120,10 @@ class Console(cmd.Cmd):
         try:
             response = requests.get(f"http://{self._host}:{self._port}/api/status")
         except requests.exceptions.ConnectionError:
-            self.prompt = "ami (offline) > "
+            self.prompt = "PAMIQ-console (offline) > "
             return "offline"
         status = json.loads(response.text)["status"]
-        self.prompt = f"ami ({status}) > "
+        self.prompt = f"PAMIQ-console ({status}) > "
         return status
 
 
