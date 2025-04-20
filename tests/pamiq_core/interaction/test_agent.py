@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import override
 
 import pytest
@@ -28,6 +29,14 @@ class AgentImpl(Agent[str, int]):
     def step(self, observation: str) -> int:
         """Simple implementation that returns a fixed action."""
         return 42
+
+
+class ChildAgentImpl(Agent[None, None]):
+    """Concrete implementation of Agent for testing."""
+
+    @override
+    def step(self, observation: None) -> None:
+        pass
 
 
 class TestAgent:
@@ -94,6 +103,16 @@ class TestAgent:
         agent.attach_data_collectors(data_collectors_dict)
         return agent
 
+    @pytest.fixture
+    def child_agent(self) -> ChildAgentImpl:
+        """Fixture providing a child agent implementation."""
+        return ChildAgentImpl()
+
+    @pytest.fixture
+    def parent_agent(self, child_agent: AgentImpl) -> AgentImpl:
+        """Fixture providing a parent agent with a child agent."""
+        return AgentImpl(agents={"child": child_agent})
+
     def test_attach_inference_models(
         self,
         agent: AgentImpl,
@@ -134,3 +153,111 @@ class TestAgent:
         """Test the step method returns the expected action."""
         action = agent_attached.step("test observation")
         assert action == 42
+
+    def test_attach_inference_models_propagation(
+        self,
+        parent_agent: AgentImpl,
+        child_agent: ChildAgentImpl,
+        mocker: MockerFixture,
+    ):
+        """Test that attaching inference models propagates to child agents."""
+        # Create mock inference model
+        mock_inference_model = mocker.Mock(InferenceModel)
+        inference_models = InferenceModelsDict({"test_model": mock_inference_model})
+
+        # Spy on the child's attach_inference_models method
+        spy_child_attach = mocker.spy(child_agent, "attach_inference_models")
+
+        # Attach to parent
+        parent_agent.attach_inference_models(inference_models)
+
+        # Verify child's method was called with the same models
+        spy_child_attach.assert_called_once_with(inference_models)
+
+    def test_attach_data_collectors_propagation(
+        self,
+        parent_agent: AgentImpl,
+        child_agent: AgentImpl,
+        data_collectors_dict: DataCollectorsDict,
+        mocker: MockerFixture,
+    ):
+        """Test that attaching data collectors propagates to child agents."""
+        # Spy on the child's attach_data_collectors method
+        spy_child_attach = mocker.spy(child_agent, "attach_data_collectors")
+
+        # Attach to parent
+        parent_agent.attach_data_collectors(data_collectors_dict)
+
+        # Verify child's method was called with the same collectors
+        spy_child_attach.assert_called_once_with(data_collectors_dict)
+
+    def test_save_and_load_state_with_child_agents(
+        self,
+        parent_agent: AgentImpl,
+        child_agent: ChildAgentImpl,
+        mocker: MockerFixture,
+        tmp_path: Path,
+    ):
+        """Test saving and loading state with child agents."""
+        # Spy on save and load methods
+        spy_child_save = mocker.spy(child_agent, "save_state")
+        spy_child_load = mocker.spy(child_agent, "load_state")
+
+        # Save state
+        save_path = tmp_path / "agent_state"
+        parent_agent.save_state(save_path)
+        assert save_path.is_dir()
+
+        # Verify child's save_state was called with correct path
+        spy_child_save.assert_called_once_with(save_path / "child")
+
+        # Load state
+        parent_agent.load_state(save_path)
+
+        # Verify child's load_state was called with correct path
+        spy_child_load.assert_called_once_with(save_path / "child")
+
+    def test_save_and_load_state_no_child_agents(
+        self,
+        agent_attached: AgentImpl,
+        tmp_path: Path,
+    ):
+        """Test saving and loading state with child agents."""
+        # Spy on save and load methods
+
+        # Save state
+        save_path = tmp_path / "agent_state"
+        agent_attached.save_state(save_path)
+        assert not save_path.exists()
+
+    def test_on_paused_propagation(
+        self,
+        parent_agent: AgentImpl,
+        child_agent: ChildAgentImpl,
+        mocker: MockerFixture,
+    ):
+        """Test that on_paused event propagates to child agents."""
+        # Spy on the child's on_paused method
+        spy_child_on_paused = mocker.spy(child_agent, "on_paused")
+
+        # Call on_paused on parent
+        parent_agent.on_paused()
+
+        # Verify child's on_paused was called
+        spy_child_on_paused.assert_called_once_with()
+
+    def test_on_resumed_propagation(
+        self,
+        parent_agent: AgentImpl,
+        child_agent: ChildAgentImpl,
+        mocker: MockerFixture,
+    ):
+        """Test that on_resumed event propagates to child agents."""
+        # Spy on the child's on_resumed method
+        spy_child_on_resumed = mocker.spy(child_agent, "on_resumed")
+
+        # Call on_resumed on parent
+        parent_agent.on_resumed()
+
+        # Verify child's on_resumed was called
+        spy_child_on_resumed.assert_called_once_with()
