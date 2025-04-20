@@ -39,6 +39,38 @@ class TestConsole:
         console = Console("localhost", 8391)
         assert console.prompt == "ami (offline) > "
 
+    def test_onecmd(
+        self,
+        console: Console,
+        mock_requests: MagicMock,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        # get all available commands
+        command_names = [
+            attr_name[3:] for attr_name in dir(console) if attr_name.startswith("do_")
+        ]
+        # set to rise connection fails
+        mock_requests.exceptions = requests.exceptions
+        mock_requests.get.side_effect = requests.exceptions.ConnectionError()
+        # test each command
+        for command_name in command_names:
+            console.onecmd(command_name)
+            assert console.prompt == "ami (offline) > "
+            captured = capsys.readouterr()
+            if command_name in [
+                "pause",
+                "p",
+                "resume",
+                "r",
+                "ckpt",
+                "c",
+                "shutdown",
+                "s",
+            ]:
+                assert f'Command "{command_name}" not executed.' in captured.out
+            else:
+                assert f'Command "{command_name}" not executed.' not in captured.out
+
     def test_help_command(
         self, console: Console, capsys: pytest.CaptureFixture[str]
     ) -> None:
