@@ -35,35 +35,20 @@ class Console(cmd.Cmd):
         # Execute command
         return super().onecmd(line)
 
+    def get_all_commands(self) -> list[str]:
+        return [attr[3:] for attr in dir(self) if attr.startswith("do_")]
+
     @override
     def do_help(self, arg: str) -> None:
         """Show all commands and details."""
-        # Store methods with the same docstring
-        # groups = {"Doscstring": ["command", "c"]}
-        groups: dict[str, list[str]] = {}
-        for attr in dir(self):
-            if attr.startswith("do_"):
-                cmd_name = attr[3:]
-                method = getattr(self, attr)
-                doc = method.__doc__ or ""
-                doc = doc
-                if doc not in groups:
-                    groups[doc] = []
-                groups[doc].append(cmd_name)
-        # Define showing order
-        _doc_order = [
-            "Show all commands and details.",
-            "Pause the AMI system.",
-            "Resume the AMI system.",
-            "Save a checkpoint.",
-            "Shutdown the AMI system.",
-            "Exit the console.",
-        ]
-        assert set(_doc_order) == set(groups.keys())
-        # Show details in the format f"{c}/{command} {Docstring}"
-        for doc in _doc_order:
-            cmds = "/".join(sorted(groups[doc], key=len))
-            print(f"{cmds:<11} {doc}")
+        print(
+            "h/help      Show all commands and details.\n"
+            "p/pause     Pause the AMI system.\n"
+            "r/resume    Resume the AMI system.\n"
+            "c/ckpt      Save a checkpoint.\n"
+            "s/shutdown  Shutdown the AMI system.\n"
+            "q/quit      Exit the console."
+        )
 
     def do_h(self, arg: str) -> None:
         """Show all commands and details."""

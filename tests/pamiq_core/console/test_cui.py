@@ -1,4 +1,5 @@
 import json
+import re
 import sys
 from collections.abc import Generator
 from unittest.mock import MagicMock, patch
@@ -71,17 +72,36 @@ class TestConsole:
             else:
                 assert f'Command "{command_name}" not executed.' not in captured.out
 
+    def test_get_all_commands(self, console: Console) -> None:
+        assert set(console.get_all_commands()) == {
+            "h",
+            "help",
+            "p",
+            "pause",
+            "r",
+            "resume",
+            "c",
+            "ckpt",
+            "s",
+            "shutdown",
+            "q",
+            "quit",
+        }
+
     def test_help_command(
         self, console: Console, capsys: pytest.CaptureFixture[str]
     ) -> None:
         console.do_help("")
         captured = capsys.readouterr()
-        assert "h/help" in captured.out
-        assert "p/pause" in captured.out
-        assert "r/resume" in captured.out
-        assert "c/ckpt" in captured.out
-        assert "s/shutdown" in captured.out
-        assert "q/quit" in captured.out
+        # Check if "help" explains all commands.
+        captured_commands: list[str] = []
+        for line in captured.out.split("\n"):
+            # catch the format "cmd1/cmd2/... Explain"
+            match = re.compile(r"^([\w/]+)").match(line)
+            if match:
+                cmds = match.group(1).split("/")
+                captured_commands += cmds
+        assert set(console.get_all_commands()) == set(captured_commands)
 
     def test_do_pause(
         self,
