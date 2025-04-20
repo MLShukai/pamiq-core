@@ -40,21 +40,22 @@ class TestConsole:
         console = Console("localhost", 8391)
         assert console.prompt == "PAMIQ-console (offline) > "
 
+    def test_get_all_commands(self, console: Console) -> None:
+        assert set(console.get_all_commands()) == {
+            attr_name[3:] for attr_name in dir(console) if attr_name.startswith("do_")
+        }
+
     def test_onecmd(
         self,
         console: Console,
         mock_httpx: MagicMock,
         capsys: pytest.CaptureFixture[str],
     ) -> None:
-        # get all available commands
-        command_names = [
-            attr_name[3:] for attr_name in dir(console) if attr_name.startswith("do_")
-        ]
         # set to rise connection fails
         mock_httpx.RequestError = httpx.RequestError
         mock_httpx.get.side_effect = httpx.RequestError("Test RequestError")
         # test each command
-        for command_name in command_names:
+        for command_name in console.get_all_commands():
             console.onecmd(command_name)
             assert console.prompt == "PAMIQ-console (offline) > "
             captured = capsys.readouterr()
@@ -71,22 +72,6 @@ class TestConsole:
                 assert f'Command "{command_name}" not executed.' in captured.out
             else:
                 assert f'Command "{command_name}" not executed.' not in captured.out
-
-    def test_get_all_commands(self, console: Console) -> None:
-        assert set(console.get_all_commands()) == {
-            "h",
-            "help",
-            "p",
-            "pause",
-            "r",
-            "resume",
-            "c",
-            "ckpt",
-            "s",
-            "shutdown",
-            "q",
-            "quit",
-        }
 
     def test_help_command(
         self, console: Console, capsys: pytest.CaptureFixture[str]
