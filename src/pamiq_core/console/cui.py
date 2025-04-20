@@ -18,6 +18,7 @@ class Console(cmd.Cmd):
 
     @override
     def onecmd(self, line: str) -> bool:
+        """Check connection status before command execution."""
         # Check command depend on WebAPI
         cmd_name, _, _ = self.parseline(line)
         if cmd_name in ["pause", "p", "resume", "r", "ckpt", "c", "shutdown", "s"]:
@@ -25,7 +26,7 @@ class Console(cmd.Cmd):
             if self._fetch_status() == "offline":
                 print(f'Command "{cmd_name}" not executed. Can\'t connect AMI system.')
                 return False
-        # Perform command
+        # Execute command
         return super().onecmd(line)
 
     @override
