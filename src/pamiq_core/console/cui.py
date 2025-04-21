@@ -25,11 +25,13 @@ class Console(cmd.Cmd):
     @override
     def onecmd(self, line: str) -> bool:
         """Check connection status before command execution."""
+        # Update status when every command execution.
+        status = self._fetch_status()
         # Check command depend on WebAPI
         cmd_name, _, _ = self.parseline(line)
-        if cmd_name in ["pause", "p", "resume", "r", "ckpt", "c", "shutdown", "s"]:
+        if cmd_name in ["pause", "p", "resume", "r", "save", "s", "shutdown"]:
             # Check if WebAPI available.
-            if self._fetch_status() == "offline":
+            if status == "offline":
                 print(f'Command "{cmd_name}" not executed. Can\'t connect AMI system.')
                 return False
         # Execute command
@@ -42,12 +44,12 @@ class Console(cmd.Cmd):
     def do_help(self, arg: str) -> None:
         """Show all commands and details."""
         print(
-            "h/help      Show all commands and details.\n"
-            "p/pause     Pause the AMI system.\n"
-            "r/resume    Resume the AMI system.\n"
-            "c/ckpt      Save a checkpoint.\n"
-            "s/shutdown  Shutdown the AMI system.\n"
-            "q/quit      Exit the console."
+            "h/help    Show all commands and details.\n"
+            "p/pause   Pause the AMI system.\n"
+            "r/resume  Resume the AMI system.\n"
+            "s/save    Save a checkpoint.\n"
+            "shutdown  Shutdown the AMI system.\n"
+            "q/quit    Exit the console."
         )
 
     def do_h(self, arg: str) -> None:
@@ -82,10 +84,6 @@ class Console(cmd.Cmd):
         print("Shutdown cancelled.")
         return False
 
-    def do_s(self, arg: str) -> bool:
-        """Shutdown the AMI system."""
-        return self.do_shutdown(arg)
-
     def do_quit(self, arg: str) -> bool:
         """Exit the console."""
         return True
@@ -94,14 +92,14 @@ class Console(cmd.Cmd):
         """Exit the console."""
         return self.do_quit(arg)
 
-    def do_ckpt(self, arg: str) -> None:
+    def do_save(self, arg: str) -> None:
         """Save a checkpoint."""
         response = httpx.post(f"http://{self._host}:{self._port}/api/save-state")
         print(json.loads(response.text)["result"])
 
-    def do_c(self, arg: str) -> None:
+    def do_s(self, arg: str) -> None:
         """Save a checkpoint."""
-        self.do_ckpt(arg)
+        self.do_save(arg)
 
     @override
     def postcmd(self, stop: bool, line: str) -> bool:

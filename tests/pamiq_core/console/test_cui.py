@@ -64,10 +64,9 @@ class TestConsole:
                 "p",
                 "resume",
                 "r",
-                "ckpt",
-                "c",
-                "shutdown",
+                "save",
                 "s",
+                "shutdown",
             ]:
                 assert f'Command "{command_name}" not executed.' in captured.out
             else:
@@ -159,11 +158,6 @@ class TestConsole:
         assert "Shutdown cancelled" in captured.out
         assert result is False
 
-    def test_do_s_as_alias(self, console: Console, mock_httpx: MagicMock) -> None:
-        with patch.object(console, "do_shutdown") as mock_shutdown:
-            console.do_s("")
-            mock_shutdown.assert_called_once_with("")
-
     def test_do_quit(self, console: Console) -> None:
         result = console.do_quit("")
         assert result is True
@@ -173,22 +167,22 @@ class TestConsole:
             console.do_q("")
             mock_quit.assert_called_once_with("")
 
-    def test_do_ckpt(
+    def test_do_save(
         self,
         console: Console,
         mock_httpx: MagicMock,
         capsys: pytest.CaptureFixture[str],
     ) -> None:
-        mock_httpx.post.return_value.text = json.dumps({"result": "test do_ckpt"})
-        console.do_ckpt("")
+        mock_httpx.post.return_value.text = json.dumps({"result": "test do_save"})
+        console.do_save("")
         mock_httpx.post.assert_called_once_with("http://localhost:8391/api/save-state")
         captured = capsys.readouterr()
-        assert "test do_ckpt" in captured.out
+        assert "test do_save" in captured.out
 
-    def test_do_c_as_alias(self, console: Console, mock_httpx: MagicMock) -> None:
-        with patch.object(console, "do_ckpt") as mock_ckpt:
-            console.do_c("")
-            mock_ckpt.assert_called_once_with("")
+    def test_do_s_as_alias(self, console: Console, mock_httpx: MagicMock) -> None:
+        with patch.object(console, "do_save") as mock_save:
+            console.do_s("")
+            mock_save.assert_called_once_with("")
 
     @pytest.mark.parametrize("exit_console", [True, False])
     def test_postcmd_updates_status(
