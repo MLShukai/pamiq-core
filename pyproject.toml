@@ -6,6 +6,7 @@ license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "httpx>=0.28.1",
     "starlette>=0.46.1",
     "uvicorn>=0.34.0",
 ]
@@ -50,7 +51,6 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.6.12",
     "mkdocstrings>=0.29.1",
