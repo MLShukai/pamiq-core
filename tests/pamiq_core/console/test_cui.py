@@ -32,13 +32,13 @@ class TestConsole:
     def test_initial_prompt(self, mock_httpx: MagicMock) -> None:
         mock_httpx.get.return_value.text = json.dumps({"status": "running"})
         console = Console("localhost", 8391)
-        assert console.prompt == "PAMIQ-console (running) > "
+        assert console.prompt == "pamiq-console (running) > "
 
     def test_initial_prompt_when_offline(self, mock_httpx: MagicMock) -> None:
         mock_httpx.RequestError = httpx.RequestError
         mock_httpx.get.side_effect = httpx.RequestError("Test RequestError")
         console = Console("localhost", 8391)
-        assert console.prompt == "PAMIQ-console (offline) > "
+        assert console.prompt == "pamiq-console (offline) > "
 
     def test_get_all_commands(self, console: Console) -> None:
         assert set(console.get_all_commands()) == {
@@ -57,7 +57,7 @@ class TestConsole:
         # test each command
         for command_name in console.get_all_commands():
             console.onecmd(command_name)
-            assert console.prompt == "PAMIQ-console (offline) > "
+            assert console.prompt == "pamiq-console (offline) > "
             captured = capsys.readouterr()
             if command_name in [
                 "pause",
@@ -190,7 +190,7 @@ class TestConsole:
     ) -> None:
         mock_httpx.get.return_value.text = json.dumps({"status": "test postcmd"})
         result = console.postcmd(stop=exit_console, line="")
-        assert console.prompt == "PAMIQ-console (test postcmd) > "
+        assert console.prompt == "pamiq-console (test postcmd) > "
         assert result is exit_console
 
 

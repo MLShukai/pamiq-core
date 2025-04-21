@@ -110,10 +110,10 @@ class Console(cmd.Cmd):
         try:
             response = httpx.get(f"http://{self._host}:{self._port}/api/status")
         except httpx.RequestError:
-            self.prompt = "PAMIQ-console (offline) > "
+            self.prompt = "pamiq-console (offline) > "
             return "offline"
         status = json.loads(response.text)["status"]
-        self.prompt = f"PAMIQ-console ({status}) > "
+        self.prompt = f"pamiq-console ({status}) > "
         return status
 
 
