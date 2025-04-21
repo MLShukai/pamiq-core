@@ -41,7 +41,17 @@ class TestConsole:
 
     def test_get_all_commands(self, console: Console) -> None:
         assert set(console.get_all_commands()) == {
-            attr_name[3:] for attr_name in dir(console) if attr_name.startswith("do_")
+            "h",
+            "help",
+            "p",
+            "pause",
+            "r",
+            "resume",
+            "s",
+            "save",
+            "shutdown",
+            "q",
+            "quit",
         }
 
     def test_onecmd(
