@@ -44,12 +44,16 @@ class Console(cmd.Cmd):
     def do_help(self, arg: str) -> None:
         """Show all commands and details."""
         print(
-            "h/help    Show all commands and details.\n"
-            "p/pause   Pause the AMI system.\n"
-            "r/resume  Resume the AMI system.\n"
-            "s/save    Save a checkpoint.\n"
-            "shutdown  Shutdown the AMI system.\n"
-            "q/quit    Exit the console."
+            "\n".join(
+                [
+                    "h/help    Show all commands and details.",
+                    "p/pause   Pause the AMI system.",
+                    "r/resume  Resume the AMI system.",
+                    "s/save    Save a checkpoint.",
+                    "shutdown  Shutdown the AMI system.",
+                    "q/quit    Exit the console.",
+                ]
+            )
         )
 
     def do_h(self, arg: str) -> None:
