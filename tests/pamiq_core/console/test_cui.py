@@ -47,7 +47,6 @@ class TestConsole:
             "pause",
             "r",
             "resume",
-            "s",
             "save",
             "shutdown",
             "q",
@@ -74,7 +73,6 @@ class TestConsole:
                 "resume",
                 "r",
                 "save",
-                "s",
                 "shutdown",
             ]:
                 assert f'Command "{command_name}" not executed.' in captured.out
@@ -198,13 +196,6 @@ class TestConsole:
         mock_httpx.post.assert_called_once_with("http://localhost:8391/api/save-state")
         captured = capsys.readouterr()
         assert "test do_save" in captured.out
-
-    def test_do_s_as_alias(
-        self, mocker: MockerFixture, console: Console, mock_httpx
-    ) -> None:
-        mock_save = mocker.spy(console, "do_save")
-        console.do_s("")
-        mock_save.assert_called_once_with("")
 
     @pytest.mark.parametrize("exit_console", [True, False])
     def test_postcmd_updates_status(

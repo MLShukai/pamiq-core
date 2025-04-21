@@ -29,7 +29,7 @@ class Console(cmd.Cmd):
         status = self._fetch_status()
         # Check command depend on WebAPI
         cmd_name, _, _ = self.parseline(line)
-        if cmd_name in ["pause", "p", "resume", "r", "save", "s", "shutdown"]:
+        if cmd_name in ["pause", "p", "resume", "r", "save", "shutdown"]:
             # Check if WebAPI available.
             if status == "offline":
                 print(f'Command "{cmd_name}" not executed. Can\'t connect AMI system.')
@@ -49,7 +49,7 @@ class Console(cmd.Cmd):
                     "h/help    Show all commands and details.",
                     "p/pause   Pause the AMI system.",
                     "r/resume  Resume the AMI system.",
-                    "s/save    Save a checkpoint.",
+                    "save    Save a checkpoint.",
                     "shutdown  Shutdown the AMI system.",
                     "q/quit    Exit the console.",
                 ]
@@ -100,10 +100,6 @@ class Console(cmd.Cmd):
         """Save a checkpoint."""
         response = httpx.post(f"http://{self._host}:{self._port}/api/save-state")
         print(json.loads(response.text)["result"])
-
-    def do_s(self, arg: str) -> None:
-        """Save a checkpoint."""
-        self.do_save(arg)
 
     @override
     def postcmd(self, stop: bool, line: str) -> bool:
