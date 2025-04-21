@@ -118,7 +118,7 @@ class Console(cmd.Cmd):
 
 
 def main() -> None:
-    "Entry point of pamiq-console."
+    """Entry point of pamiq-console."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="localhost")
     parser.add_argument("--port", default=8391, type=int)

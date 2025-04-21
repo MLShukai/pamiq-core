@@ -2,7 +2,7 @@ import json
 import re
 import sys
 from collections.abc import Generator
-from unittest.mock import MagicMock, patch
+from pytest_mock import MockerFixture
 
 import httpx
 import pytest
@@ -12,25 +12,24 @@ from pamiq_core.console.cui import Console, main
 
 class TestConsole:
     @pytest.fixture
-    def mock_httpx(self) -> Generator[MagicMock, None, None]:
+    def mock_httpx(self, mocker: MockerFixture) -> Generator[MagicMock, None, None]:
         # Mock httpx module imported in pamiq_core/console/cui.py
-        with patch("pamiq_core.console.cui.httpx") as mock_httpx:
-            # Mock GET response
-            mock_response = MagicMock()
-            mock_response.text = json.dumps({"status": "running"})
-            mock_httpx.get.return_value = mock_response
-            # Mock POST response
-            api_response = MagicMock()
-            api_response.text = json.dumps({"result": "success"})
-            mock_httpx.post.return_value = api_response
-            yield mock_httpx
+        mock_httpx = mocker.patch("pamiq_core.console.cui.httpx")
+        # Mock GET response
+        mock_response = mocker.Mock()
+        mock_response.text = json.dumps({"status": "running"})
+        mock_httpx.get.return_value = mock_response
+        # Mock POST response
+        api_response = mocker.Mock()
+        api_response.text = json.dumps({"result": "success"})
+        mock_httpx.post.return_value = api_response
+        return mock_httpx
 
     @pytest.fixture
     def console(self, mock_httpx: MagicMock) -> Console:
         return Console(host="localhost", port=8391)
 
     def test_initial_prompt(self, mock_httpx: MagicMock) -> None:
-        mock_httpx.get.return_value.text = json.dumps({"status": "running"})
         console = Console("localhost", 8391)
         assert console.prompt == "pamiq-console (running) > "
 
@@ -140,7 +139,7 @@ class TestConsole:
         assert "test do_shutdown" in captured.out
         assert result is True
 
-    @pytest.mark.parametrize("users_answer", ["other_strings"])
+    @pytest.mark.parametrize("users_answer", ["n", "N", "other_strings"])
     def test_do_shutdown_no(
         self,
         console: Console,
