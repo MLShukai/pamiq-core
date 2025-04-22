@@ -23,6 +23,7 @@ class Console:
         self.fetch_status()
 
     def fetch_status(self) -> None:
+        """Check WebAPI status."""
         try:
             response = httpx.get(f"http://{self._host}:{self._port}/api/status")
         except httpx.RequestError:
@@ -53,6 +54,7 @@ class Console:
         return loop_end
 
     def main_loop(self) -> None:
+        """Running CUI interface."""
         print('Welcome to the PAMIQ console. "help" lists commands.')
         while True:
             command = prompt(
