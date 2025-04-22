@@ -4,7 +4,7 @@ from typing import override
 import pytest
 from pytest_mock import MockerFixture
 
-from pamiq_core.data import DataUser, DataUsersDict
+from pamiq_core.data import DataCollector, DataUser, DataUsersDict
 from pamiq_core.model import InferenceModel, TrainingModel, TrainingModelsDict
 from pamiq_core.state_persistence import PersistentStateMixin
 from pamiq_core.thread import ThreadEventMixin
@@ -49,6 +49,7 @@ class TestTrainer:
         # Configure mock for trainability tests
         user.__len__.return_value = 100  # Mock buffer size
         user.count_data_added_since.return_value = 10  # Mock new data count
+        user._collector = mocker.MagicMock(DataCollector)
         return user
 
     @pytest.fixture
