@@ -2,7 +2,8 @@ import argparse
 import json
 
 import httpx
-import prompt_toolkit
+from prompt_toolkit import prompt
+from prompt_toolkit.completion import WordCompleter
 
 
 class Console:
@@ -18,6 +19,7 @@ class Console:
         super().__init__()
         self._host = host
         self._port = port
+        self.completer = WordCompleter(self.get_all_commands())
         self.fetch_status()
 
     def fetch_status(self) -> None:
@@ -53,7 +55,9 @@ class Console:
     def main_loop(self) -> None:
         print('Welcome to the PAMIQ console. "help" lists commands.')
         while True:
-            command = prompt_toolkit.prompt(f"pamiq-console ({self.status}) > ")
+            command = prompt(
+                f"pamiq-console ({self.status}) > ", completer=self.completer
+            )
             if command in self.get_all_commands():
                 if self.run_command(command):
                     break
