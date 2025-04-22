@@ -88,6 +88,55 @@ class TestConsole:
             else:
                 assert f'Command "{command}" not executed.' not in captured.out
 
+    def test_main_loop_with_quit(
+        self,
+        mocker: MockerFixture,
+        console: Console,
+        mock_httpx,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        mocker.patch(
+            "pamiq_core.console.cui.prompt", side_effect=["quit", "other_strings"]
+        )
+        mock_run_command = mocker.spy(console, "run_command")
+        console.main_loop()
+        # Check if "quit" finishes CUI and "other_strings" as an invalid command.
+        assert mock_run_command.call_count == 1
+        captured = capsys.readouterr()
+        assert "*** Unknown syntax: other_strings" not in captured.out
+
+    def test_main_loop_with_command(
+        self,
+        mocker: MockerFixture,
+        console: Console,
+        mock_httpx,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        mocker.patch("pamiq_core.console.cui.prompt", side_effect=["help", "quit"])
+        mock_run_command = mocker.spy(console, "run_command")
+        console.main_loop()
+        # Check if "help" runs as an available command and "quit" finishes CUI.
+        assert mock_run_command.call_count == 2
+        captured = capsys.readouterr()
+        assert "*** Unknown syntax: other_strings" not in captured.out
+
+    def test_main_loop_with_unknown_command(
+        self,
+        mocker: MockerFixture,
+        console: Console,
+        mock_httpx,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        mocker.patch(
+            "pamiq_core.console.cui.prompt", side_effect=["other_strings", "quit"]
+        )
+        mock_run_command = mocker.spy(console, "run_command")
+        # Check if "other_strings" as an invalid command and "quit" finishes CUI.
+        console.main_loop()
+        assert mock_run_command.call_count == 1
+        captured = capsys.readouterr()
+        assert "*** Unknown syntax: other_strings" in captured.out
+
     def test_command_help(
         self, console: Console, capsys: pytest.CaptureFixture[str]
     ) -> None:
