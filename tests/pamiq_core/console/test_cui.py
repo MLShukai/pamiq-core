@@ -105,7 +105,7 @@ class TestConsole:
         captured = capsys.readouterr()
         assert "*** Unknown syntax: other_strings" not in captured.out
 
-    def test_main_loop_with_command(
+    def test_main_loop_with_available_command(
         self,
         mocker: MockerFixture,
         console: Console,
