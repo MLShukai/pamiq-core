@@ -19,7 +19,7 @@ class Console:
         super().__init__()
         self._host = host
         self._port = port
-        self.completer = WordCompleter(self.get_all_commands())
+        self._completer = WordCompleter(self.get_all_commands())
         self.fetch_status()
 
     def fetch_status(self) -> None:
@@ -56,7 +56,7 @@ class Console:
         print('Welcome to the PAMIQ console. "help" lists commands.')
         while True:
             command = prompt(
-                f"pamiq-console ({self.status}) > ", completer=self.completer
+                f"pamiq-console ({self.status}) > ", completer=self._completer
             )
             if command in self.get_all_commands():
                 if self.run_command(command):
