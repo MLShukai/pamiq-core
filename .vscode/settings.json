@@ -1,0 +1,9 @@
+{
+    "python.defaultInterpreterPath": "./.venv/bin/python3",
+    "makefile.configureOnOpen": false,
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

@@ -1,0 +1,106 @@
+site_name: PAMIQ-Core
+site_description: Documentation for PAMIQ-Core - Framework for building AI agents with real-time adaptive learning capabilities
+site_url: https://mlshukai.github.io/pamiq-core/
+repo_url: https://github.com/MLShukai/pamiq-core
+repo_name: MLShukai/pamiq-core
+
+# Theme configuration
+theme:
+  name: material
+
+  features:
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.top
+    - navigation.sections
+    - navigation.indexes
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.tabs.link
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  icon:
+    repo: fontawesome/brands/github
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+
+# Plugins
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_submodules: true
+            separate_signature: true
+            line_length: 88
+            show_signature_annotations: true
+            show_root_heading: true
+            merge_init_into_class: true
+            docstring_section_style: spacy
+            members_order: source
+
+# Navigation structure
+nav:
+  - Home: index.md
+  - User Guide:
+    - Overview: user-guide/index.md
+    - Launch: user-guide/launch.md
+    - Interaction: user-guide/interaction.md
+    - Model: user-guide/model.md
+    - Data: user-guide/data.md
+    - Trainer: user-guide/trainer.md
+    - Torch🔥: user-guide/torch.md
+    - State Persistence: user-guide/state_persistence.md
+    - Schedulers: user-guide/schedulers.md
+  - API References:
+    - Launch: api/launch.md
+    - Interaction: api/interaction.md
+    - Model: api/model.md
+    - Data: api/data.md
+    - Trainer: api/trainer.md
+    - Torch🔥: api/torch.md
+    - State Persistence: api/state_persistence.md
+    - Schedulers: api/schedulers.md
+    - Time: api/time.md
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/MLShukai/pamiq-core

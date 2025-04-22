@@ -1,11 +1,15 @@
 [project]
 name = "pamiq-core"
-version = "0.0.3"
-description = "The core package for creating autonomous machine intelligence"
+version = "0.1.1"
+description = "Framework for building AI agents with real-time adaptive learning capabilities."
 license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "httpx>=0.28.1",
+    "starlette>=0.46.1",
+    "uvicorn>=0.34.0",
+]
 
 keywords = [
   "AI",
@@ -17,7 +21,7 @@ keywords = [
   "P-AMI<Q>"
 ]
 classifiers = [
-  "Development Status :: 1 - Planning",
+  "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: MIT License",
   "Natural Language :: English",
   "Natural Language :: Japanese",
@@ -26,11 +30,20 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
+
+[project.scripts]
+pamiq-console = "pamiq_core.console.cui:main"
 
 [project.urls]
 Repository = "https://github.com/MLShukai/pamiq-core"
 Issues = "https://github.com/MLShukai/pamiq-core/issues"
+
+[project.optional-dependencies]
+torch = [
+    "torch>=2.0.0",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -38,10 +51,15 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.12",
+    "mkdocstrings>=0.29.1",
+    "mkdocstrings-python>=1.16.10",
     "pamiq-core",
     "pre-commit>=4.0.1",
     "pyright>=1.1.391",
     "pytest>=8.3.4",
+    "pytest-asyncio>=0.26.0",
     "pytest-cov>=6.0.0",
     "pytest-mock>=3.14.0",
 ]
@@ -60,19 +78,25 @@ filterwarnings = [
   "ignore::DeprecationWarning",
   "ignore::UserWarning",
 ]
-log_cli = "True"
+log_cli = true
+log_level = "INFO"
 
 minversion = "6.0"
 testpaths = "tests/"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.pyright]
 pythonVersion = "3.12"
 exclude = [
   "**/node_modules",
   "**/__pycache__",
+  "**/.venv",
+  "tests/"
 ]
 strict = ["./src/"]
 reportMissingTypeStubs = false
+reportImplicitOverride = true
+reportPrivateUsage = "warning"
 
 [tool.ruff]
 
@@ -135,3 +159,17 @@ skip-magic-trailing-comma = false
 
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
+
+[tool.coverage.run]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == __main__:",
+    "pass",
+    "raise ImportError",
+    "..."
+]

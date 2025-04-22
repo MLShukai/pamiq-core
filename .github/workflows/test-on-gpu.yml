@@ -1,0 +1,65 @@
+name: Test on GPU
+
+on:
+  pull_request:
+    branches: [main, stable]
+    paths:
+      - ".github/workflows/test-on-gpu.yml"
+      - "src/pamiq_core/torch/**"
+      - "tests/pamiq_core/torch/**"
+env:
+  PYTHON_VERSION: "3.12"
+  UV_VERSION: "0.5.10"
+
+jobs:
+  test:
+    runs-on:
+      - codebuild-pamiq-core-linux-gpu-runner-${{ github.run_id }}-${{ github.run_attempt }}
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Check OS
+        run: cat /etc/os-release
+      - name: Check NVIDIA Driver Version File
+        run: |
+          NVIDIA_VERSION_FILE="/proc/driver/nvidia/version"
+          if [ -f "$NVIDIA_VERSION_FILE" ]; then
+            echo "NVIDIA driver version file found:"
+            cat "$NVIDIA_VERSION_FILE"
+          else
+            echo "::error::NVIDIA driver version file not found at $NVIDIA_VERSION_FILE"
+            echo "This self-hosted runner does not appear to have NVIDIA GPU drivers installed."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --extra torch
+
+      - name: Diagnose CUDA setup
+        run: |
+          echo "=== CUDA Device Information ==="
+          ls -la /dev/nvidia* || echo "No NVIDIA devices found in /dev"
+
+          echo "=== PyTorch CUDA Configuration ==="
+          # Print GPU info if available
+          uv run python -c "
+          import torch
+          if torch.cuda.is_available():
+              print(f'Found {torch.cuda.device_count()} GPU(s)')
+              for i in range(torch.cuda.device_count()):
+                  print(f'GPU {i}: {torch.cuda.get_device_name(i)}')
+          "
+
+      - name: Run pytest
+        run: |
+          uv run pytest -v --log-level=INFO tests/pamiq_core/torch/

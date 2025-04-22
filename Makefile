@@ -24,6 +24,10 @@ docker-down-volume:  ## Stop docker containers with removing volumes.
 docker-attach: ## Attach to development container
 	docker compose exec dev bash
 
+venv: ## Make virtual environment
+	uv venv
+	uv sync --all-extras
+
 format: ## Run pre-commit hooks
 	uv run pre-commit run -a
 
@@ -34,3 +38,14 @@ type: ## Run type check
 	uv run pyright
 
 run: format test type ## Run all workflow.
+
+# Documentation targets to add to your Makefile
+
+docs-build: ## Build documentation
+	uv run mkdocs build
+
+docs-serve: ## Serve documentation locally
+	uv run mkdocs serve
+
+docs-deploy: ## Deploy documentation to GitHub Pages
+	uv run mkdocs gh-deploy --force
