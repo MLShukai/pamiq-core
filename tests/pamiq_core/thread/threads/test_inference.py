@@ -94,7 +94,7 @@ class TestInferenceThread:
         inference_thread.attach_controller(thread_controller.read_only)
 
         inference_thread.start()
-        time.sleep(0.07)
+        time.sleep(0.1)
         thread_controller.shutdown()
         inference_thread.join()
 
