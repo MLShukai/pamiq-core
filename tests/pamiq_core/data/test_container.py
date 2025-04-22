@@ -25,6 +25,12 @@ class TestDataUsersDictAndCollectorsDict:
     def collectors_dict(self, users_dict: DataUsersDict) -> DataCollectorsDict:
         return users_dict.data_collectors_dict
 
+    def test_setitem(
+        self, users_dict: DataUsersDict, collectors_dict: DataCollectorsDict
+    ):
+        assert users_dict["main"]._collector is collectors_dict["main"]
+        assert users_dict["sub"]._collector is collectors_dict["sub"]
+
     # DataUsersDict initialization tests
     def test_from_data_buffers_dict(self, buffers: dict[str, MockDataBuffer]):
         users_dict = DataUsersDict.from_data_buffers(buffers)

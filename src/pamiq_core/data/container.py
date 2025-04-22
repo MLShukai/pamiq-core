@@ -49,7 +49,7 @@ class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
             item: DataUser instance to add to the dictionary.
         """
         super().__setitem__(key, item)
-        self._data_collectors_dict[key] = DataCollector(item)
+        self._data_collectors_dict[key] = item._collector  # pyright: ignore[reportPrivateUsage]
 
     @classmethod
     def from_data_buffers(
