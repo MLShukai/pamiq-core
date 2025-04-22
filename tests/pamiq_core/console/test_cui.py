@@ -53,7 +53,16 @@ class TestConsole:
             "quit",
         }
 
-    def test_run_command(
+    def test_run_command_when_online(
+        self, mocker: MockerFixture, console: Console, mock_httpx
+    ) -> None:
+        mock_help = mocker.spy(console, "command_help")
+        # test if connect WebAPI
+        console.run_command("help")
+        assert not console.status == "offline"
+        mock_help.assert_called_once_with()
+
+    def test_run_command_when_offline(
         self,
         console: Console,
         mock_httpx,
@@ -63,11 +72,11 @@ class TestConsole:
         mock_httpx.RequestError = httpx.RequestError
         mock_httpx.get.side_effect = httpx.RequestError("Test RequestError")
         # test each command
-        for command_name in console.get_all_commands():
-            console.run_command(command_name)
+        for command in console.get_all_commands():
+            console.run_command(command)
             assert console.status == "offline"
             captured = capsys.readouterr()
-            if command_name in [
+            if command in [
                 "pause",
                 "p",
                 "resume",
@@ -75,9 +84,9 @@ class TestConsole:
                 "save",
                 "shutdown",
             ]:
-                assert f'Command "{command_name}" not executed.' in captured.out
+                assert f'Command "{command}" not executed.' in captured.out
             else:
-                assert f'Command "{command_name}" not executed.' not in captured.out
+                assert f'Command "{command}" not executed.' not in captured.out
 
     def test_command_help(
         self, console: Console, capsys: pytest.CaptureFixture[str]
@@ -202,15 +211,6 @@ class TestConsole:
         mock_httpx.post.assert_called_once_with("http://localhost:8391/api/save-state")
         captured = capsys.readouterr()
         assert "test command_save" in captured.out
-
-    # @pytest.mark.parametrize("exit_console", [True, False])
-    # def test_postcmd_updates_status(
-    #     self, console: Console, mock_httpx, exit_console: bool
-    # ) -> None:
-    #     mock_httpx.get.return_value.text = json.dumps({"status": "test postcmd"})
-    #     result = console.postcmd(stop=exit_console, line="")
-    #     assert console.prompt == "pamiq-console (test postcmd) > "
-    #     assert result is exit_console
 
 
 def test_main(mocker: MockerFixture) -> None:
