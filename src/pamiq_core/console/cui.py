@@ -61,6 +61,8 @@ class Console:
             command = prompt(
                 f"pamiq-console ({self.status}) > ", completer=self._completer
             )
+            if command == "":
+                continue
             if command in self.get_all_commands():
                 if self.run_command(command):
                     break
