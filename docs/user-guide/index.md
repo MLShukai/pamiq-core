@@ -5,6 +5,7 @@ This document describes information for working with PAMIQ-Core. Let’s walk th
 ## User Guide Structure
 
 - [**Launch**](./launch.md): System setup and startup
+- [**Console**](./console.md): Interfaces for user interaction and external system control
 - [**Interaction**](./interaction.md): Interface between agent and environment
 - [**Model**](./model.md): Model implementation and management
 - [**Data**](./data.md): Data buffers and memory management

@@ -40,45 +40,45 @@ ERROR_INTERNAL_SERVER = {"error": "Internal server error"}
 
 
 class WebApiHandler:
-    f"""Web API handler for controlling the system.
+    """Web API handler for controlling the system.
 
     This class provides a simple Web API for controlling the thread
     controller, allowing external applications to pause, resume, and
     shutdown the system.
 
     API Endpoints:
-        GET /api/status
-            Returns the current system status.
-            Response: {{"status": "<status_name>"}}
-            Status codes: 200 OK, 500 Internal Server Error
+        - GET /api/status
+            - Returns the current system status.
+            - Response: {"status": *status_name*}
+            - Status codes: 200 OK, 500 Internal Server Error
 
-        POST /api/pause
-            Pauses the system.
-            Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
-            Status codes: 200 OK, 503 Service Unavailable
+        - POST /api/pause
+            - Pauses the system.
+            - Response: {"result": "ok"} or {"error": "Command queue is full, try again later"}
+            - Status codes: 200 OK, 503 Service Unavailable
 
-        POST /api/resume
-            Resumes the system.
-            Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
-            Status codes: 200 OK, 503 Service Unavailable
+        - POST /api/resume
+            - Resumes the system.
+            - Response: {"result": "ok"} or {"error": "Command queue is full, try again later"}
+            - Status codes: 200 OK, 503 Service Unavailable
 
-        POST /api/shutdown
-            Shuts down the system.
-            Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
-            Status codes: 200 OK, 503 Service Unavailable
+        - POST /api/shutdown
+            - Shuts down the system.
+            - Response: {"result": "ok"} or {"error": "Command queue is full, try again later"}
+            - Status codes: 200 OK, 503 Service Unavailable
 
-        POST /api/save-state
-            Saves a state of the current system state.
-            Response: {RESULT_OK} or {ERROR_QUEUE_FULL}
-            Status codes: 200 OK, 503 Service Unavailable
+        - POST /api/save-state:
+            - Saves a state of the current system state.
+            - Response: {"result": "ok"} or {"error": "Command queue is full, try again later"}
+            - Status codes: 200 OK, 503 Service Unavailable
 
     Error Responses:
-        404 Not Found: {ERROR_INVALID_ENDPOINT}
-        405 Method Not Allowed: {ERROR_INVALID_METHOD}
-        500 Internal Server Error: {ERROR_INTERNAL_SERVER}
+        - 404 Not Found: {"error": "Invalid API endpoint"}
+        - 405 Method Not Allowed: {"error": "Invalid API method"}
+        - 500 Internal Server Error: {"error": "Internal server error"}
     """
-    # Default maximum size of command queue
-    DEFAULT_QUEUE_SIZE = 1
+
+    DEFAULT_QUEUE_SIZE = 1  # Default maximum size of command queue
 
     def __init__(
         self,

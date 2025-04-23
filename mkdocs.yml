@@ -81,6 +81,7 @@ nav:
   - User Guide:
     - Overview: user-guide/index.md
     - Launch: user-guide/launch.md
+    - Console: user-guide/console.md
     - Interaction: user-guide/interaction.md
     - Model: user-guide/model.md
     - Data: user-guide/data.md
@@ -90,6 +91,7 @@ nav:
     - Schedulers: user-guide/schedulers.md
   - API References:
     - Launch: api/launch.md
+    - Console: api/console.md
     - Interaction: api/interaction.md
     - Model: api/model.md
     - Data: api/data.md
