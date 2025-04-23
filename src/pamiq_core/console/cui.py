@@ -19,7 +19,10 @@ class Console:
         super().__init__()
         self._host = host
         self._port = port
-        self._completer = WordCompleter(self.get_all_commands())
+        self.all_commands: list[str] = [
+            attr[len("command_") :] for attr in dir(self) if attr.startswith("command_")
+        ]
+        self._completer = WordCompleter(self.all_commands)
         self.fetch_status()
 
     def fetch_status(self) -> None:
@@ -30,11 +33,6 @@ class Console:
             self.status = "offline"
             return
         self.status = json.loads(response.text)["status"]
-
-    def get_all_commands(self) -> list[str]:
-        return [
-            attr[len("command_") :] for attr in dir(self) if attr.startswith("command_")
-        ]
 
     def run_command(self, command: str) -> bool | None:
         """Check connection status before command execution."""
@@ -63,7 +61,7 @@ class Console:
             )
             if command == "":
                 continue
-            if command in self.get_all_commands():
+            if command in self.all_commands:
                 if self.run_command(command):
                     break
             else:

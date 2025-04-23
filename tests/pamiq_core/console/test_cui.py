@@ -39,8 +39,8 @@ class TestConsole:
         console.fetch_status()
         assert console.status == "offline"
 
-    def test_get_all_commands(self, console: Console) -> None:
-        assert set(console.get_all_commands()) == {
+    def test_all_commands(self, console: Console) -> None:
+        assert set(console.all_commands) == {
             "h",
             "help",
             "p",
@@ -72,7 +72,7 @@ class TestConsole:
         mock_httpx.RequestError = httpx.RequestError
         mock_httpx.get.side_effect = httpx.RequestError("Test RequestError")
         # test each command
-        for command in console.get_all_commands():
+        for command in console.all_commands:
             console.run_command(command)
             assert console.status == "offline"
             captured = capsys.readouterr()
@@ -150,7 +150,7 @@ class TestConsole:
             if match:
                 cmds = match.group(1).split("/")
                 captured_commands += cmds
-        assert set(console.get_all_commands()) == set(captured_commands)
+        assert set(console.all_commands) == set(captured_commands)
 
     def test_command_h_as_alias(
         self, mocker: MockerFixture, console: Console, mock_httpx
