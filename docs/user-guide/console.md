@@ -1,6 +1,6 @@
 # Console
 
-The `console` module provides interfaces for user interaction and external system control through both a command-line interface and a web API.
+The `console` module provides the interactive command-line interface. It can control PAMIQ-Core system externally.
 
 ## PAMIQ Console
 
