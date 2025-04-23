@@ -55,8 +55,9 @@ class Console:
 
     def main_loop(self) -> None:
         """Running CUI interface."""
-        print('Welcome to the PAMIQ console. "help" lists commands.')
+        print('Welcome to the PAMIQ console. "help" lists commands.\n')
         while True:
+            self.fetch_status()
             command = prompt(
                 f"pamiq-console ({self.status}) > ", completer=self._completer
             )
