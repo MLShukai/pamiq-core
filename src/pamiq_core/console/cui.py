@@ -1,47 +1,73 @@
 import argparse
-import cmd
 import json
-from typing import override
 
 import httpx
+from prompt_toolkit import prompt
+from prompt_toolkit.completion import WordCompleter
 
 
-class Console(cmd.Cmd):
+class Console:
     """pamiq-console.
 
     Users can Control pamiq with CUI interface interactively.
     """
 
-    intro = 'Welcome to the PAMIQ console. "help" lists commands.\n'
-    prompt: str
+    status: str
 
     def __init__(self, host: str, port: int) -> None:
         """Initialize CUI interface."""
         super().__init__()
         self._host = host
         self._port = port
-        self._fetch_status()
+        self.all_commands: list[str] = [
+            attr[len("command_") :] for attr in dir(self) if attr.startswith("command_")
+        ]
+        self._completer = WordCompleter(self.all_commands)
+        self.fetch_status()
 
-    @override
-    def onecmd(self, line: str) -> bool:
+    def fetch_status(self) -> None:
+        """Check WebAPI status."""
+        try:
+            response = httpx.get(f"http://{self._host}:{self._port}/api/status")
+        except httpx.RequestError:
+            self.status = "offline"
+            return
+        self.status = json.loads(response.text)["status"]
+
+    def run_command(self, command: str) -> bool | None:
         """Check connection status before command execution."""
-        # Update status when every command execution.
-        status = self._fetch_status()
+        # Update self.status before command execution.
+        self.fetch_status()
         # Check command depend on WebAPI
-        cmd_name, _, _ = self.parseline(line)
-        if cmd_name in ["pause", "p", "resume", "r", "save", "shutdown"]:
+        if command in ["pause", "p", "resume", "r", "save", "shutdown"]:
             # Check if WebAPI available.
-            if status == "offline":
-                print(f'Command "{cmd_name}" not executed. Can\'t connect AMI system.')
+            if self.status == "offline":
+                print(f'Command "{command}" not executed. Can\'t connect AMI system.')
                 return False
         # Execute command
-        return super().onecmd(line)
+        loop_end = getattr(self, f"command_{command}")()
+        # Update self.status after command execution.
+        self.fetch_status()
+        # If True, main_loop ends.
+        return loop_end
 
-    def get_all_commands(self) -> list[str]:
-        return [attr[3:] for attr in dir(self) if attr.startswith("do_")]
+    def main_loop(self) -> None:
+        """Running CUI interface."""
+        print('Welcome to the PAMIQ console. "help" lists commands.\n')
+        while True:
+            self.fetch_status()
+            command = prompt(
+                f"pamiq-console ({self.status}) > ", completer=self._completer
+            )
+            if command == "":
+                continue
+            if command in self.all_commands:
+                if self.run_command(command):
+                    break
+            else:
+                print(f"*** Unknown syntax: {command}")
 
-    @override
-    def do_help(self, arg: str) -> None:
+    def command_help(self) -> None:
         """Show all commands and details."""
         print(
             "\n".join(
@@ -49,36 +75,36 @@ class Console(cmd.Cmd):
                     "h/help    Show all commands and details.",
                     "p/pause   Pause the AMI system.",
                     "r/resume  Resume the AMI system.",
-                    "save    Save a checkpoint.",
+                    "save      Save a checkpoint.",
                     "shutdown  Shutdown the AMI system.",
                     "q/quit    Exit the console.",
                 ]
             )
         )
 
-    def do_h(self, arg: str) -> None:
+    def command_h(self) -> None:
         """Show all commands and details."""
-        self.do_help(arg)
+        self.command_help()
 
-    def do_pause(self, arg: str) -> None:
+    def command_pause(self) -> None:
         """Pause the AMI system."""
         response = httpx.post(f"http://{self._host}:{self._port}/api/pause")
         print(json.loads(response.text)["result"])
 
-    def do_p(self, arg: str) -> None:
+    def command_p(self) -> None:
         """Pause the AMI system."""
-        return self.do_pause(arg)
+        self.command_pause()
 
-    def do_resume(self, arg: str) -> None:
+    def command_resume(self) -> None:
         """Resume the AMI system."""
         response = httpx.post(f"http://{self._host}:{self._port}/api/resume")
         print(json.loads(response.text)["result"])
 
-    def do_r(self, arg: str) -> None:
+    def command_r(self) -> None:
         """Resume the AMI system."""
-        return self.do_resume(arg)
+        self.command_resume()
 
-    def do_shutdown(self, arg: str) -> bool:
+    def command_shutdown(self) -> bool:
         """Shutdown the AMI system."""
         confirm = input("Confirm AMI system shutdown? (y/[N]): ")
         if confirm.lower() in ["y", "yes"]:
@@ -88,33 +114,18 @@ class Console(cmd.Cmd):
         print("Shutdown cancelled.")
         return False
 
-    def do_quit(self, arg: str) -> bool:
+    def command_quit(self) -> bool:
         """Exit the console."""
         return True
 
-    def do_q(self, arg: str) -> bool:
+    def command_q(self) -> bool:
         """Exit the console."""
-        return self.do_quit(arg)
+        return self.command_quit()
 
-    def do_save(self, arg: str) -> None:
+    def command_save(self) -> None:
         """Save a checkpoint."""
         response = httpx.post(f"http://{self._host}:{self._port}/api/save-state")
         print(json.loads(response.text)["result"])
-
-    @override
-    def postcmd(self, stop: bool, line: str) -> bool:
-        self._fetch_status()
-        return stop
-
-    def _fetch_status(self) -> str:
-        try:
-            response = httpx.get(f"http://{self._host}:{self._port}/api/status")
-        except httpx.RequestError:
-            self.prompt = "pamiq-console (offline) > "
-            return "offline"
-        status = json.loads(response.text)["status"]
-        self.prompt = f"pamiq-console ({status}) > "
-        return status
 
 
 def main() -> None:
@@ -125,7 +136,7 @@ def main() -> None:
     args = parser.parse_args()
 
     console = Console(args.host, args.port)
-    console.cmdloop()
+    console.main_loop()
 
 
 if __name__ == "__main__":
