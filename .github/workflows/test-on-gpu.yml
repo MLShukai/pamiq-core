@@ -45,12 +45,6 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
 
-      - name: Cache uv dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: uv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
-
       - name: Install dependencies
         run: uv sync --extra torch
 
