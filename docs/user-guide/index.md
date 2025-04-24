@@ -13,3 +13,4 @@ This document describes information for working with PAMIQ-Core. Let’s walk th
 - [**Torch🔥**](./torch.md): PyTorch integration
 - [**State Persistence**](./state_persistence.md): Saving and restoring system state
 - [**Schedulers**](./schedulers.md): Management of periodic task execution
+- [**Test**](./testing.md): Testing guide for PAMIQ-Core framework.
