@@ -1,11 +1,20 @@
 from abc import ABC
+from collections.abc import Mapping
 from pathlib import Path
+from typing import override
 
 import pytest
+from pytest_mock import MockerFixture
 
 from pamiq_core.interaction.env import Environment
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
-from pamiq_core.interaction.modular_env import Actuator, ModularEnvironment, Sensor
+from pamiq_core.interaction.modular_env import (
+    Actuator,
+    ActuatorsDict,
+    ModularEnvironment,
+    Sensor,
+    SensorsDict,
+)
 from pamiq_core.state_persistence import PersistentStateMixin
 from pamiq_core.thread import ThreadEventMixin
 
@@ -132,3 +141,260 @@ class TestModularEnvironment:
         env.on_resumed()
         mock_sensor.on_resumed.assert_called_once_with()
         mock_actuator.on_resumed.assert_called_once_with()
+
+
+class DummySensor(Sensor[int]):
+    """Simple sensor implementation for testing."""
+
+    def __init__(self, value: int = 0):
+        self.value = value
+
+    @override
+    def read(self) -> int:
+        return self.value
+
+
+class DummyActuator(Actuator[int]):
+    """Simple actuator implementation for testing."""
+
+    def __init__(self):
+        self.last_action = None
+
+    @override
+    def operate(self, action: int) -> None:
+        self.last_action = action
+
+
+class TestSensorsDict:
+    """Test suite for SensorsDict."""
+
+    @pytest.fixture
+    def sensors_dict(self) -> SensorsDict:
+        """Fixture providing a SensorsDict with dummy sensors."""
+        sensors = SensorsDict()
+        sensors["sensor1"] = DummySensor(1)
+        sensors["sensor2"] = DummySensor(2)
+        return sensors
+
+    def test_read(self, sensors_dict: SensorsDict) -> None:
+        """Test that read() returns readings from all sensors."""
+        readings = sensors_dict.read()
+
+        assert isinstance(readings, Mapping)
+        assert readings["sensor1"] == 1
+        assert readings["sensor2"] == 2
+
+    def test_setitem_getitem(self) -> None:
+        """Test dictionary-like operations."""
+        sensors = SensorsDict()
+        sensor = DummySensor(5)
+
+        sensors["new_sensor"] = sensor
+
+        assert "new_sensor" in sensors
+        assert sensors["new_sensor"] is sensor
+
+    def test_setup_propagates(
+        self, sensors_dict: SensorsDict, mocker: MockerFixture
+    ) -> None:
+        """Test that setup() propagates to all contained sensors."""
+        # Spy on the contained sensors' setup methods
+        spy1 = mocker.spy(sensors_dict["sensor1"], "setup")
+        spy2 = mocker.spy(sensors_dict["sensor2"], "setup")
+
+        sensors_dict.setup()
+
+        spy1.assert_called_once_with()
+        spy2.assert_called_once_with()
+
+    def test_teardown_propagates(
+        self, sensors_dict: SensorsDict, mocker: MockerFixture
+    ) -> None:
+        """Test that teardown() propagates to all contained sensors."""
+        # Spy on the contained sensors' teardown methods
+        spy1 = mocker.spy(sensors_dict["sensor1"], "teardown")
+        spy2 = mocker.spy(sensors_dict["sensor2"], "teardown")
+
+        sensors_dict.teardown()
+
+        spy1.assert_called_once_with()
+        spy2.assert_called_once_with()
+
+    def test_on_paused_propagates(
+        self, sensors_dict: SensorsDict, mocker: MockerFixture
+    ) -> None:
+        """Test that on_paused() propagates to all contained sensors."""
+        # Spy on the contained sensors' on_paused methods
+        spy1 = mocker.spy(sensors_dict["sensor1"], "on_paused")
+        spy2 = mocker.spy(sensors_dict["sensor2"], "on_paused")
+
+        sensors_dict.on_paused()
+
+        spy1.assert_called_once_with()
+        spy2.assert_called_once_with()
+
+    def test_on_resumed_propagates(
+        self, sensors_dict: SensorsDict, mocker: MockerFixture
+    ) -> None:
+        """Test that on_resumed() propagates to all contained sensors."""
+        # Spy on the contained sensors' on_resumed methods
+        spy1 = mocker.spy(sensors_dict["sensor1"], "on_resumed")
+        spy2 = mocker.spy(sensors_dict["sensor2"], "on_resumed")
+
+        sensors_dict.on_resumed()
+
+        spy1.assert_called_once_with()
+        spy2.assert_called_once_with()
+
+    def test_save_load_state(
+        self, sensors_dict: SensorsDict, mocker: MockerFixture, tmp_path: Path
+    ) -> None:
+        """Test saving and loading state."""
+        # Spy on the contained sensors' save_state methods
+        spy_save1 = mocker.spy(sensors_dict["sensor1"], "save_state")
+        spy_save2 = mocker.spy(sensors_dict["sensor2"], "save_state")
+
+        # Spy on the contained sensors' load_state methods
+        spy_load1 = mocker.spy(sensors_dict["sensor1"], "load_state")
+        spy_load2 = mocker.spy(sensors_dict["sensor2"], "load_state")
+
+        # Create a path for saving/loading
+        save_path = tmp_path / "sensors_state"
+
+        # Save state
+        sensors_dict.save_state(save_path)
+
+        # Check that save_state was called on all sensors with correct paths
+        # Check that save_state was called on all actuators with correct paths
+        spy_save1.assert_called_once_with(save_path / "sensor1")
+        spy_save2.assert_called_once_with(save_path / "sensor2")
+
+        # Load state
+        sensors_dict.load_state(save_path)
+
+        # Check that load_state was called on all actuators with correct paths
+        spy_load1.assert_called_once_with(save_path / "sensor1")
+        spy_load2.assert_called_once_with(save_path / "sensor2")
+
+
+class TestActuatorsDict:
+    """Test suite for ActuatorsDict."""
+
+    @pytest.fixture
+    def actuators_dict(self) -> ActuatorsDict:
+        """Fixture providing an ActuatorsDict with dummy actuators."""
+        actuators = ActuatorsDict()
+        actuators["actuator1"] = DummyActuator()
+        actuators["actuator2"] = DummyActuator()
+        return actuators
+
+    def test_operate(self, actuators_dict) -> None:
+        """Test that operate() distributes actions to all actuators."""
+        actions = {"actuator1": 10, "actuator2": 20}
+
+        actuators_dict.operate(actions)
+
+        # Check that each actuator received its respective action
+        assert actuators_dict["actuator1"].last_action == 10
+        assert actuators_dict["actuator2"].last_action == 20
+
+    def test_operate_missing_key(self, actuators_dict: ActuatorsDict) -> None:
+        """Test that operate() raises KeyError for missing actions."""
+        actions = {
+            "actuator1": 10
+            # actuator2 is missing
+        }
+
+        with pytest.raises(KeyError):
+            actuators_dict.operate(actions)
+
+    def test_setitem_getitem(self) -> None:
+        """Test dictionary-like operations."""
+        actuators = ActuatorsDict()
+        actuator = DummyActuator()
+
+        actuators["new_actuator"] = actuator
+
+        assert "new_actuator" in actuators
+        assert actuators["new_actuator"] is actuator
+
+    def test_setup_propagates(
+        self, actuators_dict: ActuatorsDict, mocker: MockerFixture
+    ) -> None:
+        """Test that setup() propagates to all contained actuators."""
+        # Spy on the contained actuators' setup methods
+        spy1 = mocker.spy(actuators_dict["actuator1"], "setup")
+        spy2 = mocker.spy(actuators_dict["actuator2"], "setup")
+
+        actuators_dict.setup()
+
+        spy1.assert_called_once_with()
+        spy2.assert_called_once_with()
+
+    def test_teardown_propagates(
+        self, actuators_dict: ActuatorsDict, mocker: MockerFixture
+    ) -> None:
+        """Test that teardown() propagates to all contained actuators."""
+        # Spy on the contained actuators' teardown methods
+        spy1 = mocker.spy(actuators_dict["actuator1"], "teardown")
+        spy2 = mocker.spy(actuators_dict["actuator2"], "teardown")
+
+        actuators_dict.teardown()
+
+        spy1.assert_called_once_with()
+        spy2.assert_called_once_with()
+
+    def test_on_paused_propagates(
+        self, actuators_dict: ActuatorsDict, mocker: MockerFixture
+    ) -> None:
+        """Test that on_paused() propagates to all contained actuators."""
+        # Spy on the contained actuators' on_paused methods
+        spy1 = mocker.spy(actuators_dict["actuator1"], "on_paused")
+        spy2 = mocker.spy(actuators_dict["actuator2"], "on_paused")
+
+        actuators_dict.on_paused()
+
+        spy1.assert_called_once_with()
+        spy2.assert_called_once_with()
+
+    def test_on_resumed_propagates(
+        self, actuators_dict: ActuatorsDict, mocker: MockerFixture
+    ) -> None:
+        """Test that on_resumed() propagates to all contained actuators."""
+        # Spy on the contained actuators' on_resumed methods
+        spy1 = mocker.spy(actuators_dict["actuator1"], "on_resumed")
+        spy2 = mocker.spy(actuators_dict["actuator2"], "on_resumed")
+
+        actuators_dict.on_resumed()
+
+        spy1.assert_called_once_with()
+        spy2.assert_called_once()
+
+    def test_save_load_state(
+        self, actuators_dict: ActuatorsDict, mocker: MockerFixture, tmp_path: Path
+    ) -> None:
+        """Test saving and loading state."""
+        # Spy on the contained actuators' save_state methods
+        spy_save1 = mocker.spy(actuators_dict["actuator1"], "save_state")
+        spy_save2 = mocker.spy(actuators_dict["actuator2"], "save_state")
+
+        # Spy on the contained actuators' load_state methods
+        spy_load1 = mocker.spy(actuators_dict["actuator1"], "load_state")
+        spy_load2 = mocker.spy(actuators_dict["actuator2"], "load_state")
+
+        # Create a path for saving/loading
+        save_path = tmp_path / "actuators_state"
+
+        # Save state
+        actuators_dict.save_state(save_path)
+
+        # Check that save_state was called on all actuators with correct paths
+        spy_save1.assert_called_once_with(save_path / "actuator1")
+        spy_save2.assert_called_once_with(save_path / "actuator2")
+
+        # Load state
+        actuators_dict.load_state(save_path)
+
+        # Check that load_state was called on all actuators with correct paths
+        spy_load1.assert_called_once_with(save_path / "actuator1")
+        spy_load2.assert_called_once_with(save_path / "actuator2")
