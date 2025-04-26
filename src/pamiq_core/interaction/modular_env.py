@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from collections import UserDict
 from collections.abc import Mapping
@@ -143,6 +145,32 @@ class ModularEnvironment[ObsType, ActType](Environment[ObsType, ActType]):
         super().on_resumed()
         self.sensor.on_resumed()
         self.actuator.on_resumed()
+
+    @staticmethod
+    def from_dict(
+        sensors: Mapping[str, Sensor[Any]], actuators: Mapping[str, Actuator[Any]]
+    ) -> ModularEnvironment[Mapping[str, Any], Mapping[str, Any]]:
+        """Create a modular environment from dictionaries of sensors and
+        actuators.
+
+        Args:
+            sensors: A mapping of sensor names to sensor instances.
+            actuators: A mapping of actuator names to actuator instances.
+
+        Returns:
+            A modular environment that uses composite sensors and actuators,
+            where observations are mappings of sensor names to their readings,
+            and actions are mappings of actuator names to their operations.
+
+        Example:
+            ```python
+            env = ModularEnvironment.from_dict(
+                sensors={"camera": CameraSensor(), "lidar": LidarSensor()},
+                actuators={"motor": MotorActuator(), "gripper": GripperActuator()}
+            )
+            ```
+        """
+        return ModularEnvironment(SensorsDict(sensors), ActuatorsDict(actuators))
 
 
 class SensorsDict(Sensor[Mapping[str, Any]], UserDict[str, Sensor[Any]]):

@@ -142,6 +142,15 @@ class TestModularEnvironment:
         mock_sensor.on_resumed.assert_called_once_with()
         mock_actuator.on_resumed.assert_called_once_with()
 
+    def test_from_dict(self, mock_sensor, mock_actuator):
+        env = ModularEnvironment.from_dict(
+            {"sensor": mock_sensor}, {"actuator": mock_actuator}
+        )
+
+        assert env.observe() == {"sensor": "test_observation"}
+        env.affect({"actuator": "action"})
+        mock_actuator.operate.assert_called_once_with("action")
+
 
 class DummySensor(Sensor[int]):
     """Simple sensor implementation for testing."""
