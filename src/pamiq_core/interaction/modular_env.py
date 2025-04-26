@@ -158,9 +158,7 @@ class ModularEnvironment[ObsType, ActType](Environment[ObsType, ActType]):
             actuators: A mapping of actuator names to actuator instances.
 
         Returns:
-            A modular environment that uses composite sensors and actuators,
-            where observations are mappings of sensor names to their readings,
-            and actions are mappings of actuator names to their operations.
+            A modular environment that uses composite sensors and actuators.
 
         Example:
             ```python
