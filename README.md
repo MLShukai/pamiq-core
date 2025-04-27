@@ -1,3 +1,5 @@
+![logo](./docs/images/logo.svg)
+
 # pamiq-core
 
 [![PyPI version](https://img.shields.io/pypi/v/pamiq-core.svg)](https://pypi.org/project/pamiq-core/)
