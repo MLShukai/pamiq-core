@@ -2,7 +2,7 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: [main, stable]
+    branches: [stable]
     paths:
       - 'src/**'
       - 'docs/**'
