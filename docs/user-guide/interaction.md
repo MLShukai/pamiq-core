@@ -199,6 +199,67 @@ environment = ModularEnvironment(CameraSensor(), MotorActuator())
 
 This approach enables reusable components and cleaner separation of concerns.
 
+### Composite Sensors and Actuators
+
+ModularEnvironment provides mechanisms for handling multiple sensors and actuators together, enhancing flexibility:
+
+```python
+from pamiq_core import ModularEnvironment, SensorsDict, ActuatorsDict
+
+# Combine multiple sensors
+sensors = SensorsDict({
+    "camera": CameraSensor(),
+    "lidar": LidarSensor(),
+    "temperature": TemperatureSensor()
+})
+
+# Combine multiple actuators
+actuators = ActuatorsDict({
+    "motor": MotorActuator(),
+    "gripper": GripperActuator(),
+    "speaker": SpeakerActuator()
+})
+
+# Create environment with composite sensor and actuator
+environment = ModularEnvironment(sensors, actuators)
+```
+
+With this approach, sensor readings are returned as a dictionary with sensor names as keys, and actions are passed as dictionaries with actuator names as keys.
+
+```python
+# Example observation
+observation = environment.observe()
+# Result: {"camera": [...], "lidar": [...], "temperature": 22.5}
+
+# Example action
+action = {
+    "motor": 0.5,       # Run motor at 50% speed
+    "gripper": "close", # Close the gripper
+    "speaker": "beep"   # Play a beep sound
+}
+environment.affect(action)
+```
+
+### Convenient Factory Method
+
+ModularEnvironment also provides a factory method to simplify creating environments with composite sensors and actuators:
+
+```python
+# Create ModularEnvironment directly from dictionaries
+environment = ModularEnvironment.from_dict(
+    sensors={
+        "camera": CameraSensor(),
+        "lidar": LidarSensor()
+    },
+    actuators={
+        "motor": MotorActuator(),
+        "gripper": GripperActuator()
+    }
+)
+```
+
+This approach allows you to modularize complex environments by component, enhancing reusability and extensibility.
+
 ## Wrappers
 
 Wrappers transform data flowing between components. PAMIQ-Core provides wrappers for environments, sensors, and actuators:

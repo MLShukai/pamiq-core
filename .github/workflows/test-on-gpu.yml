@@ -14,7 +14,10 @@ env:
 jobs:
   test:
     runs-on:
-      - codebuild-pamiq-core-linux-gpu-runner-${{ github.run_id }}-${{ github.run_attempt }}
+      - self-hosted
+      - Linux
+      - X64
+      - gpu
     strategy:
       fail-fast: false
 

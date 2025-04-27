@@ -81,6 +81,7 @@ nav:
   - User Guide:
     - Overview: user-guide/index.md
     - Launch: user-guide/launch.md
+    - Console: user-guide/console.md
     - Interaction: user-guide/interaction.md
     - Model: user-guide/model.md
     - Data: user-guide/data.md
@@ -88,8 +89,10 @@ nav:
     - Torch🔥: user-guide/torch.md
     - State Persistence: user-guide/state_persistence.md
     - Schedulers: user-guide/schedulers.md
+    - Test: user-guide/testing.md
   - API References:
     - Launch: api/launch.md
+    - Console: api/console.md
     - Interaction: api/interaction.md
     - Model: api/model.md
     - Data: api/data.md
@@ -98,6 +101,7 @@ nav:
     - State Persistence: api/state_persistence.md
     - Schedulers: api/schedulers.md
     - Time: api/time.md
+    - Testing: api/testing.md
 
 # Customization
 extra:

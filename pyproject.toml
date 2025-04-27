@@ -1,6 +1,6 @@
 [project]
 name = "pamiq-core"
-version = "0.1.1"
+version = "0.2.0"
 description = "Framework for building AI agents with real-time adaptive learning capabilities."
 license = {file = "LICENSE"}
 readme = "README.md"
@@ -8,6 +8,7 @@ requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.28.1",
     "starlette>=0.46.1",
+    "prompt-toolkit>=3.0.51",
     "uvicorn>=0.34.0",
 ]
 
@@ -62,6 +63,7 @@ dev = [
     "pytest-asyncio>=0.26.0",
     "pytest-cov>=6.0.0",
     "pytest-mock>=3.14.0",
+    "ruff>=0.11.6",
 ]
 
 [tool.uv.sources]
