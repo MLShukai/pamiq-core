@@ -300,3 +300,5 @@ class TestTorchTrainingModel:
         assert inference_model(torch.randn(8, 10, device=device)).shape == (8, 20)
         input = torch.randn(8, 10, device=device)
         assert torch.allclose(training_model(input), inference_model(input))
+
+        training_model.sync()
