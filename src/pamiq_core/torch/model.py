@@ -11,11 +11,11 @@ from pamiq_core.model import InferenceModel, TrainingModel
 CPU_DEVICE = torch.device("cpu")
 
 
-class InferenceProcedureCallable(Protocol):
+class InferenceProcedureCallable[T: nn.Module](Protocol):
     """Typing for `inference_procedure` argument of TorchTrainingModel because
     `typing.Callable` can not typing `*args` and `**kwds`."""
 
-    def __call__(self, model: nn.Module, /, *args: Any, **kwds: Any) -> Any: ...
+    def __call__(self, model: T, /, *args: Any, **kwds: Any) -> Any: ...
 
 
 def get_device(
@@ -63,7 +63,7 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
     """Wrapper class for torch model to infer in InferenceThread."""
 
     def __init__(
-        self, model: T, inference_procedure: InferenceProcedureCallable
+        self, model: T, inference_procedure: InferenceProcedureCallable[T]
     ) -> None:
         """Initialize.
 
@@ -113,7 +113,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         inference_thread_only: bool = False,
         device: torch.device | str | None = None,
         dtype: torch.dtype | None = None,
-        inference_procedure: InferenceProcedureCallable = default_infer_procedure,
+        inference_procedure: InferenceProcedureCallable[T] = default_infer_procedure,
         pretrained_parameter_file: str | Path | None = None,
     ):
         """Initialize.
