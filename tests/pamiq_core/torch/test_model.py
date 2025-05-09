@@ -1,6 +1,7 @@
 import copy
 import logging
 from pathlib import Path
+from typing import override
 
 import pytest
 import torch
@@ -13,7 +14,6 @@ from pamiq_core.torch import (
     default_infer_procedure,
     get_device,
 )
-from typing import override
 
 logger = logging.getLogger(__name__)
 
@@ -286,7 +286,6 @@ class TestTorchTrainingModel:
         )
         assert torch.equal(inference_model._raw_model.bias.data, custom_model.bias.data)
 
-
     @parametrize_device
     def test_initialize_with_compile(self, device, mocker: MockerFixture):
         model = nn.Linear(10, 20)
@@ -294,8 +293,10 @@ class TestTorchTrainingModel:
         training_model = TorchTrainingModel(model, compile=True, device=device)
         inference_model = training_model.inference_model
 
-        spy_compile.assert_awaited_once_with()
+        spy_compile.assert_called_with()
+        assert spy_compile.call_count == 2  # Include inference model
 
-        assert training_model(torch.randn(8, 10)).shape == (8, 20)
-        assert inference_model(torch.randn(8, 10)).shape == (8, 20)
-        
+        assert training_model(torch.randn(8, 10, device=device)).shape == (8, 20)
+        assert inference_model(torch.randn(8, 10, device=device)).shape == (8, 20)
+        input = torch.randn(8, 10, device=device)
+        assert torch.allclose(training_model(input), inference_model(input))

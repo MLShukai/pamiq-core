@@ -146,8 +146,8 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         if compile:
             if self.has_inference_model:
                 # copy before compile
-                self.inference_model._raw_model.compile() # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
-            self.model.compile() # pyright: ignore[reportUnknownMemberType, ]                
+                self.inference_model._raw_model.compile()  # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
+            self.model.compile()  # pyright: ignore[reportUnknownMemberType, ]
 
     @override
     def _create_inference_model(self) -> TorchInferenceModel[T]:
