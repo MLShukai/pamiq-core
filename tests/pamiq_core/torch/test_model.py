@@ -5,14 +5,15 @@ from pathlib import Path
 import pytest
 import torch
 import torch.nn as nn
+from pytest_mock import MockerFixture
 
-from pamiq_core.model import InferenceModel, TrainingModel
 from pamiq_core.torch import (
     TorchInferenceModel,
     TorchTrainingModel,
     default_infer_procedure,
     get_device,
 )
+from typing import override
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,7 @@ def test_default_infer_procedure(device: torch.device) -> None:
             super().__init__()
             self.p = torch.nn.Parameter(torch.randn([2, 3]))
 
+        @override
         def forward(
             self, a: torch.Tensor, b: torch.Tensor, use_b: bool = True
         ) -> torch.Tensor:
@@ -283,3 +285,17 @@ class TestTorchTrainingModel:
             inference_model._raw_model.weight.data, custom_model.weight.data
         )
         assert torch.equal(inference_model._raw_model.bias.data, custom_model.bias.data)
+
+
+    @parametrize_device
+    def test_initialize_with_compile(self, device, mocker: MockerFixture):
+        model = nn.Linear(10, 20)
+        spy_compile = mocker.spy(model, "compile")
+        training_model = TorchTrainingModel(model, compile=True, device=device)
+        inference_model = training_model.inference_model
+
+        spy_compile.assert_awaited_once_with()
+
+        assert training_model(torch.randn(8, 10)).shape == (8, 20)
+        assert inference_model(torch.randn(8, 10)).shape == (8, 20)
+        
