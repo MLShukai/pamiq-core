@@ -8,8 +8,6 @@ import torch.nn as nn
 
 from pamiq_core.model import InferenceModel, TrainingModel
 
-CPU_DEVICE = torch.device("cpu")
-
 
 class InferenceProcedureCallable[T: nn.Module](Protocol):
     """Typing for `inference_procedure` argument of TorchTrainingModel because
@@ -19,7 +17,7 @@ class InferenceProcedureCallable[T: nn.Module](Protocol):
 
 
 def get_device(
-    module: nn.Module, default_device: torch.device = CPU_DEVICE
+    module: nn.Module, default_device: torch.device | None = None
 ) -> torch.device:
     """Retrieves the device where the module runs.
 
@@ -33,6 +31,8 @@ def get_device(
         return param.device
     for buf in module.buffers():
         return buf.device
+    if default_device is None:
+        default_device = torch.get_default_device()
     return default_device
 
 
@@ -43,7 +43,7 @@ def default_infer_procedure(model: nn.Module, *args: Any, **kwds: Any) -> Any:
     you override this method, be careful to send the input tensor to the
     computing device.
     """
-    device = get_device(model, CPU_DEVICE)
+    device = get_device(model)
     new_args: list[Any] = []
     new_kwds: dict[str, Any] = {}
     for i in args:
@@ -134,7 +134,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             model = model.type(dtype)
         self.model = model
         if device is None:  # prevents from moving the model to cpu unintentionally.
-            device = get_device(model, CPU_DEVICE)
+            device = get_device(model)
         self._inference_procedure = inference_procedure
         self.model.to(device)
 
