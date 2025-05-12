@@ -34,7 +34,7 @@ inference_models = components.inference_models
 
 The function returns a `ConnectedComponents` named tuple containing all the connected component dictionaries for easy access in your tests.
 
-### Create Mock Models
+### Creating Mock Models
 
 When testing components that interact with models, you often need mock implementations of `TrainingModel` and `InferenceModel`. The `create_mock_models` function creates pre-configured mock model pairs:
 
@@ -55,7 +55,7 @@ assert training_model.has_inference_model is True
 assert training_model.inference_model is inference_model
 ```
 
-### Create Mock Buffer
+### Creating Mock Buffer
 
 When testing components that require data buffers, you can quickly create mock buffer instances using the `create_mock_buffer` function:
 
