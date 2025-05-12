@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 from typing import Any, NamedTuple
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 from .data import DataBuffer, DataCollectorsDict, DataUsersDict
 from .interaction import Agent
@@ -104,3 +104,21 @@ def create_mock_models(
     if has_inference_model:
         training_model.inference_model = inference_model
     return training_model, inference_model
+
+
+def create_mock_buffer(max_size: int = 1) -> MagicMock:
+    """Create a mock data buffer for testing.
+
+    Creates a MagicMock instance that mocks a DataBuffer with the specified
+    max_size parameter. This is useful for testing components that depend on
+    DataBuffer without implementing a full buffer.
+
+    Args:
+        max_size: Maximum size of the buffer. Defaults to 1.
+
+    Returns:
+        A MagicMock object that mocks a DataBuffer.
+    """
+    buf = MagicMock(DataBuffer)
+    buf.max_size = max_size
+    return buf

@@ -12,6 +12,7 @@ from pamiq_core.model import (
 from pamiq_core.testing import (
     ConnectedComponents,
     connect_components,
+    create_mock_buffer,
     create_mock_models,
 )
 from pamiq_core.trainer import Trainer
@@ -169,7 +170,7 @@ class TestConnectComponents:
         assert "model1" in result.inference_models
 
 
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 
 class TestCreateMockModels:
@@ -209,3 +210,24 @@ class TestCreateMockModels:
         assert training_model.has_inference_model is True
         assert training_model.inference_thread_only is True
         assert training_model.inference_model is inference_model
+
+
+class TestCreateMockBuffer:
+    """Test suite for create_mock_buffer helper function."""
+
+    def test_default_configuration(self) -> None:
+        """Test create_mock_buffer with default parameters."""
+        buffer = create_mock_buffer()
+
+        # Verify buffer is correctly configured
+        assert buffer.max_size == 1
+        assert isinstance(buffer, MagicMock)
+        assert isinstance(buffer, DataBuffer)
+
+    def test_custom_max_size(self) -> None:
+        """Test create_mock_buffer with custom max_size."""
+        custom_size = 100
+        buffer = create_mock_buffer(max_size=custom_size)
+
+        # Verify buffer has the specified max_size
+        assert buffer.max_size == custom_size
