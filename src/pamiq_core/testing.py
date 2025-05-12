@@ -1,9 +1,15 @@
 from collections.abc import Mapping
 from typing import Any, NamedTuple
+from unittest.mock import Mock
 
 from .data import DataBuffer, DataCollectorsDict, DataUsersDict
 from .interaction import Agent
-from .model import InferenceModelsDict, TrainingModel, TrainingModelsDict
+from .model import (
+    InferenceModel,
+    InferenceModelsDict,
+    TrainingModel,
+    TrainingModelsDict,
+)
 from .trainer import Trainer, TrainersDict
 
 
@@ -74,3 +80,27 @@ def connect_components(
         training_models=training_models,
         inference_models=inference_models,
     )
+
+
+def create_mock_models(
+    has_inference_model: bool = True, inference_thread_only: bool = False
+) -> tuple[Mock, Mock]:
+    """Create mock training and inference models for testing.
+
+    Creates mocked instances of TrainingModel and InferenceModel with the specified
+    configuration, properly connecting them when has_inference_model is True.
+
+    Args:
+        has_inference_model: Whether the training model should have an inference model
+        inference_thread_only: Whether the model is for inference thread only
+
+    Returns:
+        A tuple containing (training_model, inference_model) mocks
+    """
+    training_model = Mock(TrainingModel)
+    inference_model = Mock(InferenceModel)
+    training_model.has_inference_model = has_inference_model
+    training_model.inference_thread_only = inference_thread_only
+    if has_inference_model:
+        training_model.inference_model = inference_model
+    return training_model, inference_model

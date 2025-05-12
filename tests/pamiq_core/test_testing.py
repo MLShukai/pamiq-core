@@ -9,7 +9,11 @@ from pamiq_core.model import (
     TrainingModel,
     TrainingModelsDict,
 )
-from pamiq_core.testing import ConnectedComponents, connect_components
+from pamiq_core.testing import (
+    ConnectedComponents,
+    connect_components,
+    create_mock_models,
+)
 from pamiq_core.trainer import Trainer
 
 
@@ -163,3 +167,45 @@ class TestConnectComponents:
         assert "buffer1" in result.data_collectors
         assert "model1" in result.training_models
         assert "model1" in result.inference_models
+
+
+from unittest.mock import Mock
+
+
+class TestCreateMockModels:
+    """Test suite for create_mock_models helper function."""
+
+    def test_default_configuration(self) -> None:
+        """Test create_mock_models with default parameters."""
+        # Default values: has_inference_model=True, inference_thread_only=False
+        training_model, inference_model = create_mock_models()
+
+        # Verify the models are correctly configured
+        assert training_model.has_inference_model is True
+        assert training_model.inference_thread_only is False
+        assert training_model.inference_model is inference_model
+        assert isinstance(training_model, Mock)
+        assert isinstance(inference_model, Mock)
+        assert isinstance(training_model, TrainingModel)
+        assert isinstance(inference_model, InferenceModel)
+
+    def test_without_inference_model(self) -> None:
+        """Test create_mock_models with has_inference_model=False."""
+        training_model, inference_model = create_mock_models(has_inference_model=False)
+
+        # Verify the training model doesn't have an inference model
+        assert training_model.has_inference_model is False
+        assert training_model.inference_thread_only is False
+        assert training_model.inference_model != inference_model
+        assert isinstance(inference_model, Mock)
+
+    def test_inference_thread_only(self) -> None:
+        """Test create_mock_models with inference_thread_only=True."""
+        training_model, inference_model = create_mock_models(
+            has_inference_model=True, inference_thread_only=True
+        )
+
+        # Verify inference_thread_only is correctly set
+        assert training_model.has_inference_model is True
+        assert training_model.inference_thread_only is True
+        assert training_model.inference_model is inference_model
