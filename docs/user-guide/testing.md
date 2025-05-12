@@ -34,6 +34,27 @@ inference_models = components.inference_models
 
 The function returns a `ConnectedComponents` named tuple containing all the connected component dictionaries for easy access in your tests.
 
+### Create Mock Models
+
+When testing components that interact with models, you often need mock implementations of `TrainingModel` and `InferenceModel`. The `create_mock_models` function creates pre-configured mock model pairs:
+
+```python
+from pamiq_core.testing import create_mock_models
+
+# Create a standard model pair
+training_model, inference_model = create_mock_models()
+
+# Create a training model without inference model
+training_model_no_inference, _ = create_mock_models(has_inference_model=False)
+
+# Create an inference-thread-only model
+inference_only_model, inference_model = create_mock_models(inference_thread_only=True)
+
+# Use in tests
+assert training_model.has_inference_model is True
+assert training_model.inference_model is inference_model
+```
+
 ### API Reference
 
 For more detailed information, check out the [API Reference](../api/testing.md)
