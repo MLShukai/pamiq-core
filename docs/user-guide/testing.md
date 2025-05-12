@@ -55,6 +55,22 @@ assert training_model.has_inference_model is True
 assert training_model.inference_model is inference_model
 ```
 
+### Create Mock Buffer
+
+When testing components that require data buffers, you can quickly create mock buffer instances using the `create_mock_buffer` function:
+
+```python
+from pamiq_core.testing import create_mock_buffer
+
+
+buffers = {
+    # Create a default buffer with max_size=1
+    "buffer": create_mock_buffer(),
+    # Create a buffer with custom max_size
+    "large_buffer": create_mock_buffer(max_size=1000),
+}
+```
+
 ### API Reference
 
 For more detailed information, check out the [API Reference](../api/testing.md)
