@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping
 
 from pamiq_core.state_persistence import PersistentStateMixin
 
 type StepData[T] = Mapping[str, T]
-type BufferData[T] = Mapping[str, Sequence[T]]
+type BufferData[T] = Mapping[str, Iterable[T]]
 
 
 class DataBuffer[T](ABC, PersistentStateMixin):
