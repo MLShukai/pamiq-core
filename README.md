@@ -17,6 +17,7 @@
 - 🧵 **Thread-safe Design**: Robust synchronization mechanisms for parameter sharing and data transfers
 - 🔌 **Modular Components**: Easy-to-extend agent, environment, and model interfaces
 - 🛠️ **Comprehensive Tools**: Built-in state persistence, time control, and monitoring
+- 🌍 **Cross Platform**: Linux is the primary focus, but Windows and macOS are also supported. (However, some older macOS and Windows systems may have significantly less accurate time control.)
 
 ## 📋 Requirements
 
