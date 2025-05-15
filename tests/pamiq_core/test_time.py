@@ -75,7 +75,6 @@ def test_monotonic_monotonicity(controller):
 
 
 @skip_if_platform_is_not_linux()
-@skip_if_kernel_is_linuxkit()
 def test_sleep_duration(controller):
     """Verify sleep duration at normal speed."""
     sleep_time = 0.1

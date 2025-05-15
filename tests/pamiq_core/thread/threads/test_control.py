@@ -15,7 +15,7 @@ from pamiq_core.thread import (
     ThreadTypes,
 )
 from pamiq_core.thread.threads.control import ControlThread
-from tests.helpers import check_log_message
+from tests.helpers import check_log_message, skip_if_platform_is_not_linux
 
 
 class TestControlThread:
@@ -325,6 +325,7 @@ class TestControlThread:
         # Verify time was resumed
         mock_time_resume.assert_called_once()
 
+    @skip_if_platform_is_not_linux()
     def test_shutdown_by_max_uptime_reached(
         self, thread_statuses, caplog: pytest.LogCaptureFixture, mock_state_store
     ) -> None:

@@ -12,7 +12,7 @@ from pamiq_core.thread import (
     ThreadStatusesMonitor,
     ThreadTypes,
 )
-from tests.helpers import check_log_message
+from tests.helpers import check_log_message, skip_if_platform_is_not_linux
 
 
 class TestThreadController:
@@ -109,6 +109,7 @@ class TestThreadController:
         assert thread_controller.wait_for_resume(timeout=0.1) is True
         assert time.perf_counter() - start < 1e-3
 
+    @skip_if_platform_is_not_linux()
     def test_wait_for_resume_when_already_paused(
         self, thread_controller: ThreadController
     ) -> None:
@@ -209,6 +210,7 @@ class TestControllerCommandHandler:
         handler.stop_if_pause()
         assert time.perf_counter() - start < 1e-3
 
+    @skip_if_platform_is_not_linux()
     def test_stop_if_pause_pause_to_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
     ) -> None:
@@ -507,6 +509,7 @@ class TestThreadStatusesMonitor:
             (True, True),
         ],
     )
+    @skip_if_platform_is_not_linux()
     def test_wait_for_all_threads_pause_all_when_paused_after_waiting(
         self,
         is_inference_resumed,
