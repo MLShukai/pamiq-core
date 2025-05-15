@@ -34,6 +34,7 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS :: MacOS X"
 ]
 
 [project.scripts]
