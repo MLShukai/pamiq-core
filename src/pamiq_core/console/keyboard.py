@@ -82,6 +82,7 @@ class KeyboardController:
         name = self.get_key_name(key)
         if not name:
             return
+        print("key press:", name)
         self._current_keys.add(name)
 
         if self._current_keys == self._pause_keys:
