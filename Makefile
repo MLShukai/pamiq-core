@@ -35,11 +35,7 @@ BASE_COMPOSE  := -f docker-compose.yml
 NVIDIA_COMPOSE   := -f docker-compose.nvidia.yml
 
 # Auto-detection capabilities.
-ifeq ($(OS),Windows_NT)
-    HAS_NVIDIA := $(shell where nvidia-smi >nul 2>&1 && echo true || echo false)
-else
-    HAS_NVIDIA := $(shell command -v nvidia-smi > /dev/null 2>&1 && echo true || echo false)
-endif
+HAS_NVIDIA := $(shell which nvidia-smi > /dev/null 2>&1 && echo true || echo false)
 
 # -f options
 COMPOSE_FILES := $(BASE_COMPOSE)
