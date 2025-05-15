@@ -61,6 +61,22 @@ pamiq-console --host localhost --port 8391
 pamiq-console --host 192.168.1.100 --port 8391
 ```
 
+### Keyboard Shortcut Control
+
+For desktop automation agents, you can control the system with keyboard shortcuts:
+
+```bash
+# Install with keyboard control support
+pip install pamiq-core[kbctl]
+
+# Start the keyboard controller
+pamiq-kbctl
+```
+
+This allows you to pause/resume the system with keyboard shortcuts (default: Alt+Shift+P/R).
+
+**Note for Linux users**: You may need to install `libevdev-dev` and `build-essential` packages.
+
 ## Documentation
 
 - [**User Guide**](./user-guide/index.md): Describes information for working with PAMIQ-Core.

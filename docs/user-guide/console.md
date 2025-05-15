@@ -83,6 +83,48 @@ The status endpoint returns one of the following values:
 - `resuming` - System is in the process of resuming
 - `shutting down` - System is shutting down
 
+## Keyboard Shortcut Controller
+
+For agents that interact with the desktop or require quick pause/resume capabilities, PAMIQ-Core provides a keyboard shortcut controller.
+
+### Installation
+
+```sh
+pip install pamiq-core[kbctl]
+```
+
+**Note for Linux users**: The following dependencies may be required:
+
+```sh
+sudo apt-get install libevdev-dev build-essential
+```
+
+### Usage
+
+```sh
+pamiq-kbctl
+```
+
+### Default Shortcuts
+
+- Windows/Linux: `Alt+Shift+P` (Pause) and `Alt+Shift+R` (Resume)
+- macOS: `Option+Shift+P` (Pause) and `Option+Shift+R` (Resume)
+- Windows also supports `Alt+Shift+Q` to quit the controller
+
+### Command-line Options
+
+- `--host`: Hostname of the PAMIQ system (default: localhost)
+- `--port`: Port number for the web API (default: 8391)
+- `--pause-key`: Custom key combination for pause
+- `--resume-key`: Custom key combination for resume
+- `--quit-key`: Custom key combination to exit the controller
+
+Example with custom shortcuts:
+
+```sh
+pamiq-kbctl --pause-key "ctrl+p" --resume-key "ctrl+r"
+```
+
 ## API Reference
 
 For detailed information about the classes and methods in the console module, check out the [API Reference](../api/console.md).

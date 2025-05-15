@@ -24,6 +24,7 @@ class KeyboardController:
             port: API server port
             pause_keys: Key combination for pause command (e.g., "alt+shift+p")
             resume_keys: Key combination for resume command (e.g., "alt+shift+r")
+            quit_keys: Key combination for quit command (e.g., "alt+shift+q")
         """
         self.host = host
         self.port = port
