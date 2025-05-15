@@ -61,3 +61,16 @@ docker-down-volume:  ## Stop docker containers with removing volumes.
 
 docker-attach: ## Attach to development container
 	docker compose $(BASE_COMPOSE) exec dev bash
+
+# ------------------------
+# Documentation Workflows
+# ------------------------
+
+docs-build: ## Build documentation
+	uv run mkdocs build
+
+docs-serve: ## Serve documentation locally
+	uv run mkdocs serve
+
+docs-deploy: ## Deploy documentation to GitHub Pages
+	uv run mkdocs gh-deploy --force
