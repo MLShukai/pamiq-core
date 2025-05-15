@@ -52,6 +52,7 @@ class TestGetDevice:
         model = nn.Module().to(device)
         assert get_device(model, CPU_DEVICE) == CPU_DEVICE
         assert get_device(model, CUDA_DEVICE) == CUDA_DEVICE
+        assert get_device(model) == torch.get_default_device()
 
 
 @parametrize_device
