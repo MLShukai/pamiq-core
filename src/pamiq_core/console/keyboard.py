@@ -5,8 +5,6 @@ import sys
 import httpx
 from pynput import keyboard
 
-type KeysSet = set[keyboard.Key | keyboard.KeyCode]
-
 
 class KeyboardController:
     """Keyboard controller for PAMIQ system control."""
@@ -20,46 +18,31 @@ class KeyboardController:
             pause_keys: Key combination for pause command (e.g., "alt+shift+p")
             resume_keys: Key combination for resume command (e.g., "alt+shift+r")
         """
-        self._host = host
-        self._port = port
+        self.host = host
+        self.port = port
         self._pause_keys = self._parse_key_combination(pause_keys)
         self._resume_keys = self._parse_key_combination(resume_keys)
-        self._current_keys: KeysSet = set()
+        self._current_keys: set[str] = set()
 
-    def _parse_key_combination(
-        self, keys_str: str
-    ) -> set[keyboard.Key | keyboard.KeyCode]:
-        """Parse key combination string to pynput key objects.
+    def _parse_key_combination(self, keys_str: str) -> set[str]:
+        """Parse key combination string to key name set.
 
         Args:
             keys_str: Key combination string (e.g., "alt+shift+p")
 
         Returns:
-            Set of keyboard keys
+            Set of key names in lowercase
         """
-        key_map = {
-            "alt": keyboard.Key.alt,
-            "ctrl": keyboard.Key.ctrl,
-            "shift": keyboard.Key.shift,
-            "cmd": keyboard.Key.cmd,
-        }
+        return set(keys_str.lower().split("+"))
 
-        keys: KeysSet = set()
-        for key in keys_str.lower().split("+"):
-            if key in key_map:
-                keys.add(key_map[key])
-            else:
-                keys.add(keyboard.KeyCode.from_char(key))
-        return keys
-
-    def _send_command(self, endpoint: str) -> None:
+    def send_command(self, endpoint: str) -> None:
         """Send command to PAMIQ API.
 
         Args:
             endpoint: API endpoint name
         """
         try:
-            response = httpx.post(f"http://{self._host}:{self._port}/api/{endpoint}")
+            response = httpx.post(f"http://{self.host}:{self.port}/api/{endpoint}")
             result = json.loads(response.text)
             print(f"{endpoint}: {result.get('result', 'error')}")
         except httpx.ConnectError:
@@ -72,7 +55,23 @@ class KeyboardController:
         except httpx.RequestError as e:
             print(f"{endpoint}: Request error: {e}")
 
-    def _on_press(self, key: keyboard.Key | keyboard.KeyCode | None) -> None:
+    @staticmethod
+    def get_key_name(key: keyboard.Key | keyboard.KeyCode) -> str | None:
+        """Convert key object to lowercase string name.
+
+        Args:
+            key: Key object from pynput
+
+        Returns:
+            Lowercase key name or None if not determinable
+        """
+        if isinstance(key, keyboard.Key):
+            return key.name.lower()
+        else:
+            if key.char:
+                return key.char.lower()
+
+    def on_press(self, key: keyboard.Key | keyboard.KeyCode | None) -> None:
         """Handle key press event.
 
         Args:
@@ -80,14 +79,17 @@ class KeyboardController:
         """
         if key is None:
             return
-        self._current_keys.add(key)
+        name = self.get_key_name(key)
+        if not name:
+            return
+        self._current_keys.add(name)
 
         if self._current_keys == self._pause_keys:
-            self._send_command("pause")
+            self.send_command("pause")
         elif self._current_keys == self._resume_keys:
-            self._send_command("resume")
+            self.send_command("resume")
 
-    def _on_release(self, key: keyboard.Key | keyboard.KeyCode | None) -> None:
+    def on_release(self, key: keyboard.Key | keyboard.KeyCode | None) -> None:
         """Handle key release event.
 
         Args:
@@ -95,21 +97,20 @@ class KeyboardController:
         """
         if key is None:
             return
-        self._current_keys.discard(key)
+        name = self.get_key_name(key)
+        if not name:
+            return
+        self._current_keys.discard(name)
 
     def run(self) -> None:
         """Start keyboard listener."""
         print("Keyboard controller started.")
-        print(
-            f"Pause: {'+'.join(str(k).replace('Key.', '') for k in self._pause_keys)}"
-        )
-        print(
-            f"Resume: {'+'.join(str(k).replace('Key.', '') for k in self._resume_keys)}"
-        )
+        print(f"Pause: {'+'.join(self._pause_keys)}")
+        print(f"Resume: {'+'.join(self._resume_keys)}")
         print("Press Ctrl+C to exit.")
 
         with keyboard.Listener(
-            on_press=self._on_press, on_release=self._on_release
+            on_press=self.on_press, on_release=self.on_release
         ) as listener:
             listener.join()
 
