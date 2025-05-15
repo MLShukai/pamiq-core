@@ -34,6 +34,11 @@ def check_log_message(
         AssertionError: if the expected log message is not in the log messages of specified log level.
     """
 
+    try:
+        re.compile(expected_log_message)
+    except re.error:
+        expected_log_message = re.escape(expected_log_message)
+
     if log_level:
         error_level_log_messages = [
             record.message for record in caplog.records if record.levelname == log_level

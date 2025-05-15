@@ -74,6 +74,7 @@ def test_monotonic_monotonicity(controller):
     assert all(t2 >= t1 for t1, t2 in zip(times, times[1:]))
 
 
+@skip_if_platform_is_not_linux()
 def test_sleep_duration(controller):
     """Verify sleep duration at normal speed."""
     sleep_time = 0.1

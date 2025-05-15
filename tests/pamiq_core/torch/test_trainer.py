@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import override
 
@@ -259,6 +260,6 @@ class TestTorchTrainer:
 
         with pytest.raises(
             ValueError,
-            match=f"Path {invalid_path} is not a directory or does not exist",
+            match=f"Path {re.escape(str(invalid_path))} is not a directory or does not exist",
         ):
             torch_trainer.load_state(invalid_path)
