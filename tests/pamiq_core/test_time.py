@@ -130,6 +130,8 @@ def test_pause_freezes_all_time_functions(controller):
         controller.resume()
 
 
+@skip_if_platform_is_not_linux()
+@skip_if_kernel_is_linuxkit()
 def test_resume_continues_time_properly(controller):
     """Verify time continues correctly after resume."""
     start_time = controller.time()
@@ -157,6 +159,8 @@ def test_pause_resume_with_time_scale(controller):
     assert end_time - start_time == pytest.approx(0.2, abs=0.01)
 
 
+@skip_if_platform_is_not_linux()
+@skip_if_kernel_is_linuxkit()
 def test_multiple_pause_resume_cycles(controller):
     """Verify multiple pause/resume cycles work correctly."""
     start_time = controller.time()
@@ -229,6 +233,8 @@ def test_resume_idempotent(controller):
     assert abs(second_resume_time - first_resume_time) < 0.01
 
 
+@skip_if_platform_is_not_linux()
+@skip_if_kernel_is_linuxkit()
 def test_pause_resume_fixed_time_unaffected():
     """Verify fixed time functions are not affected by pause/resume."""
     start_fixed = pamiq_time.fixed_time()
@@ -243,6 +249,8 @@ def test_pause_resume_fixed_time_unaffected():
     assert end_fixed - start_fixed == pytest.approx(0.1, abs=0.01)
 
 
+@skip_if_platform_is_not_linux()
+@skip_if_kernel_is_linuxkit()
 def test_get_and_load_state_dict():
     """Verify state dict."""
     controller = TimeController()
