@@ -10,6 +10,7 @@ dependencies = [
     "starlette>=0.46.1",
     "prompt-toolkit>=3.0.51",
     "uvicorn>=0.34.0",
+    "pynput>=1.8.1",
 ]
 
 keywords = [

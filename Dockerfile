@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     make \
+    libevdev-dev \
+    build-essential \
     && rm -rf /var/lib/apt/lists/* \
     && make venv \
     # Install pre-commit hook.
