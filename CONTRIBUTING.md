@@ -8,15 +8,6 @@ Please install the following tools in advance:
 
 ### Required Tools
 
-- 🐳 **Docker (Docker Compose)**
-
-    - Docker Desktop: <https://www.docker.com/get-started/>
-    - Docker Engine (Linux only): <https://docs.docker.com/engine/install/>
-    - Verification command:
-        ```sh
-        docker version && docker compose version
-        ```
-
 - 🔨 **make**
 
     - Windows: Install via [`scoop`](https://scoop.sh) or [`chocolatey`](https://chocolatey.org)
@@ -35,7 +26,30 @@ Please install the following tools in advance:
         git -v
         ```
 
+#### Developing on Docker container (Recommended)
+
+- 🐳 **Docker (Docker Compose)**
+
+    - Docker Desktop: <https://www.docker.com/get-started/>
+    - Docker Engine (Linux only): <https://docs.docker.com/engine/install/>
+    - Verification command:
+        ```sh
+        docker version && docker compose version
+        ```
+
+#### Developing on Local
+
+- ⚡**uv**
+
+    - Installation guide: <https://docs.astral.sh/uv/getting-started/installation/>
+    - Verification command:
+        ```sh
+        uv --version
+        ```
+
 ## 🚀 Setting Up the Development Environment
+
+### Docker Container Development (Recommended)
 
 1. Repository Setup
 
@@ -70,6 +84,22 @@ Please install the following tools in advance:
     git config user.email <your GitHub email>
     ```
 
+### Local Development
+
+1. Repository Setup
+
+    Same as Docker development - fork and clone the repository.
+
+2. Create Virtual Environment
+
+    ```sh
+    make venv
+    ```
+
+3. Git Initial Configuration
+
+    Same as Docker development - configure your git identity.
+
 ## 💻 Development Environment Configuration
 
 ### Development with VSCode
@@ -89,7 +119,7 @@ The development container includes the following environment:
 Use the following commands for development:
 
 ```sh
-# Set up Python virtual environment
+# Set up Python virtual environment (if not already done)
 make venv
 
 # Format code and run pre-commit hooks
