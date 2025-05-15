@@ -66,8 +66,7 @@ Please install the following tools in advance:
 
 2. Building the Docker Environment
 
-    > [!WARNING]
-    > **USE Git Bash on Windows User**
+    ⚠️ **USE Git Bash on Windows User**
 
     ```sh
     # Build the image
