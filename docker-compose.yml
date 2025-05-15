@@ -15,7 +15,6 @@ services:
     command: /bin/bash
     working_dir: /workspace
     stop_grace_period: 0s
-    privileged: true
 
 volumes:
   pamiq-core:
