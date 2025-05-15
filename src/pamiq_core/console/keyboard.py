@@ -106,8 +106,8 @@ class KeyboardController:
     def run(self) -> None:
         """Start keyboard listener."""
         print("Keyboard controller started.")
-        print(f"Pause: {'+'.join(self._pause_keys)}")
-        print(f"Resume: {'+'.join(self._resume_keys)}")
+        print(f"Pause: {'+'.join(sorted(self._pause_keys))}")
+        print(f"Resume: {'+'.join(sorted(self._resume_keys))}")
         print("Press Ctrl+C to exit.")
 
         with keyboard.Listener(
@@ -118,14 +118,24 @@ class KeyboardController:
 
 def main() -> None:
     """Entry point of pamiq-kbctl."""
+    default_pause_key = "alt+shift+p"
+    default_resume_key = "alt+shift+r"
+    if sys.platform == "darwin":  # macOS setting
+        default_pause_key = "alt+shift+∏"  # "∏" is opt + p
+        default_resume_key = "alt+shift+‰"  # "‰" is opt + r
+
     parser = argparse.ArgumentParser(description="PAMIQ keyboard controller")
     parser.add_argument("--host", default="localhost", help="API server host")
     parser.add_argument("--port", default=8391, type=int, help="API server port")
     parser.add_argument(
-        "--pause-key", default="alt+shift+p", help="Key combination for pause"
+        "--pause-key",
+        default=default_pause_key,
+        help="Key combination for pause. Default is 'alt+shift+p' ('alt' is 'option' on macOS)",
     )
     parser.add_argument(
-        "--resume-key", default="alt+shift+r", help="Key combination for resume"
+        "--resume-key",
+        default=default_resume_key,
+        help="Key combination for resume. Default is 'alt+shift+r' ('alt' is 'option' on macOS)",
     )
 
     args = parser.parse_args()
