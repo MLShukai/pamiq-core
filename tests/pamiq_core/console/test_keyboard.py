@@ -15,10 +15,10 @@ from pamiq_core.console.keyboard import KeyboardController
 class TestKeyboardController:
     @pytest.fixture
     def controller(self) -> KeyboardController:
-        return KeyboardController("localhost", 8391, "alt+shift+p", "alt+shift+r")
+        return KeyboardController("localhost", 8391, "alt+shift+p", "alt+shift+r", None)
 
     def test_init(self):
-        controller = KeyboardController("test.com", 1234, "ctrl+p", "ctrl+r")
+        controller = KeyboardController("test.com", 1234, "ctrl+p", "ctrl+r", None)
         assert controller.host == "test.com"
         assert controller.port == 1234
 
