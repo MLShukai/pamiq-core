@@ -105,6 +105,17 @@ sudo apt-get install libevdev-dev build-essential
 pamiq-kbctl
 ```
 
+### macOS Accessibility Permissions
+
+On macOS, you must grant Accessibility permissions to your terminal application before using `pamiq-kbctl`:
+
+1. Go to System Settings → Privacy & Security → Accessibility
+2. Click the "+" button
+3. Add your terminal application (Terminal, iTerm2, VS Code Terminal, etc.)
+4. Restart your terminal application after granting permissions
+
+Without these permissions, macOS will prevent keyboard monitoring and `pamiq-kbctl` will not function properly.
+
 ### Default Shortcuts
 
 - Windows/Linux: `Alt+Shift+P` (Pause) and `Alt+Shift+R` (Resume)
