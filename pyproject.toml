@@ -39,6 +39,7 @@ classifiers = [
 
 [project.scripts]
 pamiq-console = "pamiq_core.console.cui:main"
+pamiq-kbctl = "pamiq_core.console.keyboard:main"
 
 [project.urls]
 Repository = "https://github.com/MLShukai/pamiq-core"
@@ -47,6 +48,10 @@ Issues = "https://github.com/MLShukai/pamiq-core/issues"
 [project.optional-dependencies]
 torch = [
     "torch>=2.0.0",
+]
+kbctl = [
+    "httpx>=0.28.1",
+    "pynput>=1.8.1",
 ]
 
 [build-system]
