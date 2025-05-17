@@ -127,7 +127,7 @@ class DataUser[T](PersistentStateMixin):
             Number of data points added after the specified timestamp.
         """
         for i, t in enumerate(reversed(self._timestamps)):
-            if t < timestamp:
+            if t <= timestamp:
                 return i
         return len(self._timestamps)
 
