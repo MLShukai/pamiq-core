@@ -297,6 +297,40 @@ class ImageProcessingWrapper(Wrapper[list[float], list[float]]):
         return [x * 0.5 + 0.1 for x in image]
 ```
 
+### Sensor and Actuator Wrappers
+
+In addition to wrapping entire environments, you can wrap individual sensors and actuators:
+
+```python
+from pamiq_core import SensorWrapper, ActuatorWrapper
+
+# Wrap a sensor to process its readings
+sensor_wrapper = SensorWrapper(camera_sensor, normalize_observation)
+
+# Wrap an actuator to transform actions before they reach it
+actuator_wrapper = ActuatorWrapper(motor_actuator, scale_action)
+```
+
+These wrappers work similarly to `EnvironmentWrapper` but operate at the component level:
+
+- `SensorWrapper` transforms the output from a sensor after reading
+- `ActuatorWrapper` transforms the input to an actuator before operating
+
+### Wrapper Helper Methods
+
+Wrapper instances provide convenient helper methods to directly create sensor and actuator wrappers:
+
+```python
+# Create an image processing wrapper
+image_processor = ImageProcessingWrapper()
+
+# Apply the wrapper to a sensor
+processed_camera = image_processor.wrap_sensor(camera_sensor)
+
+# Apply the inverse of the wrapper to an actuator
+processed_motor = image_processor.wrap_actuator(motor_actuator)
+```
+
 ## Common Event Hooks
 
 PAMIQ-Core components have common event hooks that you can override:

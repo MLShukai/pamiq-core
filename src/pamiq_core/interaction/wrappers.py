@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
@@ -40,6 +42,38 @@ class Wrapper[T, W](ABC, InteractionEventMixin, PersistentStateMixin, ThreadEven
             Transformed value.
         """
         return self.wrap(value)
+
+    def wrap_sensor(self, sensor: Sensor[T]) -> SensorWrapper[T, W]:
+        """Create a SensorWrapper that combines this wrapper with the provided
+        sensor.
+
+        This is a convenience method that applies the current wrapper to a sensor,
+        creating a SensorWrapper that will transform the sensor's readings using
+        this wrapper's transformation logic.
+
+        Args:
+            sensor: The sensor to wrap with this wrapper.
+
+        Returns:
+            A new SensorWrapper that applies this wrapper's transformation to the sensor.
+        """
+        return SensorWrapper(sensor, self)
+
+    def wrap_actuator(self, actuator: Actuator[W]) -> ActuatorWrapper[W, T]:
+        """Create an ActuatorWrapper that combines this wrapper with the
+        provided actuator.
+
+        This is a convenience method that applies the current wrapper to an actuator,
+        creating an ActuatorWrapper that will transform actions before passing them
+        to the actuator using this wrapper's transformation logic.
+
+        Args:
+            actuator: The actuator to wrap with this wrapper.
+
+        Returns:
+            A new ActuatorWrapper that applies this wrapper's transformation to actions.
+        """
+        return ActuatorWrapper(actuator, self)
 
 
 class LambdaWrapper[T, W](Wrapper[T, W]):
