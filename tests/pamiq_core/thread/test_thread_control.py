@@ -124,6 +124,7 @@ class TestThreadController:
         assert thread_controller.wait_for_resume(0.1) is False
         assert 0.1 <= time.perf_counter() - start < 0.2
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     def test_wait_for_resume_when_resumed_after_waiting(
         self, thread_controller: ThreadController
@@ -218,6 +219,7 @@ class TestControllerCommandHandler:
         handler.stop_if_pause()
         assert time.perf_counter() - start < 1e-3
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     def test_stop_if_pause_pause_to_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
@@ -515,6 +517,7 @@ class TestThreadStatusesMonitor:
                 caplog=caplog,
             )
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     @pytest.mark.parametrize(
         "is_inference_resumed, is_training_resumed",
