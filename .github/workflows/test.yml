@@ -1,43 +1,33 @@
-name: Lint & Format / Tests / Type Check
+name: Test
 
 on:
   push:
     branches: [main, stable]
+    paths:
+      - "**/*.py"
+      - "**/*.pyi"
+      - ".github/workflows/test.yml"
+      - "pyproject.toml"
+      - "uv.lock"
   pull_request:
     branches: [main, stable]
+    paths:
+      - "**/*.py"
+      - "**/*.pyi"
+      - ".github/workflows/test.yml"
+      - "pyproject.toml"
+      - "uv.lock"
 
 env:
   PYTHON_VERSION: "3.12"
-  UV_VERSION: "0.5.10"
 
 jobs:
-  run_pre-commit:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: ${{ env.UV_VERSION }}
-          python-version: ${{ env.PYTHON_VERSION }}
-          enable-cache: true
-
-      - name: Cache pre-commit
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
-
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
-
   run_tests:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-22.04", "ubuntu-24.04", "windows-latest", "macos-latest"]
+        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
         python-version: ["3.12", "3.13"]
 
     timeout-minutes: 20
@@ -46,9 +36,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv and set the python version
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v6
         with:
-          version: ${{ env.UV_VERSION }}
+          version: "latest"
           python-version: ${{ matrix.python-version }}
           enable-cache: true
 
@@ -111,34 +101,3 @@ jobs:
   #       with:
   #         token: ${{ secrets.CODECOV_TOKEN }}
   #         slug: MLShukai/pamiq-core
-
-  run_type-check:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: ${{ env.UV_VERSION }}
-          python-version: ${{ env.PYTHON_VERSION }}
-          enable-cache: true
-
-      - name: Cache uv dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: uv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
-
-      - name: Install dependencies
-        run: make venv
-
-      - name: Check installed packages
-        run: |
-          echo "Python version:"
-          uv run python -V
-          echo "All installed packages:"
-          uv pip list
-
-      - name: Run pyright
-        run: uv run pyright
