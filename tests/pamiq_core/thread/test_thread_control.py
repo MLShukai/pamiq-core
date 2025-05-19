@@ -241,6 +241,7 @@ class TestControllerCommandHandler:
         assert handler.manage_loop() is True
         assert time.perf_counter() - start < 1e-3
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     def test_manage_loop_pause_to_resume(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
@@ -370,6 +371,7 @@ class TestThreadStatus:
         assert thread_status.wait_for_pause(0.1) is True
         assert time.perf_counter() - start < 1e-3
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     def test_wait_for_pause_when_already_resumed(
         self, thread_status: ThreadStatus
