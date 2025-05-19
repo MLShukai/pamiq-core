@@ -9,7 +9,7 @@ from pamiq_core.interaction.interval_adjustors import (
     IntervalAdjustor,
     SleepIntervalAdjustor,
 )
-from tests.helpers import skip_if_kernel_is_linuxkit, skip_if_platform_is_not_linux
+from tests.helpers import skip_if_kernel_is_linuxkit
 
 
 def compute_adjustor_spec(
@@ -27,7 +27,6 @@ def compute_adjustor_spec(
 
 
 class TestSleepIntervalAdjustor:
-    @skip_if_platform_is_not_linux()
     @skip_if_kernel_is_linuxkit()
     @pytest.mark.parametrize(
         """interval,num_trial""",

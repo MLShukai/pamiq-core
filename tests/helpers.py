@@ -5,12 +5,6 @@ from pathlib import Path
 import pytest
 
 
-def skip_if_platform_is_not_linux():
-    return pytest.mark.skipif(
-        platform.system() != "Linux", reason="Platform is not linux."
-    )
-
-
 def skip_if_kernel_is_linuxkit():
     osrelease = Path("/proc/sys/kernel/osrelease")
     skip = False
