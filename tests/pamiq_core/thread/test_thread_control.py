@@ -262,6 +262,7 @@ class TestControllerCommandHandler:
         assert handler.manage_loop() is False
         assert time.perf_counter() - start < 1e-3
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     def test_manage_loop_pause_to_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
