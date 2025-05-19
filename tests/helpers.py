@@ -1,17 +1,27 @@
 import platform
 import re
-from pathlib import Path
+import sys
 
 import pytest
 
 
-def skip_if_kernel_is_linuxkit():
-    osrelease = Path("/proc/sys/kernel/osrelease")
-    skip = False
-    if osrelease.is_file() and "linuxkit" in osrelease.read_text():
-        skip = True
+def skip_if_platform_is_windows():
+    return pytest.mark.skipif(
+        sys.platform == "win32", reason=f"Platform is {platform.system()}"
+    )
 
-    return pytest.mark.skipif(skip, reason="Linux kernel is linuxkit.")
+
+def skip_if_platform_is_darwin():
+    return pytest.mark.skipif(
+        sys.platform == "darwin", reason=f"Platform is {platform.system()}"
+    )
+
+
+def skip_if_kernel_is_linuxkit():
+    return pytest.mark.skipif(
+        "linuxkit" in platform.release(),
+        reason=f"Linux kernel is linuxkit ({platform.release()})",
+    )
 
 
 def check_log_message(
