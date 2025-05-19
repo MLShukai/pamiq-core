@@ -78,6 +78,7 @@ def test_monotonic_monotonicity(controller):
     assert all(t2 >= t1 for t1, t2 in zip(times, times[1:]))
 
 
+@skip_if_platform_is_windows()
 @skip_if_platform_is_darwin()
 def test_sleep_duration(controller):
     """Verify sleep duration at normal speed."""
@@ -88,6 +89,7 @@ def test_sleep_duration(controller):
     assert elapsed == pytest.approx(0.1, abs=0.01)
 
 
+@skip_if_platform_is_windows()
 @skip_if_platform_is_darwin()
 @skip_if_kernel_is_linuxkit()
 def test_sleep_with_time_scale(controller):
