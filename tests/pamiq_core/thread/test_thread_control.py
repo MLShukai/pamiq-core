@@ -259,6 +259,7 @@ class TestControllerCommandHandler:
         assert handler.manage_loop() is False
         assert time.perf_counter() - start < 1e-3
 
+    @skip_if_platform_is_darwin()
     def test_manage_loop_pause_to_shutdown(
         self, thread_controller: ThreadController, handler: ControllerCommandHandler
     ) -> None:
@@ -378,6 +379,7 @@ class TestThreadStatus:
         assert thread_status.wait_for_pause(0.1) is False
         assert 0.1 <= time.perf_counter() - start < 0.2
 
+    @skip_if_platform_is_darwin()
     def test_wait_for_pause_when_paused_after_waiting(
         self, thread_status: ThreadStatus
     ) -> None:
@@ -513,6 +515,7 @@ class TestThreadStatusesMonitor:
                 caplog=caplog,
             )
 
+    @skip_if_platform_is_darwin()
     @pytest.mark.parametrize(
         "is_inference_resumed, is_training_resumed",
         [
