@@ -381,6 +381,7 @@ class TestThreadStatus:
         assert thread_status.wait_for_pause(0.1) is False
         assert 0.1 <= time.perf_counter() - start < 0.2
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     def test_wait_for_pause_when_paused_after_waiting(
         self, thread_status: ThreadStatus
