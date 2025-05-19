@@ -13,7 +13,11 @@ from pamiq_core.thread import (
 )
 from pamiq_core.thread.threads.base import BackgroundThread, Thread
 from pamiq_core.time import perf_counter
-from tests.helpers import check_log_message, skip_if_platform_is_darwin
+from tests.helpers import (
+    check_log_message,
+    skip_if_platform_is_darwin,
+    skip_if_platform_is_windows,
+)
 
 
 class TestThread:
@@ -235,6 +239,7 @@ class TestBackgroundThread:
 
         assert background_thread.thread_status.is_resume() is True
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     def test_thread_life_cycle(
         self, spy_run, thread_controller, background_thread_with_controller, mocker

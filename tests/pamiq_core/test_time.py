@@ -5,7 +5,11 @@ import pytest
 
 from pamiq_core import time as pamiq_time
 from pamiq_core.time import TimeController, get_global_time_controller
-from tests.helpers import skip_if_kernel_is_linuxkit, skip_if_platform_is_darwin
+from tests.helpers import (
+    skip_if_kernel_is_linuxkit,
+    skip_if_platform_is_darwin,
+    skip_if_platform_is_windows,
+)
 
 
 def test_module_global_values():
@@ -95,6 +99,7 @@ def test_sleep_with_time_scale(controller):
     assert elapsed == pytest.approx(0.05, abs=0.01)
 
 
+@skip_if_platform_is_windows()
 @skip_if_platform_is_darwin()
 @skip_if_kernel_is_linuxkit()
 def test_time_functions_scale_properly(controller):

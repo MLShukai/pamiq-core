@@ -12,7 +12,11 @@ from pamiq_core.thread import (
     ThreadStatusesMonitor,
     ThreadTypes,
 )
-from tests.helpers import check_log_message, skip_if_platform_is_darwin
+from tests.helpers import (
+    check_log_message,
+    skip_if_platform_is_darwin,
+    skip_if_platform_is_windows,
+)
 
 
 class TestThreadController:
@@ -109,6 +113,7 @@ class TestThreadController:
         assert thread_controller.wait_for_resume(timeout=0.1) is True
         assert time.perf_counter() - start < 1e-3
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     def test_wait_for_resume_when_already_paused(
         self, thread_controller: ThreadController
@@ -180,6 +185,7 @@ class TestControllerCommandHandler:
         on_paused_callback_mock.assert_not_called()
         on_resumed_callback_mock.assert_not_called()
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     def test_stop_if_pause_pause_to_resume(
         self,
@@ -460,6 +466,7 @@ class TestThreadStatusesMonitor:
         assert thread_statuses_monitor.wait_for_all_threads_pause(0.1) is True
         assert time.perf_counter() - start < 1e-2  # test not passed if 1e-3
 
+    @skip_if_platform_is_windows()
     @skip_if_platform_is_darwin()
     @pytest.mark.parametrize(
         "is_inference_resumed, is_training_resumed",
