@@ -58,11 +58,9 @@ class Encoder(nn.Module):
              Tensor: The mean of the distribution.
         """
 
-        self.eval()
-        with no_grad():
-            x = x.to(get_device(self))
-            dist: Normal = self(x)
-            return dist.mean
+        x = x.to(get_device(self))
+        dist: Normal = self(x)
+        return dist.mean
 
 
 class Decoder(nn.Module):
