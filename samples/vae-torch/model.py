@@ -1,6 +1,6 @@
 from typing import override
 
-from torch import Tensor, nn
+from torch import Tensor, nn, no_grad
 from torch.distributions import Normal
 
 from pamiq_core.torch import get_device
@@ -20,8 +20,6 @@ class Encoder(nn.Module):
         """
         super().__init__()
 
-        self.latent_dim = feature_size // 8
-
         self.network = nn.Sequential(
             nn.Linear(feature_size, feature_size // 2),
             nn.ReLU(),
@@ -29,8 +27,9 @@ class Encoder(nn.Module):
             nn.ReLU(),
         )
 
-        self.fc_mean = nn.Linear(feature_size // 4, self.latent_dim)
-        self.fc_logvar = nn.Linear(feature_size // 4, self.latent_dim)
+        self.fc_mean = nn.Linear(feature_size // 4, feature_size // 8)
+        self.fc_logstd = nn.Linear(feature_size // 4, feature_size // 8)
+
     @override
     def forward(self, x: Tensor) -> Normal:
         """Forward pass of the encoder.
@@ -42,24 +41,29 @@ class Encoder(nn.Module):
         """
 
         x = self.network(x)
-
-        mean, logstd = x.chunk(2, dim=1)
+        mean = self.fc_mean(x)
+        logstd = self.fc_logstd(x)
         scale = (0.5 * logstd).exp()  # 0.5 offers stability
 
         return Normal(loc=mean, scale=scale)
+
     def infer(self, x: Tensor) -> Tensor:
-        """Inference of the encoder. 
-        
+        """Inference of the encoder.
+
         Returns the mean of the distribution.
 
          Args:
              x: The input tensor.
          Returns:
              Tensor: The mean of the distribution.
-     """
-     x = x.to(get_device(self))
-     dist: Normal = model(x)
-     return dist.mean
+        """
+
+        self.eval()
+        with no_grad():
+            x = x.to(get_device(self))
+            dist: Normal = self(x)
+            return dist.mean
+
 
 class Decoder(nn.Module):
     """Decoder for VAE.
@@ -95,5 +99,3 @@ class Decoder(nn.Module):
         """
         x = self.network(x)
         return x
-
-
