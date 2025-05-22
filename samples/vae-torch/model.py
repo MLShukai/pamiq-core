@@ -24,9 +24,9 @@ class Encoder(nn.Module):
 
         self.network = nn.Sequential(
             nn.Linear(feature_size, feature_size // 2),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Linear(feature_size // 2, feature_size // 4),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Linear(
                 feature_size // 4, 2 * self.latent_dim
             ),  # the output is means and log variances for a Normal distribution
