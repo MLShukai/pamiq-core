@@ -27,11 +27,10 @@ class Encoder(nn.Module):
             nn.ReLU(),
             nn.Linear(feature_size // 2, feature_size // 4),
             nn.ReLU(),
-            nn.Linear(
-                feature_size // 4, 2 * self.latent_dim
-            ),  # the output is means and log variances for a Normal distribution
         )
 
+        self.fc_mean = nn.Linear(feature_size // 4, self.latent_dim)
+        self.fc_logvar = nn.Linear(feature_size // 4, self.latent_dim)
     @override
     def forward(self, x: Tensor) -> Normal:
         """Forward pass of the encoder.
