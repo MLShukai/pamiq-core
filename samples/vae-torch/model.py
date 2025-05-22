@@ -67,9 +67,9 @@ class Decoder(nn.Module):
 
         self.network = nn.Sequential(
             nn.Linear(feature_size // 8, feature_size // 4),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Linear(feature_size // 4, feature_size // 2),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Linear(feature_size // 2, feature_size),
         )
 
