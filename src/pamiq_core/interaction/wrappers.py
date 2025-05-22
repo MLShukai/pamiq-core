@@ -30,7 +30,7 @@ class Wrapper[T, W](ABC, InteractionEventMixin, PersistentStateMixin, ThreadEven
         Returns:
             Transformed value.
         """
-        ...
+        pass
 
     def __call__(self, value: T) -> W:
         """Enable calling the wrapper as a function.

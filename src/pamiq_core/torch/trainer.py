@@ -106,7 +106,7 @@ class TorchTrainer(Trainer):
             - Dictionary mapping names to optimizers
             - Tuple containing (optimizers dictionary, schedulers dictionary)
         """
-        ...
+        pass
 
     def _setup_optimizers_and_schedulers(self) -> None:
         """Setup optimizers and schedulers from configuration.

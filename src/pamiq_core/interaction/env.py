@@ -18,7 +18,7 @@ class Environment[ObsType, ActType](
         Returns:
             Observation from the environment.
         """
-        ...
+        pass
 
     @abstractmethod
     def affect(self, action: ActType) -> None:
@@ -27,4 +27,4 @@ class Environment[ObsType, ActType](
         Args:
             action: Action to apply to the environment.
         """
-        ...
+        pass
