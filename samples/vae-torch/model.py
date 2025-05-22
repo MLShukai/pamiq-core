@@ -86,16 +86,3 @@ class Decoder(nn.Module):
         return x
 
 
-def encoder_infer(model: Encoder, input: Tensor) -> Tensor:
-    """Inference of the encoder. Returns the mean of the distribution.
-
-    Args:
-        model: The encoder model.
-        input: The input tensor.
-    Returns:
-        Tensor: The mean of the distribution.
-    """
-
-    input = input.to(get_device(model))
-    dist: Normal = model(input)
-    return dist.mean
