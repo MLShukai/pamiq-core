@@ -28,7 +28,7 @@ class Encoder(nn.Module):
         )
 
         self.fc_mean = nn.Linear(feature_size // 4, feature_size // 8)
-        self.fc_logstd = nn.Linear(feature_size // 4, feature_size // 8)
+        self.fc_logvar = nn.Linear(feature_size // 4, feature_size // 8)
 
     @override
     def forward(self, x: Tensor) -> Normal:
@@ -43,7 +43,7 @@ class Encoder(nn.Module):
         x = self.network(x)
         mean = self.fc_mean(x)
         logvar = self.fc_logvar(x)
-        std = (0.5 * logvar).exp()  # 0.5 offers stability
+        scale = (0.5 * logvar).exp()  # 0.5 offers stability
 
         return Normal(loc=mean, scale=scale)
 
@@ -58,6 +58,8 @@ class Encoder(nn.Module):
              Tensor: The mean of the distribution.
         """
 
+        # We don't need `self.eval()` nor `torch.inference_mode()` here,
+        # because torch extension of pamiq-core do this.
         x = x.to(get_device(self))
         dist: Normal = self(x)
         return dist.mean
