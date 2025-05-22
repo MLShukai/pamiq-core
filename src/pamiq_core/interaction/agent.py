@@ -52,7 +52,7 @@ class Agent[ObsType, ActType](
         Returns:
             The action to take in response to the observation.
         """
-        ...
+        pass
 
     def attach_inference_models(self, inference_models: InferenceModelsDict) -> None:
         """Attaches inference models dictionary to this agent.

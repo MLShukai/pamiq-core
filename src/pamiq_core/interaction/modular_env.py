@@ -28,7 +28,7 @@ class Sensor[T](ABC, InteractionEventMixin, PersistentStateMixin, ThreadEventMix
         Returns:
             Sensor reading/observation data.
         """
-        ...
+        pass
 
 
 class Actuator[T](ABC, InteractionEventMixin, PersistentStateMixin, ThreadEventMixin):
@@ -46,7 +46,7 @@ class Actuator[T](ABC, InteractionEventMixin, PersistentStateMixin, ThreadEventM
         Args:
             action: The action to be executed.
         """
-        ...
+        pass
 
 
 class ModularEnvironment[ObsType, ActType](Environment[ObsType, ActType]):

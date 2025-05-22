@@ -73,7 +73,7 @@ class TrainingModel[T: InferenceModel](ABC, PersistentStateMixin):
         Returns:
             InferenceModel.
         """
-        ...
+        pass
 
     @abstractmethod
     def forward(self, *args: Any, **kwds: Any) -> Any:
@@ -85,7 +85,7 @@ class TrainingModel[T: InferenceModel](ABC, PersistentStateMixin):
         Returns:
             Result of forward path of the model.
         """
-        ...
+        pass
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         """Calls `forward` method."""
@@ -110,4 +110,4 @@ class TrainingModel[T: InferenceModel](ABC, PersistentStateMixin):
         Args:
             inference_model: InferenceModel to sync.
         """
-        ...
+        pass
