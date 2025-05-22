@@ -1,6 +1,6 @@
 from typing import override
 
-from torch import Tensor, nn, no_grad
+from torch import Tensor, nn
 from torch.distributions import Normal
 
 from pamiq_core.torch import get_device
