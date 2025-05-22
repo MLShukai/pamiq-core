@@ -1,3 +1,5 @@
+from typing import override
+
 from torch import Tensor, nn
 from torch.distributions import Normal
 
@@ -30,6 +32,7 @@ class Encoder(nn.Module):
             ),  # the output is means and log variances for a Normal distribution
         )
 
+    @override
     def forward(self, x: Tensor) -> Normal:
         """Forward pass of the encoder.
 
@@ -70,6 +73,7 @@ class Decoder(nn.Module):
             nn.Linear(feature_size // 2, feature_size),
         )
 
+    @override
     def forward(self, x: Tensor) -> Tensor:
         """Forward pass of the decoder.
 
