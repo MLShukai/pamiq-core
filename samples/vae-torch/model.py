@@ -42,8 +42,8 @@ class Encoder(nn.Module):
 
         x = self.network(x)
         mean = self.fc_mean(x)
-        logstd = self.fc_logstd(x)
-        scale = (0.5 * logstd).exp()  # 0.5 offers stability
+        logvar = self.fc_logvar(x)
+        std = (0.5 * logvar).exp()  # 0.5 offers stability
 
         return Normal(loc=mean, scale=scale)
 
