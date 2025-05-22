@@ -48,7 +48,19 @@ class Encoder(nn.Module):
         scale = (0.5 * logstd).exp()  # 0.5 offers stability
 
         return Normal(loc=mean, scale=scale)
+    def infer(self, x: Tensor) -> Tensor:
+        """Inference of the encoder. 
+        
+        Returns the mean of the distribution.
 
+         Args:
+             x: The input tensor.
+         Returns:
+             Tensor: The mean of the distribution.
+     """
+     x = x.to(get_device(self))
+     dist: Normal = model(x)
+     return dist.mean
 
 class Decoder(nn.Module):
     """Decoder for VAE.
