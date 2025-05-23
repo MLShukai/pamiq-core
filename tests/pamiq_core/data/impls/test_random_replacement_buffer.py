@@ -43,6 +43,70 @@ class TestRandomReplacementBuffer:
         with pytest.raises(ValueError):
             RandomReplacementBuffer(data_names, max_size, replace_probability=1.1)
 
+    def test_init_with_expected_survival_length(self):
+        """Test initialization with expected_survival_length parameter."""
+        data_names = ["state", "action", "reward"]
+        max_size = 10
+
+        # Test with expected_survival_length only
+        buffer = RandomReplacementBuffer(
+            data_names, max_size, expected_survival_length=20
+        )
+
+        # Should compute probability automatically
+        assert 0.0 <= buffer._replace_probability <= 1.0
+        assert buffer.max_size == max_size
+        assert buffer.collecting_data_names == set(data_names)
+
+    def test_init_with_both_parameters_raises_error(self):
+        """Test that specifying both replace_probability and
+        expected_survival_length raises ValueError."""
+        data_names = ["state", "action", "reward"]
+        max_size = 10
+
+        with pytest.raises(
+            ValueError,
+            match="Cannot specify both replace_probability and expected_survival_length",
+        ):
+            RandomReplacementBuffer(
+                data_names,
+                max_size,
+                replace_probability=0.5,
+                expected_survival_length=20,
+            )
+
+    def test_init_with_none_parameters(self):
+        """Test initialization when both parameters are None (should default to
+        1.0)."""
+        data_names = ["state", "action", "reward"]
+        max_size = 10
+
+        buffer = RandomReplacementBuffer(data_names, max_size)
+        assert buffer._replace_probability == 1.0
+
+    @pytest.mark.parametrize(
+        "max_size,survival_length",
+        [
+            (10, 5),
+            (10, 10),
+            (10, 20),
+            (100, 50),
+            (100, 200),
+            (50, 25),
+            (50, 100),
+        ],
+    )
+    def test_compute_replace_probability_from_expected_survival_length(
+        self, max_size, survival_length
+    ):
+        """Test the static method for computing replace probability."""
+        probability = RandomReplacementBuffer.compute_replace_probability_from_expected_survival_length(
+            max_size, survival_length
+        )
+        assert (
+            0.0 <= probability <= 1.0
+        ), f"Probability {probability} out of range for max_size={max_size}, survival_length={survival_length}"
+
     def test_add_and_get_data(self, buffer: RandomReplacementBuffer[Any]):
         """Test adding data to the buffer and retrieving it."""
         # Sample data
