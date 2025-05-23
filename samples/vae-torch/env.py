@@ -25,7 +25,11 @@ class EncodingCheckEnv(Environment[Tensor, Tensor]):
     """Environment used for this sample."""
 
     def __init__(self, feature_size: int) -> None:
-        """Initialize the environment with a feature size."""
+        """Initialize the environment with a feature size.
+
+        Args:
+            feature_size (int): The size of the feature vector.
+        """
         super().__init__()
 
         self.feature_size = feature_size
