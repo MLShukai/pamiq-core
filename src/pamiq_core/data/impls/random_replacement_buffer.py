@@ -13,9 +13,6 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
 
     This buffer keeps track of collected data and, when full, randomly
     replaces existing elements based on a configurable probability.
-
-    See this page to learn more properties:
-        https://zenn.dev/gesonanko/scraps/b581e75bfd9f3e
     """
 
     def __init__(
@@ -76,8 +73,10 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
         """Compute the replace probability from expected survival length.
 
         This method calculates the replacement probability needed to achieve
-        a desired expected survival length for data in the buffer. The calculation
-        is based on the mathematical analysis described in the class documentation.
+        a desired expected survival length for data in the buffer.
+
+        The computation is based on the mathematical analysis described in below:
+            https://zenn.dev/gesonanko/scraps/b581e75bfd9f3e
 
         Args:
             max_size: Maximum size of the buffer.
@@ -86,10 +85,8 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
         Returns:
             The computed replacement probability between 0.0 and 1.0.
         """
-        alpha = 1.000486
-        beta = -0.398272
         gamma = 0.5772156649015329  # Euler-Mascheroni constant
-        p = alpha * max_size / (survival_length - beta) * (math.log(max_size) + gamma)
+        p = max_size / survival_length * (math.log(max_size) + gamma)
         return min(max(p, 0.0), 1.0)  # Clamp value between 0 to 1.
 
     @property
