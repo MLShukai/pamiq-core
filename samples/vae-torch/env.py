@@ -63,6 +63,8 @@ class EncodingCheckEnv(Environment[Tensor, Tensor]):
         # `EncodingAgent` in `agent.py`) and ensures its dimensionality is appropriate.
 
         # Check dimension of latent representation of VAE
-        assert (
-            action.shape[-1] < self.feature_size
-        ), "Action tensor (latent rep'n.) must be smaller than feature_size."
+        if action.shape[-1] >= self.feature_size:
+            raise ValueError(
+                f"Action tensor (latent rep'n.) must be smaller than feature_size. "
+                f"Got action.shape[-1] = {action.shape[-1]} and feature_size = {self.feature_size}."
+            )
