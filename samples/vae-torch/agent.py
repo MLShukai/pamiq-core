@@ -48,8 +48,10 @@ class EncodingAgent(Agent[Tensor, Tensor]):
             Tensor: The inferred latent representation from the encoder.
         """
         # Collect the observation data
-        self.data_collector.collect({"data": observation.cpu()})  # explanation of this line:
-        # The data_collector has `_queues_dict` of `dict[str, deque[T]]`.
-        # With this code, `observation` is stored in the deque of the key "data".
-        # The data in the data_collector is used in the training process in `trainer.py`.
+        self.data_collector.collect(
+            {"data": observation.cpu()}
+        )  # explanation of this line:
+        # The data_collector supports multiple named data stacks.
+        # Here, we add the current observation to the stack named "data".
+        # The data stack is used in the training process in `trainer.py`.
         return self.encoder.infer(observation)
