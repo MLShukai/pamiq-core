@@ -107,7 +107,7 @@ class VAETrainer(TorchTrainer):
 
                 # Forward pass
                 dist = self.encoder(batch)
-                z = self.decoder(dist.rsample())
+                z = dist.rsample()
                 recon = self.decoder(z)
 
                 # Reconstruction loss (L2 / MSE)
