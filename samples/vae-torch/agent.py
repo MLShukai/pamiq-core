@@ -39,7 +39,7 @@ class EncodingAgent(Agent[Tensor, Tensor]):
         """Take an action based on the observation.
 
         In this example,
-        (1) return the latent representation as the action (this is auxiliarity.)
+        (1) return the latent representation as the action (this is auxiliary.)
         (2) store the observation data in the data collector.
 
         Args:
