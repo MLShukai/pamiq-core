@@ -54,4 +54,4 @@ class EncodingAgent(Agent[Tensor, Tensor]):
         # The data_collector supports multiple named data stacks.
         # Here, we add the current observation to the stack named "data".
         # The data stack is used in the training process in `trainer.py`.
-        return self.encoder.infer(observation)
+        return self.encoder(observation)
