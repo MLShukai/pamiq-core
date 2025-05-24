@@ -68,15 +68,15 @@ class VAETrainer(TorchTrainer):
 
     @override
     def create_optimizers(self) -> OptimizersSetup:
-        params = itertools.chain(
-            self.encoder.model.parameters(),
-            self.decoder.model.parameters(),
-        )
         """Create optimizers for the encoder and decoder models.
 
         Returns:
             OptimizersSetup: A dictionary containing the optimizer for the VAE.
         """
+        params = itertools.chain(
+            self.encoder.model.parameters(),
+            self.decoder.model.parameters(),
+        )
         self.optim = torch.optim.Adam(params, lr=self.lr)
         return {"optimizer": self.optim}
 
