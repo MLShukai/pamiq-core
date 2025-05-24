@@ -48,7 +48,7 @@ class EncodingAgent(Agent[Tensor, Tensor]):
             Tensor: The inferred latent representation from the encoder.
         """
         # Collect the observation data
-        self.data_collector.collect({"data": observation})  # explanation of this line:
+        self.data_collector.collect({"data": observation.cpu()})  # explanation of this line:
         # The data_collector has `_queues_dict` of `dict[str, deque[T]]`.
         # With this code, `observation` is stored in the deque of the key "data".
         # The data in the data_collector is used in the training process in `trainer.py`.
