@@ -5,7 +5,7 @@
 #
 # [Outline of this implementation]
 # In this VAE example, `step()` returns the latent representation as the action.
-# (The dimension of the action is verified in the environment. This is auxiliarity.)
+# (The dimension of the action is verified in the environment. This is auxiliary.)
 #
 # [Why this implementation?]
 # In this VAE example, the environment serves only as a data provider and does not maintain a state or respond to the agent's actions.
