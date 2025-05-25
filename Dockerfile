@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     make \
+    libevdev-dev \
+    build-essential \
     bash-completion \
     && rm -rf /var/lib/apt/lists/* \
     # Setup Bash Completion
