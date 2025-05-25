@@ -85,7 +85,7 @@ The status endpoint returns one of the following values:
 
 ## Keyboard Shortcut Controller
 
-PAMIQ-Core provides a keyboard shortcut controller. Users can pause/resume a agent by keyboard shortcuts. 
+PAMIQ-Core provides a keyboard shortcut controller. Users can pause/resume a agent by keyboard shortcuts.
 
 ### Default Shortcuts
 
