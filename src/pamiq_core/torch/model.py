@@ -13,7 +13,8 @@ class InferenceProcedureCallable[T: nn.Module](Protocol):
     """Typing for `inference_procedure` argument of TorchTrainingModel because
     `typing.Callable` can not typing `*args` and `**kwds`."""
 
-    def __call__(self, model: T, /, *args: Any, **kwds: Any) -> Any: ...
+    def __call__(self, model: T, /, *args: Any, **kwds: Any) -> Any:
+        pass
 
 
 def get_device(

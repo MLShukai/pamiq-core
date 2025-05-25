@@ -1,3 +1,4 @@
+import math
 import pickle
 import random
 from collections.abc import Iterable, Mapping
@@ -12,16 +13,14 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
 
     This buffer keeps track of collected data and, when full, randomly
     replaces existing elements based on a configurable probability.
-
-    See this page to learn more properties:
-        https://zenn.dev/gesonanko/scraps/b581e75bfd9f3e
     """
 
     def __init__(
         self,
         collecting_data_names: Iterable[str],
         max_size: int,
-        replace_probability: float = 1.0,
+        replace_probability: float | None = None,
+        expected_survival_length: int | None = None,
     ) -> None:
         """Initialize a RandomReplacementBuffer.
 
@@ -29,13 +28,32 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
             collecting_data_names: Names of data fields to collect.
             max_size: Maximum number of data points to store.
             replace_probability: Probability of replacing an existing element when buffer is full.
-                Must be between 0.0 and 1.0 inclusive. Default is 1.0 (always replace).
+                Must be between 0.0 and 1.0 inclusive. If None and expected_survival_length is provided,
+                this will be computed automatically. Default is 1.0 if both are None.
+            expected_survival_length: Expected number of steps that data should survive in the buffer.
+                Used to automatically compute replace_probability if replace_probability is None.
+                Cannot be specified together with replace_probability.
 
         Raises:
-            ValueError: If replace_probability is not between 0.0 and 1.0 inclusive.
+            ValueError: If replace_probability is not between 0.0 and 1.0 inclusive, or if both
+                replace_probability and expected_survival_length are specified.
         """
         super().__init__(collecting_data_names, max_size)
 
+        if replace_probability is None:
+            if expected_survival_length is None:
+                replace_probability = 1.0
+            else:
+                replace_probability = (
+                    self.compute_replace_probability_from_expected_survival_length(
+                        max_size, expected_survival_length
+                    )
+                )
+        elif expected_survival_length is not None:
+            raise ValueError(
+                "Cannot specify both replace_probability and expected_survival_length. "
+                "Please specify only one of them."
+            )
         if not (1.0 >= replace_probability >= 0.0):
             raise ValueError(
                 "replace_probability must be between 0.0 and 1.0 inclusive"
@@ -47,6 +65,29 @@ class RandomReplacementBuffer[T](DataBuffer[T]):
 
         self._replace_probability = replace_probability
         self._current_size = 0
+
+    @staticmethod
+    def compute_replace_probability_from_expected_survival_length(
+        max_size: int, survival_length: int
+    ) -> float:
+        """Compute the replace probability from expected survival length.
+
+        This method calculates the replacement probability needed to achieve
+        a desired expected survival length for data in the buffer.
+
+        The computation is based on the mathematical analysis described in below:
+            https://zenn.dev/gesonanko/scraps/b581e75bfd9f3e
+
+        Args:
+            max_size: Maximum size of the buffer.
+            survival_length: Expected number of steps that data should survive.
+
+        Returns:
+            The computed replacement probability between 0.0 and 1.0.
+        """
+        gamma = 0.5772156649015329  # Euler-Mascheroni constant
+        p = max_size / survival_length * (math.log(max_size) + gamma)
+        return min(max(p, 0.0), 1.0)  # Clamp value between 0 to 1.
 
     @property
     def is_full(self) -> bool:

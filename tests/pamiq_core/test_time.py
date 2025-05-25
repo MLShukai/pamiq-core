@@ -5,7 +5,11 @@ import pytest
 
 from pamiq_core import time as pamiq_time
 from pamiq_core.time import TimeController, get_global_time_controller
-from tests.helpers import skip_if_kernel_is_linuxkit, skip_if_platform_is_not_linux
+from tests.helpers import (
+    skip_if_kernel_is_linuxkit,
+    skip_if_platform_is_darwin,
+    skip_if_platform_is_windows,
+)
 
 
 def test_module_global_values():
@@ -74,7 +78,8 @@ def test_monotonic_monotonicity(controller):
     assert all(t2 >= t1 for t1, t2 in zip(times, times[1:]))
 
 
-@skip_if_platform_is_not_linux()
+@skip_if_platform_is_windows()
+@skip_if_platform_is_darwin()
 def test_sleep_duration(controller):
     """Verify sleep duration at normal speed."""
     sleep_time = 0.1
@@ -84,7 +89,8 @@ def test_sleep_duration(controller):
     assert elapsed == pytest.approx(0.1, abs=0.01)
 
 
-@skip_if_platform_is_not_linux()
+@skip_if_platform_is_windows()
+@skip_if_platform_is_darwin()
 @skip_if_kernel_is_linuxkit()
 def test_sleep_with_time_scale(controller):
     """Verify sleep duration is affected by time scale."""
@@ -96,7 +102,8 @@ def test_sleep_with_time_scale(controller):
     assert elapsed == pytest.approx(0.05, abs=0.01)
 
 
-@skip_if_platform_is_not_linux()
+@skip_if_platform_is_windows()
+@skip_if_platform_is_darwin()
 @skip_if_kernel_is_linuxkit()
 def test_time_functions_scale_properly(controller):
     """Verify all time functions respect time scale."""
@@ -130,7 +137,7 @@ def test_pause_freezes_all_time_functions(controller):
         controller.resume()
 
 
-@skip_if_platform_is_not_linux()
+@skip_if_platform_is_darwin()
 @skip_if_kernel_is_linuxkit()
 def test_resume_continues_time_properly(controller):
     """Verify time continues correctly after resume."""
@@ -143,7 +150,7 @@ def test_resume_continues_time_properly(controller):
     assert end_time - start_time == pytest.approx(0.1, abs=0.01)
 
 
-@skip_if_platform_is_not_linux()
+@skip_if_platform_is_darwin()
 @skip_if_kernel_is_linuxkit()
 def test_pause_resume_with_time_scale(controller):
     """Verify pause/resume works correctly with different time scales."""
@@ -159,7 +166,7 @@ def test_pause_resume_with_time_scale(controller):
     assert end_time - start_time == pytest.approx(0.2, abs=0.01)
 
 
-@skip_if_platform_is_not_linux()
+@skip_if_platform_is_darwin()
 @skip_if_kernel_is_linuxkit()
 def test_multiple_pause_resume_cycles(controller):
     """Verify multiple pause/resume cycles work correctly."""
@@ -233,7 +240,7 @@ def test_resume_idempotent(controller):
     assert abs(second_resume_time - first_resume_time) < 0.01
 
 
-@skip_if_platform_is_not_linux()
+@skip_if_platform_is_darwin()
 @skip_if_kernel_is_linuxkit()
 def test_pause_resume_fixed_time_unaffected():
     """Verify fixed time functions are not affected by pause/resume."""
@@ -249,7 +256,7 @@ def test_pause_resume_fixed_time_unaffected():
     assert end_fixed - start_fixed == pytest.approx(0.1, abs=0.01)
 
 
-@skip_if_platform_is_not_linux()
+@skip_if_platform_is_darwin()
 @skip_if_kernel_is_linuxkit()
 def test_get_and_load_state_dict():
     """Verify state dict."""
