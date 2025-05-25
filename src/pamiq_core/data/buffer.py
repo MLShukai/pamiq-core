@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping
 
 from pamiq_core.state_persistence import PersistentStateMixin
 
 type StepData[T] = Mapping[str, T]
-type BufferData[T] = Mapping[str, Sequence[T]]
+type BufferData[T] = Mapping[str, Iterable[T]]
 
 
 class DataBuffer[T](ABC, PersistentStateMixin):
@@ -51,7 +51,7 @@ class DataBuffer[T](ABC, PersistentStateMixin):
             step_data: Dictionary containing data for one step. Must contain
                 all fields specified in collecting_data_names.
         """
-        ...
+        pass
 
     @abstractmethod
     def get_data(self) -> BufferData[T]:
@@ -61,7 +61,7 @@ class DataBuffer[T](ABC, PersistentStateMixin):
             Dictionary mapping data field names to sequences of their values.
             Each sequence has the same length.
         """
-        ...
+        pass
 
     @abstractmethod
     def __len__(self) -> int:
@@ -70,4 +70,4 @@ class DataBuffer[T](ABC, PersistentStateMixin):
         Returns:
             int: The number of samples currently stored in the buffer.
         """
-        ...
+        pass

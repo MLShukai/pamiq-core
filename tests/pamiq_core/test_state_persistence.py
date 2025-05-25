@@ -226,7 +226,7 @@ class TestLatestStatesKeeper:
         # Start the keeper in background
         keeper.start(background=True)
 
-        time.sleep(0.01)
+        time.sleep(0.05)
         # Stop the keeper
         keeper.stop()
 

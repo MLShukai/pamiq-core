@@ -8,18 +8,17 @@ import torch.nn as nn
 
 from pamiq_core.model import InferenceModel, TrainingModel
 
-CPU_DEVICE = torch.device("cpu")
-
 
 class InferenceProcedureCallable[T: nn.Module](Protocol):
     """Typing for `inference_procedure` argument of TorchTrainingModel because
     `typing.Callable` can not typing `*args` and `**kwds`."""
 
-    def __call__(self, model: T, /, *args: Any, **kwds: Any) -> Any: ...
+    def __call__(self, model: T, /, *args: Any, **kwds: Any) -> Any:
+        pass
 
 
 def get_device(
-    module: nn.Module, default_device: torch.device = CPU_DEVICE
+    module: nn.Module, default_device: torch.device | None = None
 ) -> torch.device:
     """Retrieves the device where the module runs.
 
@@ -33,6 +32,8 @@ def get_device(
         return param.device
     for buf in module.buffers():
         return buf.device
+    if default_device is None:
+        default_device = torch.get_default_device()
     return default_device
 
 
@@ -43,7 +44,7 @@ def default_infer_procedure(model: nn.Module, *args: Any, **kwds: Any) -> Any:
     you override this method, be careful to send the input tensor to the
     computing device.
     """
-    device = get_device(model, CPU_DEVICE)
+    device = get_device(model)
     new_args: list[Any] = []
     new_kwds: dict[str, Any] = {}
     for i in args:
@@ -115,6 +116,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
         dtype: torch.dtype | None = None,
         inference_procedure: InferenceProcedureCallable[T] = default_infer_procedure,
         pretrained_parameter_file: str | Path | None = None,
+        compile: bool = False,
     ):
         """Initialize.
 
@@ -126,13 +128,14 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             dtype: Data type of the model.
             inference_procedure: An inference procedure as Callable.
             pretrained_parameter_file: Path to a pre-trained model parameter file to load. If provided, the model parameters will be loaded from this file.
+            compile: Whether to compile torch model.
         """
         super().__init__(has_inference_model, inference_thread_only)
         if dtype is not None:
             model = model.type(dtype)
         self.model = model
         if device is None:  # prevents from moving the model to cpu unintentionally.
-            device = get_device(model, CPU_DEVICE)
+            device = get_device(model)
         self._inference_procedure = inference_procedure
         self.model.to(device)
 
@@ -140,6 +143,12 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
             self.model.load_state_dict(
                 torch.load(pretrained_parameter_file, map_location=device)  # pyright: ignore[reportUnknownMemberType]
             )
+
+        if compile:
+            if self.has_inference_model:
+                # copy before compile
+                self.inference_model._raw_model.compile()  # pyright: ignore[reportPrivateUsage, reportUnknownMemberType]
+            self.model.compile()  # pyright: ignore[reportUnknownMemberType, ]
 
     @override
     def _create_inference_model(self) -> TorchInferenceModel[T]:

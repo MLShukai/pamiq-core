@@ -1,6 +1,7 @@
 from typing import override
 
 import pytest
+from pytest_mock import MockerFixture
 
 from pamiq_core.interaction.env import Environment
 from pamiq_core.interaction.event_mixin import InteractionEventMixin
@@ -41,6 +42,38 @@ class TestWrapper:
         """Test that the __call__ method calls wrap."""
         wrapper = WrapperImpl()
         assert wrapper(5) == "10"  # wrap doubles value and converts to string
+
+    def test_wrap_sensor(self, mocker: MockerFixture):
+        """Test that wrap_sensor correctly creates a SensorWrapper."""
+        # Create a mock sensor
+        mock_sensor = mocker.Mock(spec=Sensor)
+
+        # Create a concrete wrapper implementation
+        wrapper = WrapperImpl()
+
+        # Test the method
+        result = wrapper.wrap_sensor(mock_sensor)
+
+        # Verify correct SensorWrapper was created
+        assert isinstance(result, SensorWrapper)
+        assert result.sensor is mock_sensor
+        assert result._wrapper is wrapper
+
+    def test_wrap_actuator(self, mocker: MockerFixture):
+        """Test that wrap_actuator correctly creates an ActuatorWrapper."""
+        # Create a mock actuator
+        mock_actuator = mocker.Mock(spec=Actuator)
+
+        # Create a concrete wrapper implementation
+        wrapper = WrapperImpl()
+
+        # Test the method
+        result = wrapper.wrap_actuator(mock_actuator)
+
+        # Verify correct ActuatorWrapper was created
+        assert isinstance(result, ActuatorWrapper)
+        assert result.actuator is mock_actuator
+        assert result._wrapper is wrapper
 
 
 class TestLambdaWrapper:

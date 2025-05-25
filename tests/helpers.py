@@ -1,23 +1,27 @@
 import platform
 import re
-from pathlib import Path
+import sys
 
 import pytest
 
 
-def skip_if_platform_is_not_linux():
+def skip_if_platform_is_windows():
     return pytest.mark.skipif(
-        platform.system() != "Linux", reason="Platform is not linux."
+        sys.platform == "win32", reason=f"Platform is {platform.system()}"
+    )
+
+
+def skip_if_platform_is_darwin():
+    return pytest.mark.skipif(
+        sys.platform == "darwin", reason=f"Platform is {platform.system()}"
     )
 
 
 def skip_if_kernel_is_linuxkit():
-    osrelease = Path("/proc/sys/kernel/osrelease")
-    skip = False
-    if osrelease.is_file() and "linuxkit" in osrelease.read_text():
-        skip = True
-
-    return pytest.mark.skipif(skip, reason="Linux kernel is linuxkit.")
+    return pytest.mark.skipif(
+        "linuxkit" in platform.release(),
+        reason=f"Linux kernel is linuxkit ({platform.release()})",
+    )
 
 
 def check_log_message(
@@ -33,6 +37,11 @@ def check_log_message(
     Raises:
         AssertionError: if the expected log message is not in the log messages of specified log level.
     """
+
+    try:
+        re.compile(expected_log_message)
+    except re.error:
+        expected_log_message = re.escape(expected_log_message)
 
     if log_level:
         error_level_log_messages = [

@@ -6,7 +6,9 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Document Style](https://img.shields.io/badge/%20docstyle-google-3666d6.svg)](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings)
-[![Lint & Format / Tests / Type Check](https://github.com/MLShukai/pamiq-core/actions/workflows/main.yaml/badge.svg)](https://github.com/MLShukai/pamiq-core/actions/workflows/main.yaml)
+[![Test](https://github.com/MLShukai/pamiq-core/actions/workflows/test.yml/badge.svg)](https://github.com/MLShukai/pamiq-core/actions/workflows/test.yml)
+[![Type Check](https://github.com/MLShukai/pamiq-core/actions/workflows/type-check.yml/badge.svg)](https://github.com/MLShukai/pamiq-core/actions/workflows/type-check.yml)
+[![Format & Lint (pre-commit)](https://github.com/MLShukai/pamiq-core/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/MLShukai/pamiq-core/actions/workflows/pre-commit.yml)
 
 **pamiq-core** is a framework for building AI agents. Developed for P-AMI\<Q>, it enables train and inference in parallel, allowing agents to adapt continuously during interaction with their environment.
 
@@ -17,6 +19,7 @@
 - 🧵 **Thread-safe Design**: Robust synchronization mechanisms for parameter sharing and data transfers
 - 🔌 **Modular Components**: Easy-to-extend agent, environment, and model interfaces
 - 🛠️ **Comprehensive Tools**: Built-in state persistence, time control, and monitoring
+- 🌍 **Cross Platform**: Linux is the primary focus, but Windows and macOS are also supported. (However, some older macOS and Windows systems may have significantly less accurate time control.)
 
 ## 📋 Requirements
 

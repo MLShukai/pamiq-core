@@ -1,6 +1,6 @@
 [project]
 name = "pamiq-core"
-version = "0.2.2"
+version = "0.3.0"
 description = "Framework for building AI agents with real-time adaptive learning capabilities."
 license = {file = "LICENSE"}
 readme = "README.md"
@@ -32,10 +32,14 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS :: MacOS X"
 ]
 
 [project.scripts]
 pamiq-console = "pamiq_core.console.cui:main"
+pamiq-kbctl = "pamiq_core.console.keyboard:main"
 
 [project.urls]
 Repository = "https://github.com/MLShukai/pamiq-core"
@@ -44,6 +48,10 @@ Issues = "https://github.com/MLShukai/pamiq-core/issues"
 [project.optional-dependencies]
 torch = [
     "torch>=2.0.0",
+]
+kbctl = [
+    "httpx>=0.28.1",
+    "pynput>=1.8.1",
 ]
 
 [build-system]
@@ -172,6 +180,5 @@ exclude_lines = [
     "raise NotImplementedError",
     "if __name__ == __main__:",
     "pass",
-    "raise ImportError",
-    "..."
+    "raise ImportError"
 ]
