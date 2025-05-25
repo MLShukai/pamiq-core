@@ -86,11 +86,13 @@ The status endpoint returns one of the following values:
 ## Keyboard Shortcut Controller
 
 PAMIQ-Core provides a keyboard shortcut controller. Users can pause/resume a agent by keyboard shortcuts. 
+
 ### Default Shortcuts
 
 - Windows/Linux: `Alt+Shift+P` (Pause) and `Alt+Shift+R` (Resume)
 - macOS: `Option+Shift+P` (Pause) and `Option+Shift+R` (Resume)
 - Windows also supports `Alt+Shift+Q` to quit the controller
+
 ### Installation
 
 ```sh
@@ -119,12 +121,6 @@ On macOS, you must grant Accessibility permissions to your terminal application 
 4. Restart your terminal application after granting permissions
 
 Without these permissions, macOS will prevent keyboard monitoring and `pamiq-kbctl` will not function properly.
-
-### Default Shortcuts
-
-- Windows/Linux: `Alt+Shift+P` (Pause) and `Alt+Shift+R` (Resume)
-- macOS: `Option+Shift+P` (Pause) and `Option+Shift+R` (Resume)
-- Windows also supports `Alt+Shift+Q` to quit the controller
 
 ### Command-line Options
 
