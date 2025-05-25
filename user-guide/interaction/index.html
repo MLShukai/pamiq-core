@@ -654,6 +654,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Wrappers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sensor-and-actuator-wrappers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sensor and Actuator Wrappers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapper-helper-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Wrapper Helper Methods
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1343,6 +1367,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Wrappers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sensor-and-actuator-wrappers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sensor and Actuator Wrappers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrapper-helper-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Wrapper Helper Methods
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1649,33 +1697,59 @@
 <a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>        <span class="c1"># Complex image processing logic</span>
 <a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>        <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="o">*</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">image</span><span class="p">]</span>
 </code></pre></div>
+<h3 id="sensor-and-actuator-wrappers">Sensor and Actuator Wrappers<a class="headerlink" href="#sensor-and-actuator-wrappers" title="Permanent link">&para;</a></h3>
+<p>In addition to wrapping entire environments, you can wrap individual sensors and actuators:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pamiq_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">SensorWrapper</span><span class="p">,</span> <span class="n">ActuatorWrapper</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1"># Wrap a sensor to process its readings</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="n">sensor_wrapper</span> <span class="o">=</span> <span class="n">SensorWrapper</span><span class="p">(</span><span class="n">camera_sensor</span><span class="p">,</span> <span class="n">normalize_observation</span><span class="p">)</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1"># Wrap an actuator to transform actions before they reach it</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="n">actuator_wrapper</span> <span class="o">=</span> <span class="n">ActuatorWrapper</span><span class="p">(</span><span class="n">motor_actuator</span><span class="p">,</span> <span class="n">scale_action</span><span class="p">)</span>
+</code></pre></div>
+<p>These wrappers work similarly to <code>EnvironmentWrapper</code> but operate at the component level:</p>
+<ul>
+<li><code>SensorWrapper</code> transforms the output from a sensor after reading</li>
+<li><code>ActuatorWrapper</code> transforms the input to an actuator before operating</li>
+</ul>
+<h3 id="wrapper-helper-methods">Wrapper Helper Methods<a class="headerlink" href="#wrapper-helper-methods" title="Permanent link">&para;</a></h3>
+<p>Wrapper instances provide convenient helper methods to directly create sensor and actuator wrappers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Create an image processing wrapper</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">image_processor</span> <span class="o">=</span> <span class="n">ImageProcessingWrapper</span><span class="p">()</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Apply the wrapper to a sensor</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="n">processed_camera</span> <span class="o">=</span> <span class="n">image_processor</span><span class="o">.</span><span class="n">wrap_sensor</span><span class="p">(</span><span class="n">camera_sensor</span><span class="p">)</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1"># Apply the inverse of the wrapper to an actuator</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="n">processed_motor</span> <span class="o">=</span> <span class="n">image_processor</span><span class="o">.</span><span class="n">wrap_actuator</span><span class="p">(</span><span class="n">motor_actuator</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="common-event-hooks">Common Event Hooks<a class="headerlink" href="#common-event-hooks" title="Permanent link">&para;</a></h2>
 <p>PAMIQ-Core components have common event hooks that you can override:</p>
 <h3 id="interaction-events">Interaction Events<a class="headerlink" href="#interaction-events" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nd">@override</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Called when the interaction starts.&quot;&quot;&quot;</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>  <span class="c1"># Always call the parent method</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Setting up resources...&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="nd">@override</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Called when the interaction ends.&quot;&quot;&quot;</span>
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">teardown</span><span class="p">()</span>  <span class="c1"># Always call the parent method</span>
-<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cleaning up resources...&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nd">@override</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Called when the interaction starts.&quot;&quot;&quot;</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>  <span class="c1"># Always call the parent method</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Setting up resources...&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="nd">@override</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Called when the interaction ends.&quot;&quot;&quot;</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">teardown</span><span class="p">()</span>  <span class="c1"># Always call the parent method</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cleaning up resources...&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="thread-events">Thread Events<a class="headerlink" href="#thread-events" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nd">@override</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">on_paused</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Called when the system is paused.&quot;&quot;&quot;</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">on_paused</span><span class="p">()</span>  <span class="c1"># Always call the parent method</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;System paused, suspending external connections...&quot;</span><span class="p">)</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="nd">@override</span>
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">on_resumed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Called when the system is resumed.&quot;&quot;&quot;</span>
-<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">on_resumed</span><span class="p">()</span>  <span class="c1"># Always call the parent method</span>
-<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;System resumed, restoring external connections...&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nd">@override</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">on_paused</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Called when the system is paused.&quot;&quot;&quot;</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">on_paused</span><span class="p">()</span>  <span class="c1"># Always call the parent method</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;System paused, suspending external connections...&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="nd">@override</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">on_resumed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Called when the system is resumed.&quot;&quot;&quot;</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">on_resumed</span><span class="p">()</span>  <span class="c1"># Always call the parent method</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;System resumed, restoring external connections...&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>These event hooks enable proper lifecycle management and allow components to respond to system state changes.</p>
 <h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>

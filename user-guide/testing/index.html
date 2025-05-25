@@ -720,6 +720,24 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#creating-mock-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating Mock Models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-mock-buffer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating Mock Buffer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       API Reference
@@ -1140,6 +1158,24 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#creating-mock-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating Mock Models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-mock-buffer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating Mock Buffer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       API Reference
@@ -1218,6 +1254,35 @@
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="n">inference_models</span> <span class="o">=</span> <span class="n">components</span><span class="o">.</span><span class="n">inference_models</span>
 </code></pre></div>
 <p>The function returns a <code>ConnectedComponents</code> named tuple containing all the connected component dictionaries for easy access in your tests.</p>
+<h3 id="creating-mock-models">Creating Mock Models<a class="headerlink" href="#creating-mock-models" title="Permanent link">&para;</a></h3>
+<p>When testing components that interact with models, you often need mock implementations of <code>TrainingModel</code> and <code>InferenceModel</code>. The <code>create_mock_models</code> function creates pre-configured mock model pairs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pamiq_core.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_mock_models</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Create a standard model pair</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">training_model</span><span class="p">,</span> <span class="n">inference_model</span> <span class="o">=</span> <span class="n">create_mock_models</span><span class="p">()</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Create a training model without inference model</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">training_model_no_inference</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">create_mock_models</span><span class="p">(</span><span class="n">has_inference_model</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Create an inference-thread-only model</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">inference_only_model</span><span class="p">,</span> <span class="n">inference_model</span> <span class="o">=</span> <span class="n">create_mock_models</span><span class="p">(</span><span class="n">inference_thread_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1"># Use in tests</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="k">assert</span> <span class="n">training_model</span><span class="o">.</span><span class="n">has_inference_model</span> <span class="ow">is</span> <span class="kc">True</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="k">assert</span> <span class="n">training_model</span><span class="o">.</span><span class="n">inference_model</span> <span class="ow">is</span> <span class="n">inference_model</span>
+</code></pre></div>
+<h3 id="creating-mock-buffer">Creating Mock Buffer<a class="headerlink" href="#creating-mock-buffer" title="Permanent link">&para;</a></h3>
+<p>When testing components that require data buffers, you can quickly create mock buffer instances using the <code>create_mock_buffer</code> function:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pamiq_core.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_mock_buffer</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">buffers</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="c1"># Create a default buffer with max_size=1</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="s2">&quot;buffer&quot;</span><span class="p">:</span> <span class="n">create_mock_buffer</span><span class="p">(),</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="c1"># Create a buffer with custom max_size</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="s2">&quot;large_buffer&quot;</span><span class="p">:</span> <span class="n">create_mock_buffer</span><span class="p">(</span><span class="n">max_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">),</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span>
+</code></pre></div>
 <h3 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h3>
 <p>For more detailed information, check out the <a href="../../api/testing/">API Reference</a></p>
 <h2 id="testing-agents">Testing Agents<a class="headerlink" href="#testing-agents" title="Permanent link">&para;</a></h2>
@@ -1229,30 +1294,30 @@
 <li>Call teardown</li>
 </ol>
 <p>For example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_my_agent</span><span class="p">():</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="c1"># Create and connect components</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">agent</span> <span class="o">=</span> <span class="n">MyAgent</span><span class="p">()</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">buffer</span> <span class="o">=</span> <span class="n">MyDataBuffer</span><span class="p">([</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">],</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">MyTrainingModel</span><span class="p">()</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">connect_components</span><span class="p">(</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">buffers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;experience&quot;</span><span class="p">:</span> <span class="n">buffer</span><span class="p">},</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="n">models</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;policy&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="p">)</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="c1"># Initialize the agent</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">agent</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="c1"># Test the step method</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">observation</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">action</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="c1"># Verify the action is as expected</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="k">assert</span> <span class="n">action</span> <span class="o">==</span> <span class="mi">1</span>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="c1"># Clean up</span>
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="n">agent</span><span class="o">.</span><span class="n">teardown</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_my_agent</span><span class="p">():</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="c1"># Create and connect components</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">agent</span> <span class="o">=</span> <span class="n">MyAgent</span><span class="p">()</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">buffer</span> <span class="o">=</span> <span class="n">MyDataBuffer</span><span class="p">([</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">],</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">MyTrainingModel</span><span class="p">()</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">connect_components</span><span class="p">(</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        <span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        <span class="n">buffers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;experience&quot;</span><span class="p">:</span> <span class="n">buffer</span><span class="p">},</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="n">models</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;policy&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="p">)</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="c1"># Initialize the agent</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">agent</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="c1"># Test the step method</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="n">observation</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>    <span class="n">action</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>    <span class="c1"># Verify the action is as expected</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>    <span class="k">assert</span> <span class="n">action</span> <span class="o">==</span> <span class="mi">1</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    <span class="c1"># Clean up</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="n">agent</span><span class="o">.</span><span class="n">teardown</span><span class="p">()</span>
 </code></pre></div>
 <p>Remember that the <code>step</code> method can only be properly tested after components have been connected and <code>setup</code> has been called.</p>
 <h2 id="testing-trainers">Testing Trainers<a class="headerlink" href="#testing-trainers" title="Permanent link">&para;</a></h2>
@@ -1265,61 +1330,61 @@
 <li>Call teardown</li>
 </ol>
 <p>Here's an example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_my_trainer</span><span class="p">():</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="c1"># Create and connect components</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">trainer</span> <span class="o">=</span> <span class="n">MyTrainer</span><span class="p">()</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">buffer</span> <span class="o">=</span> <span class="n">MyDataBuffer</span><span class="p">([</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">],</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">MyTrainingModel</span><span class="p">()</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">components</span> <span class="o">=</span> <span class="n">connect_components</span><span class="p">(</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="n">trainers</span><span class="o">=</span><span class="n">trainer</span><span class="p">,</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="n">buffers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;experience&quot;</span><span class="p">:</span> <span class="n">buffer</span><span class="p">},</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="n">models</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;policy&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="p">)</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="c1"># Initialize the trainer</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="c1"># Must check the trainer is trainable.</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="k">assert</span> <span class="n">trainer</span><span class="o">.</span><span class="n">is_trainable</span><span class="p">()</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="c1"># Test the train method</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
-<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
-<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="c1"># Sync the models</span>
-<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">sync_models</span><span class="p">()</span>
-<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
-<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>    <span class="c1"># Verify training effects</span>
-<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="c1"># ...</span>
-<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>
-<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    <span class="c1"># Clean up</span>
-<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">teardown</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_my_trainer</span><span class="p">():</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="c1"># Create and connect components</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">trainer</span> <span class="o">=</span> <span class="n">MyTrainer</span><span class="p">()</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">buffer</span> <span class="o">=</span> <span class="n">MyDataBuffer</span><span class="p">([</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">],</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">MyTrainingModel</span><span class="p">()</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">components</span> <span class="o">=</span> <span class="n">connect_components</span><span class="p">(</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="n">trainers</span><span class="o">=</span><span class="n">trainer</span><span class="p">,</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>        <span class="n">buffers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;experience&quot;</span><span class="p">:</span> <span class="n">buffer</span><span class="p">},</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="n">models</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;policy&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="p">)</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="c1"># Initialize the trainer</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="c1"># Must check the trainer is trainable.</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    <span class="k">assert</span> <span class="n">trainer</span><span class="o">.</span><span class="n">is_trainable</span><span class="p">()</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    <span class="c1"># Test the train method</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>    <span class="c1"># Sync the models</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">sync_models</span><span class="p">()</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>    <span class="c1"># Verify training effects</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>    <span class="c1"># ...</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>    <span class="c1"># Clean up</span>
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">teardown</span><span class="p">()</span>
 </code></pre></div>
 <p>While you can use the <code>run</code> method to execute the entire workflow (setup → train → sync_models → teardown), note that it will only execute if <code>is_trainable()</code> returns <code>True</code>. This is important to remember when setting up your test data.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Alternative approach using run</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_trainer_run</span><span class="p">():</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="c1"># Create and connect components</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">trainer</span> <span class="o">=</span> <span class="n">MyTrainer</span><span class="p">()</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">buffer</span> <span class="o">=</span> <span class="n">MyDataBuffer</span><span class="p">([</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">],</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">MyTrainingModel</span><span class="p">()</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">connect_components</span><span class="p">(</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        <span class="n">trainers</span><span class="o">=</span><span class="n">trainer</span><span class="p">,</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="n">buffers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;experience&quot;</span><span class="p">:</span> <span class="n">buffer</span><span class="p">},</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="n">models</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;policy&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="p">)</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="c1"># Prepare test data to ensure is_trainable returns True</span>
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="c1"># ...</span>
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="c1"># Run the entire training workflow</span>
-<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>
-<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>    <span class="c1"># Verify run was successful</span>
-<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>    <span class="k">assert</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">True</span>
-<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>
-<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    <span class="c1"># Verify training effects</span>
-<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="c1"># ...</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Alternative approach using run</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_trainer_run</span><span class="p">():</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="c1"># Create and connect components</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">trainer</span> <span class="o">=</span> <span class="n">MyTrainer</span><span class="p">()</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">buffer</span> <span class="o">=</span> <span class="n">MyDataBuffer</span><span class="p">([</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">],</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">MyTrainingModel</span><span class="p">()</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">connect_components</span><span class="p">(</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        <span class="n">trainers</span><span class="o">=</span><span class="n">trainer</span><span class="p">,</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        <span class="n">buffers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;experience&quot;</span><span class="p">:</span> <span class="n">buffer</span><span class="p">},</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>        <span class="n">models</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;policy&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="p">)</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="c1"># Prepare test data to ensure is_trainable returns True</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="c1"># ...</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="c1"># Run the entire training workflow</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>    <span class="c1"># Verify run was successful</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    <span class="k">assert</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">True</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>    <span class="c1"># Verify training effects</span>
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>    <span class="c1"># ...</span>
 </code></pre></div>
 
 

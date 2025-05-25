@@ -592,6 +592,66 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#keyboard-shortcut-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keyboard Shortcut Controller
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Keyboard Shortcut Controller">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-shortcuts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Shortcuts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-accessibility-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      macOS Accessibility Permissions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-line-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command-line Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       API Reference
@@ -1229,6 +1289,66 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#keyboard-shortcut-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keyboard Shortcut Controller
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Keyboard Shortcut Controller">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-shortcuts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Shortcuts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-accessibility-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      macOS Accessibility Permissions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-line-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command-line Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
       API Reference
@@ -1319,6 +1439,43 @@
 <li><code>resuming</code> - System is in the process of resuming</li>
 <li><code>shutting down</code> - System is shutting down</li>
 </ul>
+<h2 id="keyboard-shortcut-controller">Keyboard Shortcut Controller<a class="headerlink" href="#keyboard-shortcut-controller" title="Permanent link">&para;</a></h2>
+<p>PAMIQ-Core provides a keyboard shortcut controller. Users can pause/resume a agent by keyboard shortcuts.</p>
+<h3 id="default-shortcuts">Default Shortcuts<a class="headerlink" href="#default-shortcuts" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Windows/Linux: <code>Alt+Shift+P</code> (Pause) and <code>Alt+Shift+R</code> (Resume)</li>
+<li>macOS: <code>Option+Shift+P</code> (Pause) and <code>Option+Shift+R</code> (Resume)</li>
+<li>Windows also supports <code>Alt+Shift+Q</code> to quit the controller</li>
+</ul>
+<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pip<span class="w"> </span>install<span class="w"> </span>pamiq-core<span class="o">[</span>kbctl<span class="o">]</span>
+</code></pre></div>
+<p><strong>Note for Linux users</strong>: The following dependencies may be required:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libevdev-dev<span class="w"> </span>build-essential
+</code></pre></div>
+<h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>pamiq-kbctl
+</code></pre></div>
+<h3 id="macos-accessibility-permissions">macOS Accessibility Permissions<a class="headerlink" href="#macos-accessibility-permissions" title="Permanent link">&para;</a></h3>
+<p>On macOS, you must grant Accessibility permissions to your terminal application before using <code>pamiq-kbctl</code>:</p>
+<ol>
+<li>Go to System Settings → Privacy &amp; Security → Accessibility</li>
+<li>Click the "+" button</li>
+<li>Add your terminal application (Terminal, iTerm2, VS Code Terminal, etc.)</li>
+<li>Restart your terminal application after granting permissions</li>
+</ol>
+<p>Without these permissions, macOS will prevent keyboard monitoring and <code>pamiq-kbctl</code> will not function properly.</p>
+<h3 id="command-line-options">Command-line Options<a class="headerlink" href="#command-line-options" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>--host</code>: Hostname of the PAMIQ system (default: localhost)</li>
+<li><code>--port</code>: Port number for the web API (default: 8391)</li>
+<li><code>--pause-key</code>: Custom key combination for pause</li>
+<li><code>--resume-key</code>: Custom key combination for resume</li>
+<li><code>--quit-key</code>: Custom key combination to exit the controller</li>
+</ul>
+<p>Example with custom shortcuts:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>pamiq-kbctl<span class="w"> </span>--pause-key<span class="w"> </span><span class="s2">&quot;ctrl+p&quot;</span><span class="w"> </span>--resume-key<span class="w"> </span><span class="s2">&quot;ctrl+r&quot;</span>
+</code></pre></div>
 <h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
 <p>For detailed information about the classes and methods in the console module, check out the <a href="../../api/console/">API Reference</a>.</p>
 
