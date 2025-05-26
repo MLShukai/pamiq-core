@@ -9,6 +9,7 @@
 # In this VAE example, all the functions are implemented in the same way as the original design principles.
 
 import itertools
+from pathlib import Path
 from typing import override
 
 import torch
@@ -97,8 +98,6 @@ class VAETrainer(TorchTrainer):
 
         device = get_device(self.encoder.model)
 
-        batch_steps = 0
-
         # Training loop for ordinary VAE
         for epoch in range(self.max_epochs):
             recon_sum = 0.0
@@ -139,6 +138,7 @@ class VAETrainer(TorchTrainer):
                 data_count += batch_size
 
                 # log per batch
+                self.global_step += 1
                 self.writer.add_scalar(
                     "Loss/Total/Batch", loss.item() / batch_size, self.global_step
                 )
@@ -150,7 +150,6 @@ class VAETrainer(TorchTrainer):
                 self.writer.add_scalar(
                     "Loss/KL/Batch", kl_loss.item() / batch_size, self.global_step
                 )
-                self.global_step+= 1
 
             # accumulate metrics per epoch
             avg_total = (recon_sum + kl_sum) / data_count
@@ -158,7 +157,31 @@ class VAETrainer(TorchTrainer):
             avg_kl = kl_sum / data_count
 
             # log per epoch
+            self.current_epoch += 1
             self.writer.add_scalar("Loss/Total/Epoch", avg_total, self.current_epoch)
-            self.writer.add_scalar("Loss/Reconstruction/Epoch", avg_recon, self.current_epoch)
+            self.writer.add_scalar(
+                "Loss/Reconstruction/Epoch", avg_recon, self.current_epoch
+            )
             self.writer.add_scalar("Loss/KL/Epoch", avg_kl, self.current_epoch)
 
+    @override
+    def save_state(self, path: Path) -> None:
+        """Save the trainer's state to the specified path.
+
+        Args:
+            path (Path): The directory where the state will be saved.
+        """
+        super().save_state(path)
+        (path / "global_step").write_text(str(self.global_step))
+        (path / "current_epoch").write_text(str(self.current_epoch))
+
+    @override
+    def load_state(self, path: Path) -> None:
+        """Load the trainer's state from the specified path.
+
+        Args:
+            path (Path): The directory from which the state will be loaded.
+        """
+        super().load_state(path)
+        self.global_step = int((path / "global_step").read_text())
+        self.current_epoch = int((path / "current_epoch").read_text())
