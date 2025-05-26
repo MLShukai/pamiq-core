@@ -160,5 +160,3 @@ class VAETrainer(TorchTrainer):
             self.writer.add_scalar("Loss/Reconstruction/Epoch", avg_recon, self.current_epoch)
             self.writer.add_scalar("Loss/KL/Epoch", avg_kl, self.current_epoch)
 
-        # close writer after training
-        self.writer.close()
