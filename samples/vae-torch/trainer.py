@@ -138,17 +138,17 @@ class VAETrainer(TorchTrainer):
 
                 # log per batch
                 self.writer.add_scalar(
-                    "Loss/Total/Batch", loss.item() / batch_size, batch_steps
+                    "Loss/Total/Batch", loss.item() / batch_size, self.global_step
                 )
                 self.writer.add_scalar(
                     "Loss/Reconstruction/Batch",
                     recon_loss.item() / batch_size,
-                    batch_steps,
+                    self.global_step,
                 )
                 self.writer.add_scalar(
-                    "Loss/KL/Batch", kl_loss.item() / batch_size, batch_steps
+                    "Loss/KL/Batch", kl_loss.item() / batch_size, self.global_step
                 )
-                batch_steps += 1
+                self.global_step+= 1
 
             # accumulate metrics per epoch
             avg_total = (recon_sum + kl_sum) / data_count
