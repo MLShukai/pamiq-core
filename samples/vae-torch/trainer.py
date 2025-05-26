@@ -48,6 +48,8 @@ class VAETrainer(TorchTrainer):
         self.max_epochs = max_epochs
         self.batch_size = batch_size
         self.lr = lr
+        self.global_step = 0
+        self.current_epoch = 0
 
         # TensorBoard writer
         self.writer = SummaryWriter(log_dir=log_dir) if log_dir else SummaryWriter()
