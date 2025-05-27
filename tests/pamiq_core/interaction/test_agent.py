@@ -191,6 +191,38 @@ class TestAgent:
         # Verify child's method was called with the same collectors
         spy_child_attach.assert_called_once_with(data_collectors_dict)
 
+    def test_setup_propagation(
+        self,
+        parent_agent: AgentImpl,
+        child_agent: ChildAgentImpl,
+        mocker: MockerFixture,
+    ):
+        """Test that setup event propagates to child agents."""
+        # Spy on the child's method
+        spy_child_setup = mocker.spy(child_agent, "setup")
+
+        # Call setup on parent
+        parent_agent.setup()
+
+        # Verify child's setup was called
+        spy_child_setup.assert_called_once_with()
+
+    def test_teardown_propagation(
+        self,
+        parent_agent: AgentImpl,
+        child_agent: ChildAgentImpl,
+        mocker: MockerFixture,
+    ):
+        """Test that teardown event propagates to child agents."""
+        # Spy on the child's method
+        spy_child_teardown = mocker.spy(child_agent, "teardown")
+
+        # Call teardown on parent
+        parent_agent.teardown()
+
+        # Verify child's teardown was called
+        spy_child_teardown.assert_called_once_with()
+
     def test_save_and_load_state_with_child_agents(
         self,
         parent_agent: AgentImpl,

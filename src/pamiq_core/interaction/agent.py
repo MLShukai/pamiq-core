@@ -134,6 +134,26 @@ class Agent[ObsType, ActType](
         return self._data_collectors.acquire(name)
 
     @override
+    def setup(self) -> None:
+        """Handle interaction setup event.
+
+        Propagates the event to all child agents.
+        """
+        super().setup()
+        for agent in self._agents.values():
+            agent.setup()
+
+    @override
+    def teardown(self) -> None:
+        """Handle interaction teardown event.
+
+        Propagates the event to all child agents.
+        """
+        super().teardown()
+        for agent in self._agents.values():
+            agent.teardown()
+
+    @override
     def save_state(self, path: Path) -> None:
         """Save the agent's state and the states of any child agents.
 
