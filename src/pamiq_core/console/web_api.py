@@ -39,8 +39,8 @@ ERROR_INVALID_METHOD = {"error": "Invalid API method"}
 ERROR_INTERNAL_SERVER = {"error": "Internal server error"}
 
 
-class WebApiHandler:
-    """Web API handler for controlling the system.
+class WebApiServer:
+    """Web API Server for controlling the system.
 
     This class provides a simple Web API for controlling the thread
     controller, allowing external applications to pause, resume, and

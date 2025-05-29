@@ -1,8 +1,9 @@
 import math
+from functools import partial
 from typing import override
 
 from pamiq_core import time
-from pamiq_core.console import ControlCommands, SystemStatusProvider, WebApiHandler
+from pamiq_core.console import ControlCommands, SystemStatusProvider, WebApiServer
 from pamiq_core.state_persistence import StateStore
 from pamiq_core.utils.schedulers import TimeIntervalScheduler
 
@@ -59,8 +60,12 @@ class ControlThread(Thread):
         self._max_uptime = max_uptime
         self._system_start_time = -math.inf
 
-        self._web_api_address = web_api_address
-        self._web_api_command_queue_size = web_api_command_queue_size
+        self._partial_web_api_server = partial(
+            WebApiServer,
+            host=web_api_address[0],
+            port=web_api_address[1],
+            max_queue_size=web_api_command_queue_size,
+        )
 
         self._controller = ThreadController()
         self._running = True
@@ -179,8 +184,8 @@ class ControlThread(Thread):
         Retrieves and processes all available commands from the Web API
         handler.
         """
-        while self._web_api_handler.has_commands():
-            match self._web_api_handler.receive_command():
+        while self._web_api_server.has_commands():
+            match self._web_api_server.receive_command():
                 case ControlCommands.PAUSE:
                     self.try_pause()
                 case ControlCommands.RESUME:
@@ -215,15 +220,10 @@ class ControlThread(Thread):
             f"in time scale x{time.get_time_scale():.1f})"
         )
 
-        self._web_api_handler = WebApiHandler(
-            system_status=SystemStatusProvider(
-                self.controller, self._thread_statuses_monitor
-            ),
-            host=self._web_api_address[0],
-            port=self._web_api_address[1],
-            max_queue_size=self._web_api_command_queue_size,
+        self._web_api_server = self._partial_web_api_server(
+            SystemStatusProvider(self.controller, self._thread_statuses_monitor),
         )
-        self._web_api_handler.run_in_background()
+        self._web_api_server.run_in_background()
 
     @override
     def on_tick(self) -> None:
