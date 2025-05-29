@@ -27,6 +27,7 @@ def main():
     models = {
         "encoder": TorchTrainingModel(
             Encoder(feature_size=feature_size),
+            inference_procedure=Encoder.infer,
             device=device,
         ),
         "decoder": TorchTrainingModel(
