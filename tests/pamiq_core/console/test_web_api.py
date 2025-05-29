@@ -1,7 +1,9 @@
 """Tests for the Web API server module."""
 
+import json
 from queue import Empty
 
+import httpx
 import pytest
 from pytest_mock import MockerFixture
 from starlette.testclient import TestClient
@@ -13,6 +15,7 @@ from pamiq_core.console.web_api import (
     ERROR_INVALID_METHOD,
     RESULT_OK,
     ControlCommands,
+    WebApiClient,
     WebApiServer,
 )
 
@@ -227,3 +230,184 @@ class TestWebApiHandler:
         # Assert
         assert response.status_code == 405
         assert response.json() == ERROR_INVALID_METHOD
+
+
+class TestWebApiClient:
+    """Test suite for WebApiClient class."""
+
+    @pytest.fixture
+    def mock_client(self, mocker: MockerFixture):
+        """Fixture providing a mock httpx.Client."""
+        mock_client = mocker.Mock()
+        mocker.patch("httpx.Client", return_value=mock_client)
+        return mock_client
+
+    @pytest.fixture
+    def client(self, mock_client) -> WebApiClient:
+        """Fixture providing a WebApiClient instance with mocked
+        httpx.Client."""
+        return WebApiClient("localhost", 8391)
+
+    def test_init(self, client: WebApiClient):
+        """Test WebApiClient initialization."""
+        assert client.host == "localhost"
+        assert client.port == 8391
+
+    def test_get_status_success(self, client: WebApiClient, mock_client):
+        """Test get_status method with successful response."""
+        mock_response = mock_client.get.return_value
+        mock_response.text = json.dumps({"status": "active"})
+
+        result = client.get_status()
+
+        assert result == "active"
+        mock_client.get.assert_called_once_with("http://localhost:8391/api/status")
+
+    def test_get_status_request_error(self, client: WebApiClient, mock_client):
+        """Test get_status method with RequestError."""
+        mock_client.get.side_effect = httpx.RequestError("Connection failed")
+
+        result = client.get_status()
+
+        assert result == "offline"
+
+    def test_get_status_http_error(self, client: WebApiClient, mock_client, mocker):
+        """Test get_status method with HTTPStatusError."""
+        mock_response = mock_client.get.return_value
+        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "Server error", request=mocker.Mock(), response=mock_response
+        )
+
+        result = client.get_status()
+
+        assert result == "offline"
+
+    def test_pause_success(self, client: WebApiClient, mock_client):
+        """Test pause method with successful response."""
+        mock_response = mock_client.post.return_value
+        mock_response.text = json.dumps({"result": "ok"})
+
+        result = client.pause()
+
+        assert result == "ok"
+        mock_client.post.assert_called_once_with("http://localhost:8391/api/pause")
+
+    def test_pause_request_error(self, client: WebApiClient, mock_client):
+        """Test pause method with RequestError."""
+        mock_client.post.side_effect = httpx.RequestError("Connection failed")
+
+        result = client.pause()
+
+        assert result is None
+
+    def test_pause_http_error(
+        self, client: WebApiClient, mock_client, mocker: MockerFixture
+    ):
+        """Test pause method with HTTPStatusError."""
+        mock_response = mock_client.post.return_value
+        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "Server error", request=mocker.Mock(), response=mock_response
+        )
+
+        result = client.pause()
+
+        assert result is None
+
+    def test_resume_success(self, client: WebApiClient, mock_client):
+        """Test resume method with successful response."""
+        mock_response = mock_client.post.return_value
+        mock_response.text = json.dumps({"result": "ok"})
+
+        result = client.resume()
+
+        assert result == "ok"
+        mock_client.post.assert_called_once_with("http://localhost:8391/api/resume")
+
+    def test_resume_request_error(self, client: WebApiClient, mock_client):
+        """Test resume method with RequestError."""
+        mock_client.post.side_effect = httpx.RequestError("Connection failed")
+
+        result = client.resume()
+
+        assert result is None
+
+    def test_resume_http_error(
+        self, client: WebApiClient, mock_client, mocker: MockerFixture
+    ):
+        """Test resume method with HTTPStatusError."""
+        mock_response = mock_client.post.return_value
+        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "Server error", request=mocker.Mock(), response=mock_response
+        )
+
+        result = client.resume()
+
+        assert result is None
+
+    def test_save_state_success(self, client: WebApiClient, mock_client):
+        """Test save_state method with successful response."""
+        mock_response = mock_client.post.return_value
+        mock_response.text = json.dumps({"result": "ok"})
+
+        result = client.save_state()
+
+        assert result == "ok"
+        mock_client.post.assert_called_once_with("http://localhost:8391/api/save-state")
+
+    def test_save_state_request_error(self, client: WebApiClient, mock_client):
+        """Test save_state method with RequestError."""
+        mock_client.post.side_effect = httpx.RequestError("Connection failed")
+
+        result = client.save_state()
+
+        assert result is None
+
+    def test_save_state_http_error(
+        self, client: WebApiClient, mock_client, mocker: MockerFixture
+    ):
+        """Test save_state method with HTTPStatusError."""
+        mock_response = mock_client.post.return_value
+        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "Server error", request=mocker.Mock(), response=mock_response
+        )
+
+        result = client.save_state()
+
+        assert result is None
+
+    def test_shutdown_success(self, client: WebApiClient, mock_client):
+        """Test shutdown method with successful response."""
+        mock_response = mock_client.post.return_value
+        mock_response.text = json.dumps({"result": "ok"})
+
+        result = client.shutdown()
+
+        assert result == "ok"
+        mock_client.post.assert_called_once_with("http://localhost:8391/api/shutdown")
+
+    def test_shutdown_request_error(self, client: WebApiClient, mock_client):
+        """Test shutdown method with RequestError."""
+        mock_client.post.side_effect = httpx.RequestError("Connection failed")
+
+        result = client.shutdown()
+
+        assert result is None
+
+    def test_shutdown_http_error(
+        self, client: WebApiClient, mock_client, mocker: MockerFixture
+    ):
+        """Test shutdown method with HTTPStatusError."""
+        mock_response = mock_client.post.return_value
+        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "Server error", request=mocker.Mock(), response=mock_response
+        )
+
+        result = client.shutdown()
+
+        assert result is None
+
+    def test_close(self, client: WebApiClient, mock_client):
+        """Test close method calls client.close()."""
+        client.close()
+
+        mock_client.close.assert_called_once()
