@@ -256,11 +256,11 @@ class TestWebApiClient:
     def test_get_status_success(self, client: WebApiClient, mock_client):
         """Test get_status method with successful response."""
         mock_response = mock_client.get.return_value
-        mock_response.text = json.dumps({"status": "active"})
+        mock_response.text = json.dumps({"status": SystemStatus.ACTIVE.value})
 
         result = client.get_status()
 
-        assert result == "active"
+        assert result == SystemStatus.ACTIVE
         mock_client.get.assert_called_once_with("http://localhost:8391/api/status")
 
     def test_get_status_request_error(self, client: WebApiClient, mock_client):
@@ -269,7 +269,7 @@ class TestWebApiClient:
 
         result = client.get_status()
 
-        assert result == "offline"
+        assert result == SystemStatus.OFFLINE
 
     def test_get_status_http_error(self, client: WebApiClient, mock_client, mocker):
         """Test get_status method with HTTPStatusError."""
@@ -280,7 +280,7 @@ class TestWebApiClient:
 
         result = client.get_status()
 
-        assert result == "offline"
+        assert result == SystemStatus.OFFLINE
 
     def test_pause_success(self, client: WebApiClient, mock_client):
         """Test pause method with successful response."""

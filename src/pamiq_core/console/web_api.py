@@ -21,7 +21,7 @@ from starlette.routing import Route
 
 from pamiq_core.utils.reflection import get_class_module_path
 
-from .system_status import SystemStatusProvider
+from .system_status import SystemStatus, SystemStatusProvider
 
 
 class ControlCommands(Enum):
@@ -192,9 +192,9 @@ class WebApiServer:
             JSONResponse with the current system status.
         """
         try:
-            status_value = self._system_status.get_current_status().status_name
-            self._logger.info(f"Status request: returning {status_value}")
-            return JSONResponse({"status": status_value})
+            status = self._system_status.get_current_status()
+            self._logger.info(f"Status request: returning {status.status_name}")
+            return JSONResponse({"status": status.value})
         except Exception as e:
             self._logger.exception("Error getting system status")
             return await self._error_500(request, e)
@@ -316,18 +316,18 @@ class WebApiClient:
         """Get base URL for API requests."""
         return f"http://{self.host}:{self.port}/api"
 
-    def get_status(self) -> str:
+    def get_status(self) -> SystemStatus:
         """Get system status.
 
         Returns:
-            Status string or "offline" if request failed
+            Status enum. If error is occurred, return offline status
         """
         try:
             response = self._client.get(f"{self._base_url}/status")
             response.raise_for_status()
-            return json.loads(response.text)["status"]
+            return SystemStatus(json.loads(response.text)["status"])
         except (httpx.RequestError, httpx.HTTPStatusError):
-            return "offline"
+            return SystemStatus.OFFLINE
 
     def pause(self) -> str | None:
         """Pause the system.
