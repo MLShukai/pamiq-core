@@ -239,6 +239,7 @@ class TestSystemStatusEnum:
         assert SystemStatus.PAUSED.status_name == "paused"
         assert SystemStatus.RESUMING.status_name == "resuming"
         assert SystemStatus.SHUTTING_DOWN.status_name == "shutting down"
+        assert SystemStatus.OFFLINE.status_name == "offline"
 
         for status in SystemStatus:
             status.status_name
