@@ -1,5 +1,7 @@
 import argparse
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from typing import Literal
 
 from pynput import keyboard
 
@@ -34,6 +36,8 @@ class KeyboardController:
             self._quit_keys = self._parse_key_combination(quit_keys)
         self._current_keys: set[str] = set()
 
+        self._executor = ThreadPoolExecutor()
+
     def _parse_key_combination(self, keys_str: str) -> set[str]:
         """Parse key combination string to key name set.
 
@@ -62,6 +66,18 @@ class KeyboardController:
             if key.char:
                 return key.char.lower()
 
+    def _send_command(self, command: Literal["pause", "resume"]) -> None:
+        """Send command with client and print result message."""
+        match command:
+            case "pause":
+                success = self._client.pause()
+            case "resume":
+                success = self._client.resume()
+        if success:
+            print(f"Success to send {command} command.")
+        else:
+            print(f"Failed to send {command} command.")
+
     def on_press(self, key: keyboard.Key | keyboard.KeyCode | None) -> None:
         """Handle key press event.
 
@@ -77,15 +93,9 @@ class KeyboardController:
         self._current_keys.add(name)
 
         if self._current_keys == self._pause_keys:
-            if self._client.pause():
-                print("Success to send pause command.")
-            else:
-                print("Failed to send pause command.")
+            self._executor.submit(self._send_command, "pause")
         elif self._current_keys == self._resume_keys:
-            if self._client.resume():
-                print("Success to send resume command.")
-            else:
-                print("Failed to send resume command.")
+            self._executor.submit(self._send_command, "resume")
         elif self._current_keys == self._quit_keys:
             self._listener.stop()
 
@@ -117,6 +127,8 @@ class KeyboardController:
 
         with self._listener as listener:
             listener.join()
+
+        self._executor.shutdown()
 
 
 def main() -> None:

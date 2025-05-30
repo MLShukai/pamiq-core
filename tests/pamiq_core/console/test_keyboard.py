@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -64,6 +66,7 @@ class TestKeyboardController:
         controller.on_press(keyboard.Key.shift)
         controller.on_press(keyboard.KeyCode.from_char("p"))
 
+        time.sleep(0.001)
         mock_web_api_client.pause.assert_called_once()
 
     def test_on_press_resume_combination(
@@ -74,6 +77,7 @@ class TestKeyboardController:
         controller.on_press(keyboard.Key.shift)
         controller.on_press(keyboard.KeyCode.from_char("r"))
 
+        time.sleep(0.001)
         mock_web_api_client.resume.assert_called_once()
 
     def test_on_press_quit_combination(
@@ -117,12 +121,14 @@ class TestKeyboardController:
         controller.on_press(keyboard.Key.alt)
         controller.on_press(keyboard.Key.shift)
         controller.on_press(keyboard.KeyCode.from_char("p"))
+        time.sleep(0.001)
         mock_web_api_client.pause.assert_called_once()
 
         # Release one key and press resume
         mock_web_api_client.reset_mock()
         controller.on_release(keyboard.KeyCode.from_char("p"))
         controller.on_press(keyboard.KeyCode.from_char("r"))
+        time.sleep(0.001)
         mock_web_api_client.resume.assert_called_once()
 
     def test_on_press_none_key(
