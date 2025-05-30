@@ -28,9 +28,9 @@ class TestControlThread:
 
     @pytest.fixture
     def mock_web_api_handler(self, mocker: MockerFixture):
-        """Fixture providing a mock WebApiHandler."""
+        """Fixture providing a mock WebApiServer."""
         mock_web_api_handler_cls = mocker.patch(
-            "pamiq_core.thread.threads.control.WebApiHandler", autospec=True
+            "pamiq_core.thread.threads.control.WebApiServer", autospec=True
         )
         instance = mock_web_api_handler_cls.return_value
         instance.has_commands.return_value = False
@@ -484,7 +484,7 @@ class TestControlThread:
     ) -> None:
         """Test that on_tick processes Web API commands correctly after
         initialization."""
-        # Mock WebApiHandler class and its instance methods
+        # Mock WebApiServer class and its instance methods
         mock_web_api_handler.has_commands.side_effect = [
             True,
             True,
@@ -507,10 +507,10 @@ class TestControlThread:
         spy_save_state = mocker.spy(control_thread_with_statuses, "save_state")
         spy_shutdown = mocker.spy(control_thread_with_statuses, "shutdown")
 
-        # Initialize WebApiHandler by calling on_start
+        # Initialize WebApiServer by calling on_start
         control_thread_with_statuses.on_start()
 
-        # Verify WebApiHandler was initialized
+        # Verify WebApiServer was initialized
         mock_web_api_handler.run_in_background.assert_called_once()
 
         # Process commands by calling on_tick

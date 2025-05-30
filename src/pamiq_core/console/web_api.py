@@ -5,12 +5,14 @@ allowing external applications to pause, resume, shutdown the system and
 save states.
 """
 
+import json
 import logging
 import threading
 from enum import Enum, auto
 from queue import Full, Queue
 from typing import Any
 
+import httpx
 import uvicorn
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -19,7 +21,7 @@ from starlette.routing import Route
 
 from pamiq_core.utils.reflection import get_class_module_path
 
-from .system_status import SystemStatusProvider
+from .system_status import SystemStatus, SystemStatusProvider
 
 
 class ControlCommands(Enum):
@@ -39,8 +41,8 @@ ERROR_INVALID_METHOD = {"error": "Invalid API method"}
 ERROR_INTERNAL_SERVER = {"error": "Internal server error"}
 
 
-class WebApiHandler:
-    """Web API handler for controlling the system.
+class WebApiServer:
+    """Web API Server for controlling the system.
 
     This class provides a simple Web API for controlling the thread
     controller, allowing external applications to pause, resume, and
@@ -190,9 +192,9 @@ class WebApiHandler:
             JSONResponse with the current system status.
         """
         try:
-            status_value = self._system_status.get_current_status().status_name
-            self._logger.info(f"Status request: returning {status_value}")
-            return JSONResponse({"status": status_value})
+            status = self._system_status.get_current_status()
+            self._logger.info(f"Status request: returning {status.status_name}")
+            return JSONResponse({"status": status.value})
         except Exception as e:
             self._logger.exception("Error getting system status")
             return await self._error_500(request, e)
@@ -290,3 +292,95 @@ class WebApiHandler:
         error_msg = str(exc) if exc else "Unknown error"
         self._logger.error(f"500: {method} {path} caused an error: {error_msg}")
         return JSONResponse(ERROR_INTERNAL_SERVER, status_code=500)
+
+
+class WebApiClient:
+    """Client for PAMIQ Web API communication.
+
+    Provides methods to interact with PAMIQ system via HTTP API.
+    """
+
+    def __init__(self, host: str, port: int) -> None:
+        """Initialize Web API client.
+
+        Args:
+            host: API server host
+            port: API server port
+        """
+        self.host = host
+        self.port = port
+        self._client = httpx.Client()
+
+    @property
+    def _base_url(self) -> str:
+        """Get base URL for API requests."""
+        return f"http://{self.host}:{self.port}/api"
+
+    def get_status(self) -> SystemStatus:
+        """Get system status.
+
+        Returns:
+            Status enum. If error is occurred, return offline status
+        """
+        try:
+            response = self._client.get(f"{self._base_url}/status")
+            response.raise_for_status()
+            return SystemStatus(json.loads(response.text)["status"])
+        except (httpx.RequestError, httpx.HTTPStatusError):
+            return SystemStatus.OFFLINE
+
+    def pause(self) -> str | None:
+        """Pause the system.
+
+        Returns:
+            Result message or None if request failed
+        """
+        try:
+            response = self._client.post(f"{self._base_url}/pause")
+            response.raise_for_status()
+            return json.loads(response.text)["result"]
+        except (httpx.RequestError, httpx.HTTPStatusError):
+            return None
+
+    def resume(self) -> str | None:
+        """Resume the system.
+
+        Returns:
+            Result message or None if request failed
+        """
+        try:
+            response = self._client.post(f"{self._base_url}/resume")
+            response.raise_for_status()
+            return json.loads(response.text)["result"]
+        except (httpx.RequestError, httpx.HTTPStatusError):
+            return None
+
+    def save_state(self) -> str | None:
+        """Save system state.
+
+        Returns:
+            Result message or None if request failed
+        """
+        try:
+            response = self._client.post(f"{self._base_url}/save-state")
+            response.raise_for_status()
+            return json.loads(response.text)["result"]
+        except (httpx.RequestError, httpx.HTTPStatusError):
+            return None
+
+    def shutdown(self) -> str | None:
+        """Shutdown the system.
+
+        Returns:
+            Result message or None if request failed
+        """
+        try:
+            response = self._client.post(f"{self._base_url}/shutdown")
+            response.raise_for_status()
+            return json.loads(response.text)["result"]
+        except (httpx.RequestError, httpx.HTTPStatusError):
+            return None
+
+    def close(self) -> None:
+        """Close the HTTP client."""
+        self._client.close()

@@ -1,9 +1,11 @@
 import argparse
-import json
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from typing import Literal
 
-import httpx
 from pynput import keyboard
+
+from .web_api import WebApiClient
 
 
 class KeyboardController:
@@ -26,14 +28,15 @@ class KeyboardController:
             resume_keys: Key combination for resume command (e.g., "alt+shift+r")
             quit_keys: Key combination for quit command (e.g., "alt+shift+q")
         """
-        self.host = host
-        self.port = port
+        self._client = WebApiClient(host, port)
         self._pause_keys = self._parse_key_combination(pause_keys)
         self._resume_keys = self._parse_key_combination(resume_keys)
         self._quit_keys = quit_keys
         if quit_keys:
             self._quit_keys = self._parse_key_combination(quit_keys)
         self._current_keys: set[str] = set()
+
+        self._executor = ThreadPoolExecutor()
 
     def _parse_key_combination(self, keys_str: str) -> set[str]:
         """Parse key combination string to key name set.
@@ -45,26 +48,6 @@ class KeyboardController:
             Set of key names in lowercase
         """
         return set(keys_str.lower().split("+"))
-
-    def send_command(self, endpoint: str) -> None:
-        """Send command to PAMIQ API.
-
-        Args:
-            endpoint: API endpoint name
-        """
-        try:
-            response = httpx.post(f"http://{self.host}:{self.port}/api/{endpoint}")
-            result = json.loads(response.text)
-            print(f"{endpoint}: {result.get('result', 'error')}")
-        except httpx.ConnectError:
-            print(f"{endpoint}: Connection failed, continuing...")
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 503:
-                print(f"{endpoint}: Service unavailable, continuing...")
-            else:
-                print(f"{endpoint}: HTTP error {e.response.status_code}")
-        except httpx.RequestError as e:
-            print(f"{endpoint}: Request error: {e}")
 
     @staticmethod
     def get_key_name(key: keyboard.Key | keyboard.KeyCode) -> str | None:
@@ -83,6 +66,18 @@ class KeyboardController:
             if key.char:
                 return key.char.lower()
 
+    def _send_command(self, command: Literal["pause", "resume"]) -> None:
+        """Send command with client and print result message."""
+        match command:
+            case "pause":
+                success = self._client.pause()
+            case "resume":
+                success = self._client.resume()
+        if success:
+            print(f"Success to send {command} command.")
+        else:
+            print(f"Failed to send {command} command.")
+
     def on_press(self, key: keyboard.Key | keyboard.KeyCode | None) -> None:
         """Handle key press event.
 
@@ -98,9 +93,9 @@ class KeyboardController:
         self._current_keys.add(name)
 
         if self._current_keys == self._pause_keys:
-            self.send_command("pause")
+            self._executor.submit(self._send_command, "pause")
         elif self._current_keys == self._resume_keys:
-            self.send_command("resume")
+            self._executor.submit(self._send_command, "resume")
         elif self._current_keys == self._quit_keys:
             self._listener.stop()
 
@@ -132,6 +127,8 @@ class KeyboardController:
 
         with self._listener as listener:
             listener.join()
+
+        self._executor.shutdown()
 
 
 def main() -> None:
