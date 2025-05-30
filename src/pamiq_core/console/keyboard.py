@@ -77,9 +77,15 @@ class KeyboardController:
         self._current_keys.add(name)
 
         if self._current_keys == self._pause_keys:
-            self._client.pause()
+            if self._client.pause():
+                print("Success to send pause command.")
+            else:
+                print("Failed to send pause command.")
         elif self._current_keys == self._resume_keys:
-            self._client.resume()
+            if self._client.resume():
+                print("Success to send resume command.")
+            else:
+                print("Failed to send resume command.")
         elif self._current_keys == self._quit_keys:
             self._listener.stop()
 
