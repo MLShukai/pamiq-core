@@ -20,7 +20,7 @@ from pamiq_core.console.web_api import (
 )
 
 
-class TestWebApiHandler:
+class TestWebApiServer:
     """Test class for the WebApiServer."""
 
     @pytest.fixture
@@ -90,7 +90,7 @@ class TestWebApiHandler:
 
         # Assert - verify response
         assert response.status_code == 200
-        assert response.json() == {"status": "active"}
+        assert response.json() == {"status": SystemStatus.ACTIVE.value}
         mock_system_status.get_current_status.assert_called_once()
 
     def test_get_status_endpoint_handles_errors(
