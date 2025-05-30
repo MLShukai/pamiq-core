@@ -1,9 +1,9 @@
 import argparse
-import json
 import sys
 
-import httpx
 from pynput import keyboard
+
+from .web_api import WebApiClient
 
 
 class KeyboardController:
@@ -26,8 +26,7 @@ class KeyboardController:
             resume_keys: Key combination for resume command (e.g., "alt+shift+r")
             quit_keys: Key combination for quit command (e.g., "alt+shift+q")
         """
-        self.host = host
-        self.port = port
+        self._client = WebApiClient(host, port)
         self._pause_keys = self._parse_key_combination(pause_keys)
         self._resume_keys = self._parse_key_combination(resume_keys)
         self._quit_keys = quit_keys
@@ -45,26 +44,6 @@ class KeyboardController:
             Set of key names in lowercase
         """
         return set(keys_str.lower().split("+"))
-
-    def send_command(self, endpoint: str) -> None:
-        """Send command to PAMIQ API.
-
-        Args:
-            endpoint: API endpoint name
-        """
-        try:
-            response = httpx.post(f"http://{self.host}:{self.port}/api/{endpoint}")
-            result = json.loads(response.text)
-            print(f"{endpoint}: {result.get('result', 'error')}")
-        except httpx.ConnectError:
-            print(f"{endpoint}: Connection failed, continuing...")
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 503:
-                print(f"{endpoint}: Service unavailable, continuing...")
-            else:
-                print(f"{endpoint}: HTTP error {e.response.status_code}")
-        except httpx.RequestError as e:
-            print(f"{endpoint}: Request error: {e}")
 
     @staticmethod
     def get_key_name(key: keyboard.Key | keyboard.KeyCode) -> str | None:
@@ -98,9 +77,9 @@ class KeyboardController:
         self._current_keys.add(name)
 
         if self._current_keys == self._pause_keys:
-            self.send_command("pause")
+            self._client.pause()
         elif self._current_keys == self._resume_keys:
-            self.send_command("resume")
+            self._client.resume()
         elif self._current_keys == self._quit_keys:
             self._listener.stop()
 
