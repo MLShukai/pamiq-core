@@ -1,9 +1,10 @@
 import argparse
-import json
 
-import httpx
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
+
+from .system_status import SystemStatus
+from .web_api import WebApiClient
 
 
 class Console:
@@ -12,27 +13,21 @@ class Console:
     Users can Control pamiq with CUI interface interactively.
     """
 
-    status: str
+    status: SystemStatus
 
     def __init__(self, host: str, port: int) -> None:
         """Initialize CUI interface."""
         super().__init__()
-        self._host = host
-        self._port = port
+        self._client = WebApiClient(host, port)
         self.all_commands: list[str] = [
             attr[len("command_") :] for attr in dir(self) if attr.startswith("command_")
         ]
         self._completer = WordCompleter(self.all_commands)
-        self.fetch_status()
+        self.status = SystemStatus.OFFLINE
 
     def fetch_status(self) -> None:
         """Check WebAPI status."""
-        try:
-            response = httpx.get(f"http://{self._host}:{self._port}/api/status")
-        except httpx.RequestError:
-            self.status = "offline"
-            return
-        self.status = json.loads(response.text)["status"]
+        self.status = self._client.get_status()
 
     def run_command(self, command: str) -> bool | None:
         """Check connection status before command execution."""
@@ -41,7 +36,7 @@ class Console:
         # Check command depend on WebAPI
         if command in ["pause", "p", "resume", "r", "save", "shutdown"]:
             # Check if WebAPI available.
-            if self.status == "offline":
+            if self.status is SystemStatus.OFFLINE:
                 print(f'Command "{command}" not executed. Can\'t connect AMI system.')
                 return False
         # Execute command
@@ -57,7 +52,8 @@ class Console:
         while True:
             self.fetch_status()
             command = prompt(
-                f"pamiq-console ({self.status}) > ", completer=self._completer
+                f"pamiq-console ({self.status.status_name}) > ",
+                completer=self._completer,
             )
             if command == "":
                 continue
@@ -88,8 +84,11 @@ class Console:
 
     def command_pause(self) -> None:
         """Pause the AMI system."""
-        response = httpx.post(f"http://{self._host}:{self._port}/api/pause")
-        print(json.loads(response.text)["result"])
+        response = self._client.pause()
+        if response:
+            print(response)
+        else:
+            print("Failed to pause...")
 
     def command_p(self) -> None:
         """Pause the AMI system."""
@@ -97,8 +96,11 @@ class Console:
 
     def command_resume(self) -> None:
         """Resume the AMI system."""
-        response = httpx.post(f"http://{self._host}:{self._port}/api/resume")
-        print(json.loads(response.text)["result"])
+        response = self._client.resume()
+        if response:
+            print(response)
+        else:
+            print("Failed to resume...")
 
     def command_r(self) -> None:
         """Resume the AMI system."""
@@ -108,9 +110,11 @@ class Console:
         """Shutdown the AMI system."""
         confirm = input("Confirm AMI system shutdown? (y/[N]): ")
         if confirm.lower() in ["y", "yes"]:
-            response = httpx.post(f"http://{self._host}:{self._port}/api/shutdown")
-            print(json.loads(response.text)["result"])
-            return True
+            response = self._client.shutdown()
+            if response:
+                return True
+            else:
+                print("Failed to shutdown...")
         print("Shutdown cancelled.")
         return False
 
@@ -124,8 +128,11 @@ class Console:
 
     def command_save(self) -> None:
         """Save a checkpoint."""
-        response = httpx.post(f"http://{self._host}:{self._port}/api/save-state")
-        print(json.loads(response.text)["result"])
+        response = self._client.save_state()
+        if response:
+            print(response)
+        else:
+            print("Failed to save state...")
 
 
 def main() -> None:
