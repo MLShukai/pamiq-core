@@ -45,7 +45,7 @@ def main():
     }
 
     data = {"observation": RandomReplacementBuffer(["data"], max_size=1024)}
-    trainers = {"vae": VAETrainer(max_epochs=100, batch_size=32)}
+    trainers = {"vae": VAETrainer(max_epochs=3, batch_size=32)}
 
     launch(
         interaction=interaction,
