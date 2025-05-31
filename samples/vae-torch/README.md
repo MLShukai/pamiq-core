@@ -173,16 +173,6 @@ When you run the sample, you'll see:
 3. TensorBoard logs (if available)
 4. Model state saving to `./states/` directory
 
-Example output:
-
-```
-Using device: cuda:0
-Training VAE...
-Epoch 1/100: VAE Loss = 45.2, Recon Loss = 42.1, KL Loss = 3.1
-Epoch 2/100: VAE Loss = 38.7, Recon Loss = 36.2, KL Loss = 2.5
-...
-```
-
 ______________________________________________________________________
 
 ## Troubleshooting
