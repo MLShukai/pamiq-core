@@ -47,7 +47,7 @@ def main():
         trainers=trainers,
         config=LaunchConfig(
             states_dir=Path(__file__).parent / "states",
-            web_api_address=("localhost", 8391),
+            web_api_address=("localhost", 8391),  # for `pamiq-console` connection
             max_uptime=300.0,  # 5 minutes
         ),
     )
