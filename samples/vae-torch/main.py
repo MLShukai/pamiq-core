@@ -45,7 +45,11 @@ def main():
         models=models,
         data=data,
         trainers=trainers,
-        config=LaunchConfig(states_dir=Path(__file__).parent / "states"),
+        config=LaunchConfig(
+            states_dir=Path(__file__).parent / "states",
+            web_api_address=("localhost", 8391),
+            max_uptime=300.0,  # 5 minutes
+        ),
     )
 
 

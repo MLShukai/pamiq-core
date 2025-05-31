@@ -5,8 +5,10 @@ description = "Sample VAE project of pamiq-core with pytorch backend"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "numpy>=2.2.6",
     "pamiq-core",
-    "torch>=2.6.0",
+    "tensorboard>=2.19.0",
+    "torch>=2.0.0",
 ]
 
 [tool.uv.sources]
