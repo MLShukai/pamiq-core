@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import torch
@@ -12,6 +13,12 @@ from pamiq_core.torch import TorchTrainingModel
 
 
 def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler()],
+    )
+
     device = (
         torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
     )
