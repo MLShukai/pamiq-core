@@ -120,35 +120,6 @@ When you run the sample, you'll see:
 3. Model state saving to `./states/` directory
 
 
-## Framework Design Philosophy
-
-This sample illustrates several key design principles of `pamiq_core`:
-
-### Separation of Concerns
-
-- **Agent**: Handles decision-making (encoding in this case)
-- **Environment**: Manages data provision and validation
-- **Models**: Encapsulate neural network logic
-- **Trainer**: Implements training algorithms
-- **Data**: Manages buffering and data flow
-
-### Modularity
-
-Each component can be easily swapped or modified without affecting others:
-
-- Change the encoder architecture in `model.py`
-- Switch to real data by modifying `env.py`
-- Experiment with different training strategies in `trainer.py`
-
-### Reusability
-
-Components follow standard interfaces that work across different ML scenarios:
-
-- The same agent pattern works for RL, supervised learning, and generative models
-- Training models can be easily reused in different contexts
-- Data buffers work consistently across various data types
-
-______________________________________________________________________
 
 ## References
 
