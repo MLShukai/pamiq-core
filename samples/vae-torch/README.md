@@ -126,6 +126,3 @@ When you run the sample, you'll see:
 - [PyTorch Documentation](https://pytorch.org/)
 - [pamiq-core Documentation](https://mlshukai.github.io/pamiq-core/)
 
-______________________________________________________________________
-
-For more information, see the main project [README.md](../../README.md) or the [docs/](../../docs/) directory.
