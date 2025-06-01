@@ -69,12 +69,6 @@ vae-torch/
 ├── env.py                 # 🌍 Environment for data provision
 ├── model.py               # 🧠 VAE neural network architecture
 ├── trainer.py             # 🏋️ Training logic and loss computation
-├── README.md              # 📚 This documentation
-├── pyproject.toml         # 📦 Project dependencies
-├── uv.lock                # 🔒 Dependency lock file
-└── docs/                  # 📁 Documentation assets
-    └── images/
-        └── resulting_tensorboard.png  # 📊 Sample output screenshot
 ```
 
 
