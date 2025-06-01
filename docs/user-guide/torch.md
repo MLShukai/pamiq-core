@@ -21,7 +21,7 @@ These components handle thread-safe model synchronization, optimizer management,
 
 PAMIQ-Core uses an efficient model synchronization mechanism for PyTorch models:
 
-![Model Synchronization Architecture](../images/model-sync.png)
+![Model Synchronization Architecture](../images/model-sync.svg)
 
 The synchronization process works as follows:
 

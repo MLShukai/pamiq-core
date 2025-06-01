@@ -13,7 +13,7 @@
 - 🛠️ **Comprehensive Tools**: Built-in state persistence, time control, and monitoring
 - 🌍 **Cross Platform**: Linux is the primary focus, but Windows and macOS are also supported. (However, some older macOS and Windows systems may have significantly less accurate time control.)
 
-![System Architecture](images/system-architecture.png)
+![System Architecture](images/system-architecture.svg)
 
 ## Installation
 

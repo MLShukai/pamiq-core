@@ -81,7 +81,7 @@ For comprehensive API documentation and detailed tutorials, please visit the [do
 
 ## 🧩 Architecture
 
-![PAMIQ System Architecture](docs/images/system-architecture.png)
+![PAMIQ System Architecture](docs/images/system-architecture.svg)
 
 pamiq-core implements a unique architecture that enables autonomous intelligence:
 
