@@ -111,13 +111,6 @@ vae-torch/
     - Shows `RandomReplacementBuffer` usage
     - Demonstrates data flow configuration
 
-### 🔧 **Framework Extension**
-
-- **[pamiq_core docs](../../docs/)** - Framework documentation
-- **[API Reference](../../docs/api/)** - Detailed API docs
-
-______________________________________________________________________
-
 ## Expected Output
 
 When you run the sample, you'll see:
