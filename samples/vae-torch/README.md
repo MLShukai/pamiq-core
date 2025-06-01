@@ -122,10 +122,9 @@ ______________________________________________________________________
 
 When you run the sample, you'll see:
 
-1. Device detection and model initialization
-2. Training progress with loss values
-3. TensorBoard logs (if available)
-4. Model state saving to `./states/` directory
+1. Console logs
+2. TensorBoard logs
+3. Model state saving to `./states/` directory
 
 
 ## Framework Design Philosophy
