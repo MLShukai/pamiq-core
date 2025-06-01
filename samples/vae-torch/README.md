@@ -133,30 +133,6 @@ When you run the sample, you'll see:
 3. TensorBoard logs (if available)
 4. Model state saving to `./states/` directory
 
-______________________________________________________________________
-
-## Troubleshooting
-
-### Common Issues
-
-- **CUDA out of memory**: Reduce `batch_size` or `feature_size`
-- **Import errors**: Ensure `pamiq_core` is properly installed
-- **Slow training**: Check if GPU is being utilized
-- **Can't stop training gracefully**: Use `pamiq-console` for clean shutdown instead of `Ctrl+C`
-
-### Stopping Training Safely
-
-- **Recommended**: Use the `shutdown` command in `pamiq-console` for a graceful shutdown that ensures the final state is saved.
-- **Quick**: Use `Ctrl+C` for immediate stop (may not save final state properly)
-- **Remote**: Use Web API or keyboard shortcuts for external control
-
-### Performance Tips
-
-- Use GPU for faster training
-- Increase `batch_size` for better GPU utilization
-- Adjust `feature_size` based on your use case
-
-______________________________________________________________________
 
 ## Framework Design Philosophy
 
