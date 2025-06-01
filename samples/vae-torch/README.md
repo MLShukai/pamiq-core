@@ -15,7 +15,7 @@ ______________________________________________________________________
 ## Quick Start
 
 ```bash
-# Clone repository 
+# Clone repository
 git clone https://github.com/MLShukai/pamiq-core
 
 # Install dependencies
@@ -24,6 +24,9 @@ uv sync
 
 # Run the VAE training
 uv run python main.py
+```
+
+> **Note:** If you don't have `uv` installed, follow the [official installation guide](https://docs.astral.sh/uv/getting-started/installation/).
 
 The sample will train a VAE on synthetic data (zero tensors) and output training logs. Training automatically uses GPU if available.
 
@@ -70,7 +73,6 @@ vae-torch/
 ├── model.py               # 🧠 VAE neural network architecture
 ├── trainer.py             # 🏋️ Training logic and loss computation
 ```
-
 
 ## How to Read This Project
 
@@ -119,10 +121,7 @@ When you run the sample, you'll see:
 2. TensorBoard logs
 3. Model state saving to `./states/` directory
 
-
-
 ## References
 
 - [PyTorch Documentation](https://pytorch.org/)
 - [pamiq-core Documentation](https://mlshukai.github.io/pamiq-core/)
-
