@@ -71,7 +71,7 @@ vae-torch/
 ├── agent.py               # 🤖 EncodingAgent implementation
 ├── env.py                 # 🌍 Environment for data provision
 ├── model.py               # 🧠 VAE neural network architecture
-├── trainer.py             # 🏋️ Training logic and loss computation
+└── trainer.py             # 🏋️ Training logic and loss computation
 ```
 
 ## How to Read This Project
