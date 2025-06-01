@@ -99,6 +99,7 @@ vae-torch/
     - 3-layer encoder with mean/logvar outputs
     - 3-layer decoder for reconstruction
     - Includes reparameterization trick
+    - Custom `Encoder.infer` method: We can configure inference flow independently from training (`Encoder.forward`), by passing the method `Encoder.infer` into `inference_procedure` attribute when constructing `TorchTrainingModel` (in `main.py`)
 
 ### 🏋️ **Training Logic**
 
