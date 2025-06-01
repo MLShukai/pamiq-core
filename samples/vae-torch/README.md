@@ -15,16 +15,15 @@ ______________________________________________________________________
 ## Quick Start
 
 ```bash
-# Install pamiq-core
-pip install pamiq-core
+# Clone repository 
+git clone https://github.com/MLShukai/pamiq-core
 
 # Install dependencies
-cd PATH_TO_YOUR/pamiq-core/samples/vae-torch
-pip install .
+cd pamiq-core/pamiq-core/samples/vae-torch
+uv sync
 
 # Run the VAE training
-python main.py
-```
+uv run python main.py
 
 The sample will train a VAE on synthetic data (zero tensors) and output training logs. Training automatically uses GPU if available.
 
