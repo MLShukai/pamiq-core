@@ -124,7 +124,7 @@ When you run the sample, you'll see:
 ## References
 
 - [PyTorch Documentation](https://pytorch.org/)
-- [pamiq_core Documentation](../docs/index.md)
+- [pamiq-core Documentation](https://mlshukai.github.io/pamiq-core/)
 
 ______________________________________________________________________
 
