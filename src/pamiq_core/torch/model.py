@@ -10,11 +10,7 @@ from pamiq_core.model import InferenceModel, TrainingModel
 
 
 class InferenceProcedureCallable[T: nn.Module](Protocol):
-    """Protocol for inference procedure callables.
-
-    This protocol defines the expected signature for inference procedures
-    used by TorchTrainingModel. It allows proper typing of functions that
-    accept a model instance and variable arguments.
+    """This protocol defines inference procedures called by TorchTrainingModel.
 
     The callable must have args below:
     - model: The neural network model instance
