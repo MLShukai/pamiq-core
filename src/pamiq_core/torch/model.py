@@ -46,7 +46,7 @@ def get_device(
 
 
 def default_infer_procedure(model: nn.Module, *args: Any, **kwds: Any) -> Any:
-    """Default inference procedure that handles device placement.
+    """Default inference procedure with device placement.
 
     This function automatically moves tensor arguments to the same device
     as the model before performing inference. Non-tensor arguments are
