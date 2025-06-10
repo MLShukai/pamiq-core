@@ -325,10 +325,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
 
     @override
     def load_state(self, path: Path) -> None:
-        """Load model parameters from disk.
-
-        Loads a PyTorch state dictionary from the file at "{path}.pt" and
-        updates the model's parameters.
+        """Load model parameters.
 
         Args:
             path: Base path for loading the model state. The actual file
