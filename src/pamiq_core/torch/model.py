@@ -53,7 +53,7 @@ def default_infer_procedure(model: nn.Module, *args: Any, **kwds: Any) -> Any:
     passed through unchanged.
 
     Args:
-        model: The neural network model to perform inference with.
+        model: The model to infer.
         *args: Positional arguments to pass to the model. Tensors will be
             moved to the model's device.
         **kwds: Keyword arguments to pass to the model. Tensor values will
