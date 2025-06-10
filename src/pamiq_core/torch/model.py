@@ -16,7 +16,7 @@ class InferenceProcedureCallable[T: nn.Module](Protocol):
     used by TorchTrainingModel. It allows proper typing of functions that
     accept a model instance and variable arguments.
 
-    The callable should accept:
+    The callable must have args below:
     - model: The neural network model instance
     - *args: Variable positional arguments to pass to the model
     - **kwds: Variable keyword arguments to pass to the model
