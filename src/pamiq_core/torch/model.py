@@ -119,7 +119,7 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
             synchronization between training and inference models.
 
         Returns:
-            The underlying PyTorch model instance.
+            The internal PyTorch model instance.
         """
         return self._model
 
