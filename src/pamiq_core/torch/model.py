@@ -111,7 +111,7 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
 
     @property
     def _raw_model(self) -> T:
-        """Access the internal PyTorch model.
+        """Return the internal PyTorch model.
 
         Warning:
             This property should not be accessed directly in the inference
