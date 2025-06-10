@@ -102,7 +102,7 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
         Args:
             model: A PyTorch model to wrap for thread-safe inference.
             inference_procedure: A callable that defines how to perform
-                inference with the model. It should specify the model as the 
+                inference with the model. It should specify the model as the
                 first argument, followed by additional arguments.
         """
         self._model = model
