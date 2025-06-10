@@ -315,10 +315,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
 
     @override
     def save_state(self, path: Path) -> None:
-        """Save the model parameters to disk.
-
-        The parameters are saved as a PyTorch state dictionary with a .pt
-        extension appended to the provided path.
+        """Save the model parameters.
 
         Args:
             path: Base path for saving the model state. The actual file
