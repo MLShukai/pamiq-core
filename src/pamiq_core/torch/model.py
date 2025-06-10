@@ -63,8 +63,8 @@ def default_infer_procedure(model: nn.Module, *args: Any, **kwds: Any) -> Any:
         The output from the model's forward pass.
 
     Note:
-        If you override this method, ensure that input tensors are properly
-        sent to the computing device to avoid device mismatch errors.
+        When overriding this method, ensure that input tensors are properly
+        sent to the correct device to avoid device mismatch.
     """
     device = get_device(model)
     new_args: list[Any] = []
