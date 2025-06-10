@@ -207,6 +207,7 @@ class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
                 both models are compiled.
 
         Raises:
+            AttributeError: If inference_procedure is a string but doesn't exist in model class attributes.
             ValueError: If inference_procedure is a string but doesn't refer
                 to a callable method on the model class.
         """
