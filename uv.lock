@@ -645,7 +645,6 @@ dependencies = [
 
 [package.optional-dependencies]
 kbctl = [
-    { name = "httpx" },
     { name = "pynput" },
 ]
 torch = [
@@ -671,7 +670,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "httpx", marker = "extra == 'kbctl'", specifier = ">=0.28.1" },
     { name = "prompt-toolkit", specifier = ">=3.0.51" },
     { name = "pynput", marker = "extra == 'kbctl'", specifier = ">=1.8.1" },
     { name = "starlette", specifier = ">=0.46.1" },

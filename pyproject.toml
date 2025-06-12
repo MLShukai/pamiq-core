@@ -50,7 +50,6 @@ torch = [
     "torch>=2.0.0",
 ]
 kbctl = [
-    "httpx>=0.28.1",
     "pynput>=1.8.1",
 ]
 
