@@ -303,3 +303,67 @@ class TestTorchTrainingModel:
         assert torch.allclose(training_model(input), inference_model(input))
 
         training_model.sync()
+
+    def test_string_inference_procedure(self):
+        """Test using a string to specify the inference procedure."""
+
+        class CustomModel(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.linear = nn.Linear(3, 5)
+
+            @override
+            def forward(self, x):
+                return self.linear(x)
+
+            def custom_inference(self, x, temperature=1.0):
+                """Custom inference method with temperature scaling."""
+                output = self.forward(x)
+                return output / temperature
+
+        # Test with string inference procedure
+        model = CustomModel()
+        training_model = TorchTrainingModel(
+            model, inference_procedure="custom_inference"
+        )
+
+        input_tensor = torch.randn(2, 3)
+
+        # Test that the custom inference procedure is used
+        inference_model = training_model.inference_model
+        output_default = inference_model.infer(input_tensor)
+        output_with_temp = inference_model.infer(input_tensor, temperature=2.0)
+
+        # Verify temperature scaling works
+        assert torch.allclose(output_default / 2.0, output_with_temp, atol=1e-6)
+
+    def test_invalid_string_inference_procedure(self):
+        """Test error handling for invalid string inference procedure."""
+
+        class SimpleModel(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.linear = nn.Linear(3, 5)
+
+            @override
+            def forward(self, x):
+                return self.linear(x)
+
+            # Add a non-callable class attribute
+            not_callable = "This is not a method"
+
+        model = SimpleModel()
+
+        # Test with non-existent method name
+        with pytest.raises(
+            AttributeError,
+            match="The model class SimpleModel does not have a method named 'non_existent_method'",
+        ):
+            TorchTrainingModel(model, inference_procedure="non_existent_method")
+
+        # Test with attribute that is not callable
+        with pytest.raises(
+            ValueError,
+            match="The specified inference_procedure 'not_callable' is not a callable method",
+        ):
+            TorchTrainingModel(model, inference_procedure="not_callable")

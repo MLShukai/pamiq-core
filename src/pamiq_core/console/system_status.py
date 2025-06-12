@@ -13,6 +13,7 @@ class SystemStatus(Enum):
     PAUSED = auto()
     RESUMING = auto()
     SHUTTING_DOWN = auto()
+    OFFLINE = auto()
 
     @property
     def status_name(self) -> str:
@@ -30,6 +31,7 @@ _STATUS_NAMES = {
     SystemStatus.PAUSED: "paused",
     SystemStatus.RESUMING: "resuming",
     SystemStatus.SHUTTING_DOWN: "shutting down",
+    SystemStatus.OFFLINE: "offline",
 }
 
 
