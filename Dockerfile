@@ -19,6 +19,9 @@ RUN apt-get update && apt-get install -y \
     libevdev-dev \
     build-essential \
     bash-completion \
+    # Install Nodejs
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/* \
     # Setup Bash Completion
     && echo '[[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && \
@@ -31,10 +34,7 @@ RUN apt-get update && apt-get install -y \
 
 
 # Setup Claude Code
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash \
-    && \. "$HOME/.nvm/nvm.sh" \
-    && nvm install 22 \
-    && npm install -g @anthropic-ai/claude-code
+RUN npm install -g @anthropic-ai/claude-code
 
 # Default command (can be overridden)
 CMD ["/bin/bash"]
