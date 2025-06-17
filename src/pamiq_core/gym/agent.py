@@ -13,6 +13,8 @@ class GymAgent[O, A](Agent[GymObs[O], GymAction[A]]):
     This abstract class provides the interface for agents to handle
     Gymnasium environment observations and produce actions.
 
+    Set `self.need_reset=True` to reset the environment after current step.
+
     Example:
         ```python
         class MyCartPoleAgent(GymAgent[np.ndarray, int]):
