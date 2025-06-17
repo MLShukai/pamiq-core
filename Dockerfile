@@ -29,5 +29,12 @@ RUN apt-get update && apt-get install -y \
     # Shell completion
     && echo 'eval "$(uv generate-shell-completion bash)"' >> ~/.bashrc
 
+
+# Setup Claude Code
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash \
+    && \. "$HOME/.nvm/nvm.sh" \
+    && nvm install 22 \
+    && npm install -g @anthropic-ai/claude-code
+
 # Default command (can be overridden)
 CMD ["/bin/bash"]
