@@ -77,7 +77,8 @@ class GymEnvironment[O, A](Environment[GymObs[O], GymAction[A]]):
         the episode has ended or a reset was requested.
         """
         # Execute action in the environment
-        obs = EnvStep(*self.env.step(action.action))
+        out = self.env.step(action.action)
+        obs = EnvStep(out[0], float(out[1]), out[2], out[3], out[4])
         # Check if episode ended or agent requested reset
         if obs.done or action.need_reset:
             # Package both the final step and the reset observation

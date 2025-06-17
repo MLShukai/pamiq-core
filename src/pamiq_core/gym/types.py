@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, SupportsFloat
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -15,7 +15,7 @@ class EnvStep[T]:
     """Observation data after environment step."""
 
     obs: T
-    reward: SupportsFloat
+    reward: float
     terminated: bool
     truncated: bool
     info: dict[str, Any]

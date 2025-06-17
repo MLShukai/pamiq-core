@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from dataclasses import asdict
-from typing import Any, SupportsFloat, override
+from typing import Any, override
 
 from pamiq_core.interaction import Agent
 
@@ -53,9 +53,9 @@ class GymAgent[O, A](Agent[GymObs[O], GymAction[A]]):
     def on_step(
         self,
         obs: O,
-        reward: SupportsFloat,
-        truncated: bool,
+        reward: float,
         terminated: bool,
+        truncated: bool,
         info: dict[str, Any],
     ) -> A:
         """Process a step observation and return next action.
