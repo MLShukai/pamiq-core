@@ -4,7 +4,7 @@ import gymnasium as gym
 
 from pamiq_core.interaction import Environment
 
-from ._types import EnvReset, EnvStep, GymAction, GymObs
+from .types import EnvReset, EnvStep, GymAction, GymObs
 
 
 class GymEnvironment[O, A](Environment[GymObs[O], GymAction[A]]):

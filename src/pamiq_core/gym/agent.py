@@ -4,7 +4,7 @@ from typing import Any, SupportsFloat, override
 
 from pamiq_core.interaction import Agent
 
-from ._types import EnvReset, EnvStep, GymAction, GymObs
+from .types import EnvReset, EnvStep, GymAction, GymObs
 
 
 class GymAgent[O, A](Agent[GymObs[O], GymAction[A]]):

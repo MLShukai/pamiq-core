@@ -6,7 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from pamiq_core.gym import GymEnvironment
-from pamiq_core.gym._types import EnvReset, EnvStep, GymAction
+from pamiq_core.gym.types import EnvReset, EnvStep, GymAction
 from pamiq_core.interaction import Environment
 
 
