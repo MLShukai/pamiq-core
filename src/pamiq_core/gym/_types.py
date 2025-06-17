@@ -16,8 +16,8 @@ class EnvStep[T]:
 
     obs: T
     reward: SupportsFloat
-    truncated: bool
     terminated: bool
+    truncated: bool
     info: dict[str, Any]
 
     @property
