@@ -5,11 +5,22 @@ from importlib import metadata
 from . import data, interaction, model, time, trainer, utils
 from .data import DataBuffer, DataCollector, DataUser
 from .interaction import (
+    Actuator,
+    ActuatorsDict,
+    ActuatorWrapper,
     Agent,
     Environment,
+    EnvironmentWrapper,
     FixedIntervalInteraction,
     Interaction,
     IntervalAdjustor,
+    LambdaWrapper,
+    ModularEnvironment,
+    Sensor,
+    SensorsDict,
+    SensorWrapper,
+    SleepIntervalAdjustor,
+    Wrapper,
 )
 from .launcher import LaunchConfig, launch
 from .model import InferenceModel, TrainingModel
@@ -34,6 +45,17 @@ __all__ = [
     "Environment",
     "FixedIntervalInteraction",
     "IntervalAdjustor",
+    "SleepIntervalAdjustor",
+    "ModularEnvironment",
+    "Sensor",
+    "Actuator",
+    "SensorsDict",
+    "ActuatorsDict",
+    "Wrapper",
+    "LambdaWrapper",
+    "SensorWrapper",
+    "ActuatorWrapper",
+    "EnvironmentWrapper",
     "TrainingModel",
     "InferenceModel",
     "Trainer",
