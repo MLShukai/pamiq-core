@@ -87,9 +87,6 @@ class GymEnvironment[O, A](Environment[GymObs[O], GymAction[A]]):
 
     def __del__(self) -> None:
         """Clean up resources by closing the Gymnasium environment.
-
-        This ensures proper cleanup of any resources held by the
-        underlying Gymnasium environment.
         """
         if hasattr(self, "env"):
             self.env.close()
