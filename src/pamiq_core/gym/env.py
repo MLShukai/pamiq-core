@@ -86,7 +86,6 @@ class GymEnvironment[O, A](Environment[GymObs[O], GymAction[A]]):
         self._obs = obs
 
     def __del__(self) -> None:
-        """Clean up resources by closing the Gymnasium environment.
-        """
+        """Clean up resources by closing the Gymnasium environment."""
         if hasattr(self, "env"):
             self.env.close()
