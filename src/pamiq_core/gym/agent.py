@@ -64,7 +64,8 @@ class GymAgent[O, A](Agent[GymObs[O], GymAction[A]]):
             obs: Current observation from the environment
             reward: Reward received from the previous action
             truncated: Whether the episode was truncated
-            terminated: Whether the episode terminated naturally
+            truncated: Whether the episode was truncated before completion
+            terminated: Whether the episode terminated successfully
             info: Additional information from the environment
 
         Returns:
