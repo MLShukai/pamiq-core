@@ -12,7 +12,7 @@ pip install pamiq-core[gym]
 
 ## Overview
 
-The `pamiq_core.gym` module provides seamless integration between [Gymnasium](https://gymnasium.farama.org/) (the maintained fork of OpenAI Gym) and PAMIQ Core's interaction system. This allows you to use any Gymnasium environment as a PAMIQ Core environment and implement agents that work with Gymnasium's observation and action spaces.
+The `pamiq_core.gym` module provides seamless integration between [Gymnasium](https://gymnasium.farama.org/) (the fork of OpenAI Gym) and PAMIQ Core's interaction system. This allows you to use any Gymnasium environment as a PAMIQ Core environment.
 
 ## Key Components
 
