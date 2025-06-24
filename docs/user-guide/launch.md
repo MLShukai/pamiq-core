@@ -43,6 +43,16 @@ config = LaunchConfig(
 )
 ```
 
+### Disabling Web API
+
+To run the system without remote control capabilities:
+
+```python
+config = LaunchConfig(
+    web_api_address=None,  # Disable web API server
+)
+```
+
 ### Resumable Training
 
 To save system state for later resumption:
