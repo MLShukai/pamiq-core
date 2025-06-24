@@ -29,7 +29,7 @@ class ControlThread(Thread):
         timeout_for_all_threads_pause: float = 60.0,
         max_attempts_to_pause_all_threads: int = 3,
         max_uptime: float = math.inf,
-        web_api_address: tuple[str, int] = ("localhost", 8391),
+        web_api_address: tuple[str, int] | None = ("localhost", 8391),
         web_api_command_queue_size: int = 1,
     ) -> None:
         """Initialize the control thread.
@@ -44,7 +44,7 @@ class ControlThread(Thread):
             max_uptime: Maximum time in seconds the system is allowed to run before
                 automatic shutdown. Default is infinity (no time limit).
             web_api_address: Tuple of (host, port) specifying where the Web API
-                should listen for commands.
+                should listen for commands. If None, the Web API server will be disabled.
             web_api_command_queue_size: Maximum number of commands that can be
                 queued from the Web API.
         """
@@ -60,11 +60,15 @@ class ControlThread(Thread):
         self._max_uptime = max_uptime
         self._system_start_time = -math.inf
 
-        self._partial_web_api_server = partial(
-            WebApiServer,
-            host=web_api_address[0],
-            port=web_api_address[1],
-            max_queue_size=web_api_command_queue_size,
+        self._partial_web_api_server = (
+            None
+            if web_api_address is None
+            else partial(
+                WebApiServer,
+                host=web_api_address[0],
+                port=web_api_address[1],
+                max_queue_size=web_api_command_queue_size,
+            )
         )
 
         self._controller = ThreadController()
@@ -182,8 +186,10 @@ class ControlThread(Thread):
         """Process any pending commands received from the Web API.
 
         Retrieves and processes all available commands from the Web API
-        handler.
+        handler. Does nothing if the Web API server is disabled.
         """
+        if self._web_api_server is None:
+            return
         while self._web_api_server.has_commands():
             match self._web_api_server.receive_command():
                 case ControlCommands.PAUSE:
@@ -220,10 +226,12 @@ class ControlThread(Thread):
             f"in time scale x{time.get_time_scale():.1f})"
         )
 
-        self._web_api_server = self._partial_web_api_server(
-            SystemStatusProvider(self.controller, self._thread_statuses_monitor),
-        )
-        self._web_api_server.run_in_background()
+        self._web_api_server = None
+        if self._partial_web_api_server is not None:
+            self._web_api_server = self._partial_web_api_server(
+                SystemStatusProvider(self.controller, self._thread_statuses_monitor),
+            )
+            self._web_api_server.run_in_background()
 
     @override
     def on_tick(self) -> None:

@@ -523,3 +523,29 @@ class TestControlThread:
         spy_resume.assert_called_once()
         spy_save_state.assert_called_once()
         spy_shutdown.assert_called_once()
+
+    def test_web_api_server_disabled_when_address_is_none(
+        self,
+        mock_state_store,
+        thread_statuses: dict[ThreadTypes, ReadOnlyThreadStatus],
+        mocker: MockerFixture,
+    ) -> None:
+        """Test that WebApiServer is not created when web_api_address is
+        None."""
+        # Create ControlThread with web_api_address=None
+        control_thread = ControlThread(
+            state_store=mock_state_store,
+            web_api_address=None,
+        )
+        control_thread.attach_thread_statuses(thread_statuses)
+
+        # Mock WebApiServer class to verify it's not instantiated
+        mock_web_api_server_cls = mocker.patch(
+            "pamiq_core.thread.threads.control.WebApiServer", autospec=True
+        )
+
+        # Call on_start to initialize the thread
+        control_thread.on_start()
+
+        # Verify WebApiServer was not instantiated
+        mock_web_api_server_cls.assert_not_called()

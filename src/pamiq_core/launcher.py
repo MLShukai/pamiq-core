@@ -39,6 +39,7 @@ class LaunchConfig:
         max_uptime: Maximum time in seconds the system is allowed to run.
             Use infinity for no time limit.
         web_api_address: Tuple of (host, port) for the web API server.
+            If None, the web API server will be disabled.
         web_api_command_queue_size: Maximum size of the command queue for the web API.
         log_tick_time_statistics_interval: Interval in seconds for logging
             step time statistics in inference thread.
@@ -55,7 +56,7 @@ class LaunchConfig:
     timeout_for_all_threads_pause: float = 60.0
     max_attempts_to_pause_all_threads: int = 3
     max_uptime: float = float("inf")
-    web_api_address: tuple[str, int] = ("localhost", 8319)
+    web_api_address: tuple[str, int] | None = ("localhost", 8319)
     web_api_command_queue_size: int = 1
     log_tick_time_statistics_interval: float = 60.0
     time_scale: float = 1.0

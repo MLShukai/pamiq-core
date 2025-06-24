@@ -37,7 +37,7 @@ Example with custom connection settings:
 $ pamiq-console --host 192.168.1.100 --port 9000
 ```
 
-NOTE: You can modify the default address used by the system by changing the `web_api_address` parameter in [LaunchConfig](../api/launch.md).
+NOTE: You can modify the default address used by the system by changing the `web_api_address` parameter in [LaunchConfig](../api/launch.md). To disable the web API entirely, set `web_api_address=None`.
 
 ## Web API
 
