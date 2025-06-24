@@ -52,6 +52,9 @@ torch = [
 kbctl = [
     "pynput>=1.8.1",
 ]
+gym = [
+    "gymnasium>=1.1.1",
+]
 
 [build-system]
 requires = ["hatchling"]
