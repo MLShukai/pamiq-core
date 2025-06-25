@@ -37,11 +37,8 @@ launch(
 To speed up time for faster training:
 
 ```python
-from pamiq_core.state_persistence import PeriodicSaveCondition
-
 config = LaunchConfig(
-    time_scale=10.0,  # Run at 10x speed
-    save_state_condition=PeriodicSaveCondition(300.0)  # Save every 5 minutes
+    time_scale=10.0  # Run at 10x speed
 )
 ```
 
