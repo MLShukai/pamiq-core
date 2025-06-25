@@ -88,7 +88,6 @@ class TestTimeIntervalScheduler:
     def test_init_valid_interval(self):
         scheduler = TimeIntervalScheduler(1.0)
         assert scheduler._interval == 1.0
-        assert scheduler._previous_available_time == float("-inf")
 
     def test_init_negative_interval(self):
         with pytest.raises(ValueError):
@@ -96,41 +95,38 @@ class TestTimeIntervalScheduler:
 
     def test_is_available(self, mocker):
         mock_time = mocker.patch("pamiq_core.time.time")
-        mock_time.return_value = 10.0
+        mock_time.return_value = 0.0
 
         scheduler = TimeIntervalScheduler(5.0)
-        assert scheduler.is_available() is True
+        assert scheduler.is_available() is False  # Initial state
 
-        scheduler._previous_available_time = 6.0
-        assert scheduler.is_available() is False
-
-        scheduler._previous_available_time = 4.0
+        mock_time.return_value = 5.1
         assert scheduler.is_available() is True
 
     def test_update(self, mocker):
         mock_time = mocker.patch("pamiq_core.time.time")
-        mock_time.return_value = 10.0
+        mock_time.return_value = 0.0
 
         callback = MagicMock()
-        scheduler = TimeIntervalScheduler(5.0, [callback])
+        scheduler = TimeIntervalScheduler(5.0, callback)
 
-        # First update should execute callbacks (previous time is -inf)
-        scheduler.update()
-        callback.assert_called_once()
-        assert scheduler._previous_available_time == 10.0
-
-        # Reset mock to check next call
-        callback.reset_mock()
-
-        # Second update should not execute callbacks (not enough time elapsed)
+        # First update should not execute callbacks
         scheduler.update()
         callback.assert_not_called()
 
+        # Reset mock to check next call
+        callback.reset_mock()
+        mock_time.return_value = 5.1
+
+        # Second update should not execute callbacks (not enough time elapsed)
+        scheduler.update()
+        callback.assert_called_once_with()
+
         # Advance time past interval
+        callback.reset_mock()
         mock_time.return_value = 16.0
         scheduler.update()
         callback.assert_called_once()
-        assert scheduler._previous_available_time == 16.0
 
 
 class TestStepIntervalScheduler:
