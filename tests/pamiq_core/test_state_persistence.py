@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 
 from pamiq_core.state_persistence import (
     LatestStatesKeeper,
+    PeriodicSaveCondition,
     PersistentStateMixin,
     StateStore,
     load_pickle,
@@ -249,3 +250,49 @@ class TestLatestStatesKeeper:
 
         # Verify cleanup was called directly
         mock_cleanup.assert_called_once()
+
+
+class TestPeriodicSaveCondition:
+    """Test the PeriodicSaveCondition class."""
+
+    def test_initial_state_returns_false(self) -> None:
+        """Test that condition returns False initially."""
+        condition = PeriodicSaveCondition(interval=1.0)
+        assert condition() is False
+
+    def test_returns_true_after_interval(self) -> None:
+        """Test that condition returns True after interval has elapsed."""
+        import time
+
+        # Use very short interval for testing
+        interval = 0.01
+        condition = PeriodicSaveCondition(interval=interval)
+
+        # First call should return False
+        assert condition() is False
+
+        # Wait for interval to elapse
+        time.sleep(interval * 1.5)
+
+        # Should now return True
+        assert condition() is True
+
+    def test_multiple_intervals(self) -> None:
+        """Test behavior across multiple intervals."""
+        import time
+
+        interval = 0.01
+        condition = PeriodicSaveCondition(interval=interval)
+
+        # Initial state
+        assert condition() is False
+
+        # First interval
+        time.sleep(interval * 1.5)
+        assert condition() is True
+        assert condition() is False
+
+        # Second interval
+        time.sleep(interval * 1.5)
+        assert condition() is True
+        assert condition() is False

@@ -1,11 +1,11 @@
 import math
+from collections.abc import Callable
 from functools import partial
 from typing import override
 
 from pamiq_core import time
 from pamiq_core.console import ControlCommands, SystemStatusProvider, WebApiServer
 from pamiq_core.state_persistence import StateStore
-from pamiq_core.utils.schedulers import TimeIntervalScheduler
 
 from ..thread_control import (
     ReadOnlyController,
@@ -25,7 +25,7 @@ class ControlThread(Thread):
     def __init__(
         self,
         state_store: StateStore,
-        save_state_interval: float = math.inf,
+        save_state_condition: Callable[[], bool] | None = None,
         timeout_for_all_threads_pause: float = 60.0,
         max_attempts_to_pause_all_threads: int = 3,
         max_uptime: float = math.inf,
@@ -36,7 +36,8 @@ class ControlThread(Thread):
 
         Args:
             state_store: Store for saving and loading system state.
-            save_state_interval: Interval in seconds between automatic state saves.
+            save_state_condition: Callable that returns True when state should be saved.
+                If None, state will never be saved automatically.
             timeout_for_all_threads_pause: Maximum time in seconds to wait for
                 all threads to pause before timing out a pause attempt.
             max_attempts_to_pause_all_threads: Maximum number of retry attempts
@@ -51,9 +52,10 @@ class ControlThread(Thread):
         super().__init__()
 
         self._state_store = state_store
-        self._save_state_scheduler = TimeIntervalScheduler(
-            save_state_interval, self.save_state
-        )
+        if save_state_condition is None:
+            self._save_state_condition = lambda: False
+        else:
+            self._save_state_condition = save_state_condition
 
         self._timeout_for_all_threads_pause = timeout_for_all_threads_pause
         self._max_attempts_to_pause_all_threads = max_attempts_to_pause_all_threads
@@ -241,7 +243,8 @@ class ControlThread(Thread):
         initiates shutdown if needed.
         """
         super().on_tick()
-        self._save_state_scheduler.update()
+        if self._save_state_condition():
+            self.save_state()
 
         self.process_received_web_api_commands()
 

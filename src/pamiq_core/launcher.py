@@ -1,5 +1,5 @@
 import logging
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -25,8 +25,8 @@ class LaunchConfig:
         states_dir: Directory path where states will be saved.
         state_name_format: Format string for state directory names.
         saved_state_path: Optional path to a previously saved state to load at startup.
-        save_state_interval: Interval in seconds between automatic state saves.
-            Use infinity for no automatic saves.
+        save_state_condition: Optional callable that returns True when state should be saved.
+            If None, state will never be saved automatically.
         max_keep_states: Maximum number of state directories to keep in the states directory.
             Older state directories beyond this number will be automatically removed.
             Use -1 to disable this feature (no automatic removal).
@@ -49,7 +49,7 @@ class LaunchConfig:
     states_dir: str | Path = Path("./states")
     state_name_format: str = "%Y-%m-%d_%H-%M-%S,%f.state"
     saved_state_path: str | Path | None = None
-    save_state_interval: float = float("inf")
+    save_state_condition: Callable[[], bool] | None = None
     max_keep_states: int = -1
     state_name_pattern: str = "*.state"
     states_cleanup_interval: float = 60.0
@@ -130,7 +130,7 @@ def launch(
     # Initialize threads
     control_thread = ControlThread(
         state_store,
-        save_state_interval=config.save_state_interval,
+        save_state_condition=config.save_state_condition,
         timeout_for_all_threads_pause=config.timeout_for_all_threads_pause,
         max_attempts_to_pause_all_threads=config.max_attempts_to_pause_all_threads,
         max_uptime=config.max_uptime,

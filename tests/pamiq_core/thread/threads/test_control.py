@@ -448,14 +448,16 @@ class TestControlThread:
         # Verify resume was called since system was not already paused
         assert control_thread_with_statuses.controller.is_resume()
 
-    def test_scheduler_triggers_save_state(
+    def test_save_state_condition_triggers_save(
         self, thread_statuses, mock_state_store, mocker: MockerFixture
     ) -> None:
-        """Test that scheduler triggers save_state at specified intervals."""
-        # Create a thread with very short save_state_interval
-        save_interval = 0.01
+        """Test that save_state_condition triggers save_state when returning
+        True."""
+        # Create a mock condition that returns True
+        save_condition = mocker.Mock(return_value=True)
+
         thread = ControlThread(
-            state_store=mock_state_store, save_state_interval=save_interval
+            state_store=mock_state_store, save_state_condition=save_condition
         )
         thread.attach_thread_statuses(thread_statuses)
         thread.on_start()
@@ -464,17 +466,15 @@ class TestControlThread:
         mocker.patch.object(
             ThreadStatusesMonitor, "wait_for_all_threads_pause", return_value=True
         )
-        # First tick initializes the scheduler's time
+
+        # Call on_tick which should check the condition and save state
         thread.on_tick()
 
-        # Wait longer than the interval
-        time.sleep(save_interval * 2)
-
-        # Second tick should trigger save_state
-        thread.on_tick()
+        # Verify save_state_condition was called
+        save_condition.assert_called_once()
 
         # Verify save_state was called
-        mock_state_store.save_state.assert_called()
+        mock_state_store.save_state.assert_called_once()
 
     def test_on_tick_processes_web_api_commands(
         self,
