@@ -38,8 +38,7 @@ To speed up time for faster training:
 
 ```python
 config = LaunchConfig(
-    time_scale=10.0,  # Run at 10x speed
-    save_state_interval=300.0  # Save every 5 minutes
+    time_scale=10.0  # Run at 10x speed
 )
 ```
 
@@ -58,6 +57,8 @@ config = LaunchConfig(
 To save system state for later resumption:
 
 ```python
+from pamiq_core.state_persistence import PeriodicSaveCondition
+
 # Initial run
 launch(
     interaction=interaction,
@@ -66,7 +67,7 @@ launch(
     trainers=trainers,
     config=LaunchConfig(
         states_dir="./saved_states",
-        save_state_interval=600.0  # Save every 10 minutes
+        save_state_condition=PeriodicSaveCondition(600.0)  # Save every 10 minutes
     )
 )
 

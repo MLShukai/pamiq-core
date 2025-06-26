@@ -126,6 +126,36 @@ def load_pickle(path: Path | str) -> Any:
         return pickle.load(f)
 
 
+class PeriodicSaveCondition:
+    """Save state condition based on periodic time intervals.
+
+    This condition triggers state saving at regular time intervals.
+    """
+
+    def __init__(self, interval: float) -> None:
+        """Initializes PeriodicSaveCondition.
+
+        Args:
+            interval: Time interval in seconds between state saves.
+        """
+        # Import here to avoid circular dependency
+        from .utils.schedulers import TimeIntervalScheduler
+
+        self._flag = False
+
+        def set_true() -> None:
+            self._flag = True
+
+        self._scheduler = TimeIntervalScheduler(interval, set_true)
+
+    def __call__(self) -> bool:
+        """Check if interval has elapsed and state should be saved."""
+        self._scheduler.update()
+        # get return value and reset flag.
+        out, self._flag = self._flag, False
+        return out
+
+
 class LatestStatesKeeper:
     """Keeps a fixed number of state directories by removing older ones.
 
