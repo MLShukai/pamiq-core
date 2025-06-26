@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from pamiq_core.console import ControlCommands
-from pamiq_core.state_persistence import StateStore
+from pamiq_core.state_persistence import StatesKeeper, StateStore
 from pamiq_core.thread import (
     ReadOnlyController,
     ReadOnlyThreadStatus,
@@ -25,6 +25,11 @@ class TestControlThread:
     def mock_state_store(self, mocker: MockerFixture):
         """Fixture providing a mock StateStore."""
         return mocker.Mock(StateStore)
+
+    @pytest.fixture
+    def mock_states_keeper(self, mocker: MockerFixture):
+        """Fixture providing a mock StateKeeper."""
+        return mocker.Mock(StatesKeeper)
 
     @pytest.fixture
     def mock_web_api_handler(self, mocker: MockerFixture):
@@ -578,12 +583,12 @@ class TestControlThread:
         self,
         control_thread_with_statuses: ControlThread,
         mock_state_store,
+        mock_states_keeper,
         mocker: MockerFixture,
     ) -> None:
         """Test that states_keeper.append is called with saved path when saving
         state."""
         # Create a mock StatesKeeper
-        mock_states_keeper = mocker.Mock()
         control_thread_with_statuses._states_keeper = mock_states_keeper
 
         # Mock successful pause
