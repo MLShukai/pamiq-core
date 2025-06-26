@@ -5,7 +5,7 @@ from typing import override
 
 from pamiq_core import time
 from pamiq_core.console import ControlCommands, SystemStatusProvider, WebApiServer
-from pamiq_core.state_persistence import StateStore
+from pamiq_core.state_persistence import StatesKeeper, StateStore
 
 from ..thread_control import (
     ReadOnlyController,
@@ -26,6 +26,7 @@ class ControlThread(Thread):
         self,
         state_store: StateStore,
         save_state_condition: Callable[[], bool] | None = None,
+        states_keeper: StatesKeeper | None = None,
         timeout_for_all_threads_pause: float = 60.0,
         max_attempts_to_pause_all_threads: int = 3,
         max_uptime: float = math.inf,
@@ -38,6 +39,9 @@ class ControlThread(Thread):
             state_store: Store for saving and loading system state.
             save_state_condition: Callable that returns True when state should be saved.
                 If None, state will never be saved automatically.
+            states_keeper: Optional StatesKeeper instance for managing saved state retention.
+                If provided, it will handle automatic cleanup of old states based on its
+                retention policy. If None, no automatic state cleanup will be performed.
             timeout_for_all_threads_pause: Maximum time in seconds to wait for
                 all threads to pause before timing out a pause attempt.
             max_attempts_to_pause_all_threads: Maximum number of retry attempts
@@ -56,6 +60,7 @@ class ControlThread(Thread):
             self._save_state_condition = lambda: False
         else:
             self._save_state_condition = save_state_condition
+        self._states_keeper = states_keeper
 
         self._timeout_for_all_threads_pause = timeout_for_all_threads_pause
         self._max_attempts_to_pause_all_threads = max_attempts_to_pause_all_threads
@@ -171,6 +176,8 @@ class ControlThread(Thread):
             return
         saved_path = self._state_store.save_state()
         self._logger.info(f"Saved a state to '{saved_path}'")
+        if self._states_keeper is not None:
+            self._states_keeper.append(saved_path)
         if not already_paused:
             self.resume()
 
@@ -247,6 +254,9 @@ class ControlThread(Thread):
             self.save_state()
 
         self.process_received_web_api_commands()
+
+        if self._states_keeper is not None:
+            self._states_keeper.cleanup()
 
         if self._thread_statuses_monitor.check_exception_raised():
             self._logger.error(
