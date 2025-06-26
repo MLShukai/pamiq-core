@@ -253,10 +253,10 @@ class ControlThread(Thread):
         if self._save_state_condition():
             self.save_state()
 
-        self.process_received_web_api_commands()
-
         if self._states_keeper is not None:
             self._states_keeper.cleanup()
+
+        self.process_received_web_api_commands()
 
         if self._thread_statuses_monitor.check_exception_raised():
             self._logger.error(
