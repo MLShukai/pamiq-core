@@ -8,7 +8,7 @@ from . import time
 from .data import DataBuffer, DataUsersDict
 from .interaction import Interaction
 from .model import TrainingModel, TrainingModelsDict
-from .state_persistence import LatestStatesKeeper, StateStore
+from .state_persistence import StatesKeeper, StateStore
 from .thread.threads import ControlThread, InferenceThread, TrainingThread
 from .trainer import Trainer, TrainersDict
 
@@ -27,11 +27,8 @@ class LaunchConfig:
         saved_state_path: Optional path to a previously saved state to load at startup.
         save_state_condition: Optional callable that returns True when state should be saved.
             If None, state will never be saved automatically.
-        max_keep_states: Maximum number of state directories to keep in the states directory.
-            Older state directories beyond this number will be automatically removed.
-            Use -1 to disable this feature (no automatic removal).
-        state_name_pattern: Glob pattern to identify state directories for management.
-        states_cleanup_interval: Interval in seconds between automatic state cleanup.
+        states_keeper: Optional StatesKeeper instance for managing saved state retention.
+            If None, no automatic state cleanup will be performed.
         timeout_for_all_threads_pause: Maximum time in seconds to wait for all
             threads to pause before timing out.
         max_attempts_to_pause_all_threads: Maximum number of retry attempts
@@ -50,9 +47,7 @@ class LaunchConfig:
     state_name_format: str = "%Y-%m-%d_%H-%M-%S,%f.state"
     saved_state_path: str | Path | None = None
     save_state_condition: Callable[[], bool] | None = None
-    max_keep_states: int = -1
-    state_name_pattern: str = "*.state"
-    states_cleanup_interval: float = 60.0
+    states_keeper: StatesKeeper | None = None
     timeout_for_all_threads_pause: float = 60.0
     max_attempts_to_pause_all_threads: int = 3
     max_uptime: float = float("inf")
@@ -115,13 +110,6 @@ def launch(
     state_store.register("trainers", trainers_dict)
     state_store.register("time", time.get_global_time_controller())
 
-    states_keeper = LatestStatesKeeper(
-        states_dir=config.states_dir,
-        state_name_pattern=config.state_name_pattern,
-        max_keep=config.max_keep_states,
-        cleanup_interval=config.states_cleanup_interval,
-    )
-
     # Load state if specified
     if config.saved_state_path is not None:
         logger.info(f"Loading state from '{config.saved_state_path}'")
@@ -131,6 +119,7 @@ def launch(
     control_thread = ControlThread(
         state_store,
         save_state_condition=config.save_state_condition,
+        states_keeper=config.states_keeper,
         timeout_for_all_threads_pause=config.timeout_for_all_threads_pause,
         max_attempts_to_pause_all_threads=config.max_attempts_to_pause_all_threads,
         max_uptime=config.max_uptime,
@@ -158,8 +147,6 @@ def launch(
         logger.info(f"Setting time scale to {config.time_scale}")
         time.set_time_scale(config.time_scale)
 
-        states_keeper.start()
-
         inference_thread.start()
         training_thread.start()
         control_thread.run()  # Blocking until shutdown or KeyboardInterrupt
@@ -176,6 +163,3 @@ def launch(
         logger.info("Saving final system state")
         state_path = state_store.save_state()
         logger.info(f"Final state saved to '{state_path}'")
-
-        states_keeper.stop()
-        states_keeper.cleanup()

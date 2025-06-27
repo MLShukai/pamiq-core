@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from pamiq_core.console import ControlCommands
-from pamiq_core.state_persistence import StateStore
+from pamiq_core.state_persistence import StatesKeeper, StateStore
 from pamiq_core.thread import (
     ReadOnlyController,
     ReadOnlyThreadStatus,
@@ -25,6 +25,11 @@ class TestControlThread:
     def mock_state_store(self, mocker: MockerFixture):
         """Fixture providing a mock StateStore."""
         return mocker.Mock(StateStore)
+
+    @pytest.fixture
+    def mock_states_keeper(self, mocker: MockerFixture):
+        """Fixture providing a mock StateKeeper."""
+        return mocker.Mock(StatesKeeper)
 
     @pytest.fixture
     def mock_web_api_handler(self, mocker: MockerFixture):
@@ -549,3 +554,54 @@ class TestControlThread:
 
         # Verify WebApiServer was not instantiated
         mock_web_api_server_cls.assert_not_called()
+
+    def test_states_keeper_cleanup_called_in_on_tick(
+        self,
+        thread_statuses,
+        mock_state_store,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test that states_keeper.cleanup is called during on_tick."""
+        # Create a mock StatesKeeper
+        mock_states_keeper = mocker.Mock()
+
+        # Create ControlThread with the mock StatesKeeper
+        thread = ControlThread(
+            state_store=mock_state_store,
+            states_keeper=mock_states_keeper,
+        )
+        thread.attach_thread_statuses(thread_statuses)
+        thread.on_start()
+
+        # Call on_tick
+        thread.on_tick()
+
+        # Verify cleanup was called
+        mock_states_keeper.cleanup.assert_called_once()
+
+    def test_states_keeper_append_called_in_save_state(
+        self,
+        control_thread_with_statuses: ControlThread,
+        mock_state_store,
+        mock_states_keeper,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test that states_keeper.append is called with saved path when saving
+        state."""
+        # Create a mock StatesKeeper
+        control_thread_with_statuses._states_keeper = mock_states_keeper
+
+        # Mock successful pause
+        mocker.patch.object(
+            ThreadStatusesMonitor, "wait_for_all_threads_pause", return_value=True
+        )
+
+        # Mock the path returned by save_state
+        mock_path = Path("/test/saved.state")
+        mock_state_store.save_state.return_value = mock_path
+
+        # Call save_state
+        control_thread_with_statuses.save_state()
+
+        # Verify append was called with the saved path
+        mock_states_keeper.append.assert_called_once_with(mock_path)

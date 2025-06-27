@@ -63,11 +63,6 @@ class TestLaunch:
         model.inference_model = mocker.Mock(InferenceModel)
         return model
 
-    @pytest.fixture
-    def mock_states_keeper_cls(self, mocker: MockerFixture):
-        """Create a mock LatestStatesKeeper."""
-        return mocker.patch("pamiq_core.launcher.LatestStatesKeeper", autospec=True)
-
     def test_launch(
         self,
         caplog: pytest.LogCaptureFixture,
@@ -78,7 +73,6 @@ class TestLaunch:
         mock_trainer,
         mock_buffer,
         mock_model,
-        mock_states_keeper_cls,
     ):
         """Test the full launch cycle with state persistence."""
         state_dir = tmp_path / "states"
@@ -121,17 +115,6 @@ class TestLaunch:
         mock_env.observe.assert_called()
         mock_env.affect.assert_called()
         mock_trainer.run.assert_called()
-
-        mock_states_keeper_cls.assert_called_once_with(
-            states_dir=state_dir,
-            state_name_pattern="*.state",
-            max_keep=-1,
-            cleanup_interval=60.0,
-        )
-        mock_states_keeper = mock_states_keeper_cls.return_value
-        mock_states_keeper.start.assert_called_once_with()
-        mock_states_keeper.stop.assert_called_once_with()
-        mock_states_keeper.cleanup.assert_called_once_with()
 
     def test_launch_loading_state(
         self,

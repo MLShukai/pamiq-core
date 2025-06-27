@@ -57,9 +57,9 @@ config = LaunchConfig(
 To save system state for later resumption:
 
 ```python
-from pamiq_core.state_persistence import PeriodicSaveCondition
+from pamiq_core.state_persistence import PeriodicSaveCondition, LatestStatesKeeper
 
-# Initial run
+# Initial run with automatic state management
 launch(
     interaction=interaction,
     models=models,
@@ -67,7 +67,11 @@ launch(
     trainers=trainers,
     config=LaunchConfig(
         states_dir="./saved_states",
-        save_state_condition=PeriodicSaveCondition(600.0)  # Save every 10 minutes
+        save_state_condition=PeriodicSaveCondition(600.0),  # Save every 10 minutes
+        states_keeper=LatestStatesKeeper(
+            states_dir="./saved_states",
+            max_keep=5  # Keep only the 5 most recent states
+        )
     )
 )
 
