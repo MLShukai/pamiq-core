@@ -23,13 +23,18 @@ class SequentialBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
             collecting_data_names: Names of data fields to collect.
             max_size: Maximum number of data points to store.
         """
-        super().__init__(collecting_data_names, max_size)
+        super().__init__(max_size)
 
         self._queues_dict: dict[str, deque[T]] = {
             name: deque(maxlen=max_size) for name in collecting_data_names
         }
 
+        self._max_size = max_size
         self._current_size = 0
+
+    @property
+    def collecting_data_names(self) -> Iterable[str]:
+        return self._queues_dict.keys()
 
     @override
     def add(self, step_data: Mapping[str, T]) -> None:
@@ -47,7 +52,7 @@ class SequentialBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
                 raise KeyError(f"Required data '{name}' not found in step_data")
             self._queues_dict[name].append(step_data[name])
 
-        if self._current_size < self.max_size:
+        if self._current_size < self._max_size:
             self._current_size += 1
 
     @override
@@ -95,5 +100,5 @@ class SequentialBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
         """
         for name in self.collecting_data_names:
             with open(path / f"{name}.pkl", "rb") as f:
-                queue = deque(pickle.load(f), maxlen=self.max_size)
+                queue = deque(pickle.load(f), maxlen=self._max_size)
                 self._queues_dict[name] = queue

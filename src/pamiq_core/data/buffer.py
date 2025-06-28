@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
 
 from pamiq_core.state_persistence import PersistentStateMixin
 
@@ -18,7 +17,7 @@ class DataBuffer[T, R](ABC, PersistentStateMixin):
         R: The return type of the get_data() method.
     """
 
-    def __init__(self, collecting_data_names: Iterable[str], max_size: int) -> None:
+    def __init__(self, max_queue_size: int | None = None) -> None:
         """Initializes the DataBuffer.
 
         Args:
@@ -29,20 +28,15 @@ class DataBuffer[T, R](ABC, PersistentStateMixin):
             ValueError: If max_size is negative.
         """
         super().__init__()
-        self._collecting_data_names = set(collecting_data_names)
-        if max_size < 0:
-            raise ValueError("max_size must be non-negative")
-        self._max_size = max_size
+        if max_queue_size is not None:
+            if max_queue_size < 0:
+                raise ValueError("max_size must be non-negative")
+        self._max_queue_size = max_queue_size
 
     @property
-    def collecting_data_names(self) -> set[str]:
-        """Returns the set of data field names being collected."""
-        return self._collecting_data_names.copy()
-
-    @property
-    def max_size(self) -> int:
+    def max_queue_size(self) -> int | None:
         """Returns the maximum number of samples that can be stored."""
-        return self._max_size
+        return self._max_queue_size
 
     @abstractmethod
     def add(self, step_data: T) -> None:

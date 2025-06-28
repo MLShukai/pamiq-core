@@ -38,7 +38,6 @@ class RandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]
             ValueError: If replace_probability is not between 0.0 and 1.0 inclusive, or if both
                 replace_probability and expected_survival_length are specified.
         """
-        super().__init__(collecting_data_names, max_size)
 
         if replace_probability is None:
             if expected_survival_length is None:
@@ -58,13 +57,19 @@ class RandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]
             raise ValueError(
                 "replace_probability must be between 0.0 and 1.0 inclusive"
             )
+        super().__init__(int(max_size / replace_probability))
 
         self._lists_dict: dict[str, list[T]] = {
             name: [] for name in collecting_data_names
         }
+        self._max_size = max_size
 
         self._replace_probability = replace_probability
         self._current_size = 0
+
+    @property
+    def collecting_data_names(self) -> Iterable[str]:
+        return self._lists_dict.keys()
 
     @staticmethod
     def compute_replace_probability_from_expected_survival_length(
@@ -96,7 +101,7 @@ class RandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]
         Returns:
             True if the buffer is full, False otherwise.
         """
-        return self._current_size >= self.max_size
+        return self._current_size >= self._max_size
 
     @override
     def add(self, step_data: Mapping[str, T]) -> None:
@@ -119,7 +124,7 @@ class RandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]
         if self.is_full:
             if random.random() > self._replace_probability:
                 return
-            replace_index = random.randint(0, self.max_size - 1)
+            replace_index = random.randint(0, self._max_size - 1)
             for name in self.collecting_data_names:
                 self._lists_dict[name][replace_index] = step_data[name]
         else:
@@ -177,7 +182,7 @@ class RandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]
         size: int | None = None
         for name in self.collecting_data_names:
             with open(path / f"{name}.pkl", "rb") as f:
-                obj = list(pickle.load(f))[: self.max_size]
+                obj = list(pickle.load(f))[: self._max_size]
             if size is None:
                 size = len(obj)
             if size != len(obj):
