@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable
 
 from pamiq_core.state_persistence import PersistentStateMixin
-
-type StepData[T] = Mapping[str, T]
 
 
 class DataBuffer[T, R](ABC, PersistentStateMixin):
@@ -47,7 +45,7 @@ class DataBuffer[T, R](ABC, PersistentStateMixin):
         return self._max_size
 
     @abstractmethod
-    def add(self, step_data: StepData[T]) -> None:
+    def add(self, step_data: T) -> None:
         """Adds a new data sample to the buffer.
 
         Args:

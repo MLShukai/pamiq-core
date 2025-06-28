@@ -1,14 +1,14 @@
 import math
 import pickle
 import random
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import override
 
-from ..buffer import DataBuffer, StepData
+from ..buffer import DataBuffer
 
 
-class RandomReplacementBuffer[T](DataBuffer[T, dict[str, list[T]]]):
+class RandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
     """Buffer implementation that randomly replaces elements when full.
 
     This buffer keeps track of collected data and, when full, randomly
@@ -99,7 +99,7 @@ class RandomReplacementBuffer[T](DataBuffer[T, dict[str, list[T]]]):
         return self._current_size >= self.max_size
 
     @override
-    def add(self, step_data: StepData[T]) -> None:
+    def add(self, step_data: Mapping[str, T]) -> None:
         """Add a new data sample to the buffer.
 
         If the buffer is full, the new data may replace an existing entry

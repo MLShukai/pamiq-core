@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 
-from pamiq_core.data.buffer import StepData
 from pamiq_core.data.impls.sequential_buffer import SequentialBuffer
 
 
@@ -27,8 +26,8 @@ class TestSequentialBuffer:
     def test_add_and_get_data(self, buffer: SequentialBuffer):
         """Test adding data to the buffer and retrieving it."""
         # Sample data
-        sample1: StepData = {"state": [1.0, 0.0], "action": 1, "reward": 0.5}
-        sample2: StepData = {"state": [0.0, 1.0], "action": 0, "reward": -0.5}
+        sample1 = {"state": [1.0, 0.0], "action": 1, "reward": 0.5}
+        sample2 = {"state": [0.0, 1.0], "action": 0, "reward": -0.5}
 
         # Add data
         buffer.add(sample1)
@@ -64,7 +63,7 @@ class TestSequentialBuffer:
 
     def test_missing_data_field(self, buffer: SequentialBuffer):
         """Test adding data with missing required fields raises KeyError."""
-        incomplete_data: StepData = {
+        incomplete_data = {
             "state": [1.0, 0.0],
             "action": 1,
         }  # Missing 'reward'

@@ -1,6 +1,5 @@
 import pickle
 from collections import deque
-from collections.abc import Iterable
 from pathlib import Path
 from threading import RLock
 from typing import override
@@ -8,10 +7,10 @@ from typing import override
 from pamiq_core import time
 from pamiq_core.state_persistence import PersistentStateMixin
 
-from .buffer import DataBuffer, StepData
+from .buffer import DataBuffer
 
 
-class TimestampingQueuesDict[T]:
+class TimestampingQueue[T]:
     """A dictionary of queues that stores data with timestamps.
 
     This class maintains multiple queues for different data streams,
@@ -20,29 +19,26 @@ class TimestampingQueuesDict[T]:
     corresponding timestamps.
     """
 
-    def __init__(self, queue_names: Iterable[str], max_len: int) -> None:
+    def __init__(self, max_len: int) -> None:
         """Initialize queues for given names with specified maximum length.
 
         Args:
             queue_names: Names of the queues to be created.
             max_len: Maximum length of each queue.
         """
-        self._queues: dict[str, deque[T]] = {
-            k: deque(maxlen=max_len) for k in queue_names
-        }
+        self._queue: deque[T] = deque(maxlen=max_len)
         self._timestamps: deque[float] = deque(maxlen=max_len)
 
-    def append(self, data: StepData[T]) -> None:
+    def append(self, data: T) -> None:
         """Append new data to all queues with current timestamp.
 
         Args:
             data: Step data containing values for each queue.
         """
-        for k, q in self._queues.items():
-            q.append(data[k])
+        self._queue.append(data)
         self._timestamps.append(time.time())
 
-    def popleft(self) -> tuple[StepData[T], float]:
+    def popleft(self) -> tuple[T, float]:
         """Remove and return the leftmost elements from all queues with
         timestamp.
 
@@ -52,7 +48,7 @@ class TimestampingQueuesDict[T]:
                 - Timestamp corresponding to these values
         """
         return (
-            {k: q.popleft() for k, q in self._queues.items()},
+            self._queue.popleft(),
             self._timestamps.popleft(),
         )
 
@@ -89,15 +85,13 @@ class DataUser[T, R](PersistentStateMixin):
         # DataCollector instance is only accessed from DataUser and Container classes
         self._collector = DataCollector(self)
 
-    def create_empty_queues(self) -> TimestampingQueuesDict[T]:
+    def _create_empty_queue(self) -> TimestampingQueue[T]:
         """Create empty timestamping queues for data collection.
 
         Returns:
             New instance of TimestampingQueuesDict with appropriate configuration.
         """
-        return TimestampingQueuesDict(
-            self._buffer.collecting_data_names, self._buffer.max_size
-        )
+        return TimestampingQueue(self._buffer.max_size)
 
     def update(self) -> None:
         """Update buffer with collected data from the collector.
@@ -188,19 +182,19 @@ class DataCollector[T, R]:
             user: DataUser instance this collector is associated with.
         """
         self._user = user
-        self._queues_dict = user.create_empty_queues()
+        self._queue = user._create_empty_queue()  # pyright: ignore[reportPrivateUsage, ]
         self._lock = RLock()
 
-    def collect(self, step_data: StepData[T]) -> None:
+    def collect(self, step_data: T) -> None:
         """Collect step data in a thread-safe manner.
 
         Args:
             step_data: Data to be collected.
         """
         with self._lock:
-            self._queues_dict.append(step_data)
+            self._queue.append(step_data)
 
-    def _move_data(self) -> TimestampingQueuesDict[T]:
+    def _move_data(self) -> TimestampingQueue[T]:
         """Move collected data to a new queue and reset the collector.
 
         This method is intended to be called only by the associated DataUser.
@@ -209,6 +203,6 @@ class DataCollector[T, R]:
             TimestampingQueuesDict containing the collected data.
         """
         with self._lock:
-            data = self._queues_dict
-            self._queues_dict = self._user.create_empty_queues()
+            data = self._queue
+            self._queue = self._user._create_empty_queue()  # pyright: ignore[reportPrivateUsage, ]
             return data

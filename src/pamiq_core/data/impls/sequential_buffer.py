@@ -1,13 +1,13 @@
 import pickle
 from collections import deque
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import override
 
-from ..buffer import DataBuffer, StepData
+from ..buffer import DataBuffer
 
 
-class SequentialBuffer[T](DataBuffer[T, dict[str, list[T]]]):
+class SequentialBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
     """Implementation of DataBuffer that maintains data in sequential order.
 
     This buffer stores collected data points in ordered queues,
@@ -32,7 +32,7 @@ class SequentialBuffer[T](DataBuffer[T, dict[str, list[T]]]):
         self._current_size = 0
 
     @override
-    def add(self, step_data: StepData[T]) -> None:
+    def add(self, step_data: Mapping[str, T]) -> None:
         """Add a new data sample to the buffer.
 
         Args:

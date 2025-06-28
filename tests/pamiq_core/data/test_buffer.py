@@ -4,7 +4,7 @@ from typing import Any, override
 
 import pytest
 
-from pamiq_core.data.buffer import DataBuffer, StepData
+from pamiq_core.data.buffer import DataBuffer
 from pamiq_core.state_persistence import PersistentStateMixin
 
 
@@ -24,7 +24,7 @@ class DataBufferImpl(DataBuffer):
         self._current_size = 0
 
     @override
-    def add(self, step_data: StepData) -> None:
+    def add(self, step_data: dict[str, Any]) -> None:
         for name in self._collecting_data_names:
             if name not in step_data:
                 raise KeyError(f"Required data '{name}' not found in step_data")
