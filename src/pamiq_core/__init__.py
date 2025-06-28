@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from importlib import metadata
 
-from . import data, interaction, model, time, trainer, utils
+from . import data, interaction, model, time, trainer, typing, utils
 from .data import DataBuffer, DataCollector, DataUser
 from .interaction import (
     Actuator,
@@ -37,6 +37,7 @@ __all__ = [
     "time",
     "trainer",
     "utils",
+    "typing",
     "DataBuffer",
     "DataCollector",
     "DataUser",

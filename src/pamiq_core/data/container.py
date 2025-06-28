@@ -102,7 +102,7 @@ class DataUsersDict(UserDict[str, DataUser[Any, Any]], PersistentStateMixin):
             user.load_state(path / name)
 
 
-class DataCollectorsDict(UserDict[str, DataCollector[Any]]):
+class DataCollectorsDict(UserDict[str, DataCollector[Any, Any]]):
     """A dictionary for managing exclusive access to data collectors.
 
     Manages exclusive access to data collectors to ensure each collector
@@ -115,7 +115,7 @@ class DataCollectorsDict(UserDict[str, DataCollector[Any]]):
         super().__init__(*args, **kwds)
         self._acquired_collectors: set[str] = set()
 
-    def acquire(self, collector_name: str) -> DataCollector[Any]:
+    def acquire(self, collector_name: str) -> DataCollector[Any, Any]:
         """Acquires a data collector for exclusive use within a step.
 
         Args:

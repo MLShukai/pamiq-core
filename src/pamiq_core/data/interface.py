@@ -3,7 +3,7 @@ from collections import deque
 from collections.abc import Iterable
 from pathlib import Path
 from threading import RLock
-from typing import Any, override
+from typing import override
 
 from pamiq_core import time
 from pamiq_core.state_persistence import PersistentStateMixin
@@ -169,7 +169,7 @@ class DataUser[T, R](PersistentStateMixin):
         return len(self._buffer)
 
 
-class DataCollector[T]:
+class DataCollector[T, R]:
     """A thread-safe collector for buffered data.
 
     This class provides concurrent data collection capabilities with
@@ -181,7 +181,7 @@ class DataCollector[T]:
         R: The return type of the associated buffer's get_data() method.
     """
 
-    def __init__(self, user: DataUser[T, Any]) -> None:
+    def __init__(self, user: DataUser[T, R]) -> None:
         """Initialize DataCollector with a specified DataUser.
 
         Args:
