@@ -4,10 +4,9 @@ from collections.abc import Iterable, Mapping
 from pamiq_core.state_persistence import PersistentStateMixin
 
 type StepData[T] = Mapping[str, T]
-type BufferData[T] = Mapping[str, Iterable[T]]
 
 
-class DataBuffer[T](ABC, PersistentStateMixin):
+class DataBuffer[T, R](ABC, PersistentStateMixin):
     """Interface for managing experience data collected during system
     execution.
 
@@ -15,6 +14,10 @@ class DataBuffer[T](ABC, PersistentStateMixin):
     experience data generated during system execution. It maintains a
     buffer of fixed maximum size that stores data for specified data
     names.
+
+    Type Parameters:
+        T: The type of data stored in each step.
+        R: The return type of the get_data() method.
     """
 
     def __init__(self, collecting_data_names: Iterable[str], max_size: int) -> None:
@@ -54,12 +57,11 @@ class DataBuffer[T](ABC, PersistentStateMixin):
         pass
 
     @abstractmethod
-    def get_data(self) -> BufferData[T]:
+    def get_data(self) -> R:
         """Retrieves all stored data from the buffer.
 
         Returns:
-            Dictionary mapping data field names to sequences of their values.
-            Each sequence has the same length.
+            Data structure containing all stored samples.
         """
         pass
 

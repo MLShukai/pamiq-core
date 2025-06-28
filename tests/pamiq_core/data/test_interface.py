@@ -168,7 +168,7 @@ class TestDataUserAndCollector:
 
     def test_save_and_load_state(
         self,
-        data_user: DataUser[MockDataBuffer],
+        data_user: DataUser,
         mocker,
         buffer: MockDataBuffer,
         tmp_path: Path,

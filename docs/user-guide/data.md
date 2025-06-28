@@ -106,7 +106,7 @@ Here's an example of a simple custom buffer:
 from pamiq_core.data import DataBuffer
 from typing import override
 
-class SimpleBuffer[T](DataBuffer[T]):
+class SimpleBuffer[T](DataBuffer[T, dict[str, list[T]]]):
     """A simple buffer that stores data in lists."""
 
     @override
@@ -162,6 +162,15 @@ class SimpleBuffer[T](DataBuffer[T]):
         """
         return self._count
 ```
+
+!!! note "DataBuffer Type Parameters"
+
+    All DataBuffer implementations have two type parameters:
+
+    - `T`: The type of data stored in each step
+    - `R`: The return type of the `get_data()` method
+
+    For example, `SequentialBuffer[T]` is actually `DataBuffer[T, dict[str, list[T]]]`, meaning it returns a dictionary mapping field names to lists of values.
 
 ## Built-in DataBuffers
 

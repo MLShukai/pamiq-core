@@ -60,7 +60,7 @@ class LaunchConfig:
 def launch(
     interaction: Interaction[Any, Any],
     models: Mapping[str, TrainingModel[Any]],
-    data: Mapping[str, DataBuffer[Any]],
+    data: Mapping[str, DataBuffer[Any, Any]],
     trainers: Mapping[str, Trainer],
     config: Mapping[str, Any] | LaunchConfig | None = None,
 ) -> None:
