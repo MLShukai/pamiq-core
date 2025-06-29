@@ -35,7 +35,6 @@ class RandomReplacementBuffer[T](DataBuffer[T, list[T]]):
             ValueError: If replace_probability is not between 0.0 and 1.0 inclusive, or if both
                 replace_probability and expected_survival_length are specified.
         """
-        super().__init__(max_size)
 
         if replace_probability is None:
             if expected_survival_length is None:
@@ -55,7 +54,8 @@ class RandomReplacementBuffer[T](DataBuffer[T, list[T]]):
             raise ValueError(
                 "replace_probability must be between 0.0 and 1.0 inclusive"
             )
-
+        super().__init__(int(max_size / replace_probability))
+        self._max_size = max_size
         self._data_list: list[T] = []
 
         self._replace_probability = replace_probability
@@ -85,13 +85,19 @@ class RandomReplacementBuffer[T](DataBuffer[T, list[T]]):
         return min(max(p, 0.0), 1.0)  # Clamp value between 0 to 1.
 
     @property
+    def max_size(self) -> int:
+        """Returns the maximum number of data points that can be stored in the
+        buffer."""
+        return self._max_size
+
+    @property
     def is_full(self) -> bool:
         """Check if the buffer has reached its maximum capacity.
 
         Returns:
             True if the buffer is full, False otherwise.
         """
-        return self._current_size >= self.max_size
+        return self._current_size >= self._max_size
 
     @override
     def add(self, data: T) -> None:
@@ -106,7 +112,7 @@ class RandomReplacementBuffer[T](DataBuffer[T, list[T]]):
         if self.is_full:
             if random.random() > self._replace_probability:
                 return
-            replace_index = random.randint(0, self.max_size - 1)
+            replace_index = random.randint(0, self._max_size - 1)
             self._data_list[replace_index] = data
         else:
             self._data_list.append(data)
@@ -153,5 +159,5 @@ class RandomReplacementBuffer[T](DataBuffer[T, list[T]]):
             path: File path from where to load the buffer state (without extension).
         """
         with open(path.with_suffix(".pkl"), "rb") as f:
-            self._data_list = list(pickle.load(f))[: self.max_size]
+            self._data_list = list(pickle.load(f))[: self._max_size]
         self._current_size = len(self._data_list)

@@ -14,15 +14,17 @@ class DataBufferImpl(DataBuffer[Any, deque[Any]]):
     testing the DataBuffer interface itself.
     """
 
-    def __init__(self, max_size: int) -> None:
-        super().__init__(max_size)
-        self._buffer: deque[Any] = deque(maxlen=max_size)
+    def __init__(self, max_queue_size: int | None = None) -> None:
+        super().__init__(max_queue_size)
+        # For testing purposes, use a fixed buffer size
+        self._max_size = 1000 if max_queue_size is None else max_queue_size
+        self._buffer: deque[Any] = deque(maxlen=self._max_size)
         self._current_size = 0
 
     @override
     def add(self, data: Any) -> None:
         self._buffer.append(data)
-        if self._current_size < self.max_size:
+        if self._current_size < self._max_size:
             self._current_size += 1
 
     @override
@@ -48,15 +50,23 @@ class TestDataBuffer:
 
     def test_init(self):
         """Test DataBuffer initialization with valid parameters."""
-        max_size = 1000
-        buffer = DataBufferImpl(max_size)
+        max_queue_size = 1000
+        buffer = DataBufferImpl(max_queue_size)
 
-        assert buffer.max_size == max_size
+        assert buffer.max_queue_size == max_queue_size
 
     def test_init_negative_size(self):
-        """Test DataBuffer initialization with negative max_size raises
+        """Test DataBuffer initialization with negative max_queue_size raises
         ValueError."""
-        max_size = -1
+        max_queue_size = -1
 
-        with pytest.raises(ValueError, match="max_size must be non-negative"):
-            DataBufferImpl(max_size)
+        with pytest.raises(ValueError, match="max_queue_size must be non-negative"):
+            DataBufferImpl(max_queue_size)
+
+    def test_init_with_none_warns(self):
+        """Test DataBuffer initialization with None max_queue_size warns about
+        memory."""
+        with pytest.warns(RuntimeWarning, match="max_queue_size is None"):
+            buffer = DataBufferImpl(None)
+
+        assert buffer.max_queue_size is None

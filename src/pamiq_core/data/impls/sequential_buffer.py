@@ -25,6 +25,13 @@ class SequentialBuffer[T](DataBuffer[T, list[T]]):
         self._queue: deque[T] = deque(maxlen=max_size)
 
         self._current_size = 0
+        self._max_size = max_size
+
+    @property
+    def max_size(self) -> int:
+        """Returns the maximum number of data points that can be stored in the
+        buffer."""
+        return self._max_size
 
     @override
     def add(self, data: T) -> None:
@@ -35,7 +42,7 @@ class SequentialBuffer[T](DataBuffer[T, list[T]]):
         """
         self._queue.append(data)
 
-        if self._current_size < self.max_size:
+        if self._current_size < self._max_size:
             self._current_size += 1
 
     @override
@@ -78,5 +85,5 @@ class SequentialBuffer[T](DataBuffer[T, list[T]]):
             path: File path from where to load the buffer state (without extension)
         """
         with open(path.with_suffix(".pkl"), "rb") as f:
-            self._queue = deque(pickle.load(f), maxlen=self.max_size)
+            self._queue = deque(pickle.load(f), maxlen=self._max_size)
         self._current_size = len(self._queue)

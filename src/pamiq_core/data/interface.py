@@ -18,7 +18,7 @@ class TimestampingQueue[T]:
     retrieve data along with their corresponding timestamps.
     """
 
-    def __init__(self, max_len: int) -> None:
+    def __init__(self, max_len: int | None = None) -> None:
         """Initialize queue with specified maximum length.
 
         Args:
@@ -78,7 +78,7 @@ class DataUser[T, R](PersistentStateMixin):
             buffer: Data buffer instance to store collected data.
         """
         self._buffer = buffer
-        self._timestamps: deque[float] = deque(maxlen=buffer.max_size)
+        self._timestamps: deque[float] = deque(maxlen=buffer.max_queue_size)
         # DataCollector instance is only accessed from DataUser and Container classes
         self._collector = DataCollector(self)
 
@@ -86,9 +86,9 @@ class DataUser[T, R](PersistentStateMixin):
         """Create empty timestamping queue for data collection.
 
         Returns:
-            New instance of TimestampingQueue with the buffer's max_size.
+            New instance of TimestampingQueue with the buffer's max_queue_size.
         """
-        return TimestampingQueue(self._buffer.max_size)
+        return TimestampingQueue(self._buffer.max_queue_size)
 
     def update(self) -> None:
         """Update buffer with collected data from the collector.
@@ -153,7 +153,7 @@ class DataUser[T, R](PersistentStateMixin):
         """
         self._buffer.load_state(path / "buffer")
         with open(path / "timestamps.pkl", "rb") as f:
-            self._timestamps = deque(pickle.load(f), maxlen=self._buffer.max_size)
+            self._timestamps = deque(pickle.load(f), maxlen=self._buffer.max_queue_size)
 
     def __len__(self) -> int:
         """Returns the current number of samples in the buffer."""

@@ -1,3 +1,4 @@
+import warnings
 from abc import ABC, abstractmethod
 
 from pamiq_core.state_persistence import PersistentStateMixin
@@ -16,24 +17,34 @@ class DataBuffer[T, R](ABC, PersistentStateMixin):
         R: The return type of the get_data() method.
     """
 
-    def __init__(self, max_size: int) -> None:
+    def __init__(self, max_queue_size: int | None = None) -> None:
         """Initializes the DataBuffer.
 
         Args:
-            max_size: Maximum number of samples to store in the buffer.
+            max_queue_size: Maximum number of samples to store in the collector's queue.
+                If None, the queue will have unlimited size (may cause memory issues).
 
         Raises:
-            ValueError: If max_size is negative.
+            ValueError: If max_queue_size is negative.
         """
         super().__init__()
-        if max_size < 0:
-            raise ValueError("max_size must be non-negative")
-        self._max_size = max_size
+        if max_queue_size is not None:
+            if max_queue_size < 0:
+                raise ValueError("max_queue_size must be non-negative")
+        else:
+            warnings.warn(
+                "max_queue_size is None. The collector's queue will have unlimited size, "
+                "which may cause memory issues if data collection is faster than processing.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        self._max_queue_size = max_queue_size
 
     @property
-    def max_size(self) -> int:
-        """Returns the maximum number of samples that can be stored."""
-        return self._max_size
+    def max_queue_size(self) -> int | None:
+        """Returns the maximum number of samples that can be stored in the
+        collector's queue."""
+        return self._max_queue_size
 
     @abstractmethod
     def add(self, data: T) -> None:

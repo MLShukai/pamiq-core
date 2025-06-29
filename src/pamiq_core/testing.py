@@ -106,19 +106,19 @@ def create_mock_models(
     return training_model, inference_model
 
 
-def create_mock_buffer(max_size: int = 1) -> MagicMock:
+def create_mock_buffer(max_queue_size: int = 1) -> MagicMock:
     """Create a mock data buffer for testing.
 
     Creates a MagicMock instance that mocks a DataBuffer with the specified
-    max_size parameter. This is useful for testing components that depend on
+    max_queue_size parameter. This is useful for testing components that depend on
     DataBuffer without implementing a full buffer.
 
     Args:
-        max_size: Maximum size of the buffer. Defaults to 1.
+        max_queue_size: Maximum size of the buffer. Defaults to 1.
 
     Returns:
         A MagicMock object that mocks a DataBuffer.
     """
     buf = MagicMock(DataBuffer)
-    buf.max_size = max_size
+    buf.max_queue_size = max_queue_size
     return buf
