@@ -75,8 +75,8 @@ class TestSequentialBuffer:
         save_path = tmp_path / "test_buffer"
         buffer.save_state(save_path)
 
-        # Verify file was created
-        assert (save_path / "data.pkl").is_file()
+        # Verify file was created with .pkl extension
+        assert save_path.with_suffix(".pkl").is_file()
 
         # Create a new buffer and load state
         new_buffer = SequentialBuffer[int](buffer.max_size)

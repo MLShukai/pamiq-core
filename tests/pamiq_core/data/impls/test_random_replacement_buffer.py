@@ -27,7 +27,7 @@ class TestRandomReplacementBuffer:
 
         assert buffer.max_size == max_size
         assert buffer._replace_probability == 1.0
-        assert buffer._current_size == 0
+        assert len(buffer) == 0
         assert not buffer.is_full
 
         # Test with custom replace probability
@@ -195,8 +195,8 @@ class TestRandomReplacementBuffer:
         save_path = tmp_path / "test_buffer"
         buffer.save_state(save_path)
 
-        # Verify file was created
-        assert (save_path / "data.pkl").exists()
+        # Verify file was created with .pkl extension
+        assert save_path.with_suffix(".pkl").exists()
 
         # Create a new buffer and load state
         new_buffer = RandomReplacementBuffer[int](buffer.max_size)
@@ -207,7 +207,7 @@ class TestRandomReplacementBuffer:
         loaded_data = new_buffer.get_data()
 
         assert loaded_data == original_data
-        assert new_buffer._current_size == buffer._current_size
+        assert len(new_buffer) == len(buffer)
 
     def test_save_and_load_state_max_size(
         self, buffer: RandomReplacementBuffer[int], tmp_path: Path
@@ -221,8 +221,8 @@ class TestRandomReplacementBuffer:
         save_path = tmp_path / "test_buffer"
         buffer.save_state(save_path)
 
-        # Verify file was created
-        assert (save_path / "data.pkl").exists()
+        # Verify file was created with .pkl extension
+        assert save_path.with_suffix(".pkl").exists()
 
         # Create a new buffer with smaller max_size and load state
         new_buffer = RandomReplacementBuffer[int](max_size=1)
@@ -231,7 +231,7 @@ class TestRandomReplacementBuffer:
         # Check that loaded data is truncated to new max_size
         loaded_data = new_buffer.get_data()
         assert loaded_data == [1]
-        assert new_buffer._current_size == 1
+        assert len(new_buffer) == 1
 
     def test_len(self, buffer: RandomReplacementBuffer[int]):
         """Test the __len__ method returns the correct buffer size."""

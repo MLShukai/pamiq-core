@@ -12,7 +12,7 @@ class DataBuffer[T, R](ABC, PersistentStateMixin):
     buffer of fixed maximum size.
 
     Type Parameters:
-        T: The type of data stored in each step.
+        T: The type of individual data elements.
         R: The return type of the get_data() method.
     """
 

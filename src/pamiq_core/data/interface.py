@@ -67,7 +67,7 @@ class DataUser[T, R](PersistentStateMixin):
     collection.
 
     Type Parameters:
-        T: The type of data stored in each step.
+        T: The type of individual data elements.
         R: The return type of the buffer's get_data() method.
     """
 
@@ -168,7 +168,7 @@ class DataCollector[T, R]:
     collection and transfer.
 
     Type Parameters:
-        T: The type of data stored in each step.
+        T: The type of individual data elements.
         R: The return type of the associated buffer's get_data() method.
     """
 

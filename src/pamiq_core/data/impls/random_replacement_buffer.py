@@ -135,24 +135,23 @@ class RandomReplacementBuffer[T](DataBuffer[T, list[T]]):
     def save_state(self, path: Path) -> None:
         """Save the buffer state to the specified path.
 
-        Creates a directory at the given path and saves the data list.
+        Saves the data list to a pickle file with .pkl extension.
 
         Args:
-            path: Directory path where to save the buffer state.
+            path: File path where to save the buffer state (without extension).
         """
-        path.mkdir()
-        with open(path / "data.pkl", "wb") as f:
+        with open(path.with_suffix(".pkl"), "wb") as f:
             pickle.dump(self._data_list, f)
 
     @override
     def load_state(self, path: Path) -> None:
         """Load the buffer state from the specified path.
 
-        Loads data list from pickle file in the given directory.
+        Loads data list from pickle file with .pkl extension.
 
         Args:
-            path: Directory path from where to load the buffer state.
+            path: File path from where to load the buffer state (without extension).
         """
-        with open(path / "data.pkl", "rb") as f:
+        with open(path.with_suffix(".pkl"), "rb") as f:
             self._data_list = list(pickle.load(f))[: self.max_size]
         self._current_size = len(self._data_list)
