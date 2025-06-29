@@ -168,12 +168,7 @@ class DictRandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[
     """Buffer implementation that stores dictionary data with random
     replacement.
 
-    This buffer stores dictionary data where each key has its own list of values.
-    When the buffer is full, new data may randomly replace existing entries based
-    on the configured replacement probability.
-
-    Type Parameters:
-        T: The type of values stored for each key.
+    See [`RandomReplacementBuffer`][pamiq_core.data.impls.RandomReplacementBuffer].
     """
 
     def __init__(
@@ -188,7 +183,7 @@ class DictRandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[
         Args:
             keys: The keys that must be present in all data dictionaries.
 
-            Other arguments are same as `RandomReplacementBuffer`.
+        Other arguments are same as [`RandomReplacementBuffer`][pamiq_core.data.impls.RandomReplacementBuffer].
         """
         self._buffer = RandomReplacementBuffer[Mapping[str, T]](
             max_size, replace_probability, expected_survival_length

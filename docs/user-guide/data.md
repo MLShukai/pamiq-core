@@ -1,5 +1,14 @@
 # Data
 
+!!! warning "Breaking Changes in v0.5"
+
+    The data module has undergone significant changes from v0.4:
+
+    - `StepData` and `BufferData` type removed.
+    - `collecting_data_names` parameter removed from constructors
+    - `max_size` renamed to `max_queue_size` (can be None)
+    - For dictionary data, use `DictSequentialBuffer` or `DictRandomReplacementBuffer`
+
 The `data` module provides functionality for collecting, storing, and managing data needed for training models. It enables efficient data flow between inference and training threads, ensuring that learning can happen continuously during agent-environment interactions.
 
 ## Basic Concepts
@@ -43,13 +52,11 @@ class DataCollectingAgent(Agent[float, int]):
         """Process observation and decide on action."""
         # Make a decision
         action = int(observation > 0)
+        reward = 1.0 if action == 1 else -1.0
 
-        # Collect experience data
-        self.experience_collector.collect({
-            "observation": observation,
-            "action": action,
-            "reward": 1.0 if action == 1 else -1.0
-        })
+        # Collect experience data as a single value (e.g., tuple)
+        experience = (observation, action, reward)
+        self.experience_collector.collect(experience)
 
         return action
 ```
@@ -79,14 +86,12 @@ class ExperienceTrainer(Trainer):
         self.experience_data.update()
 
         # Get the latest data
-        data = self.experience_data.get_data()
+        experiences = self.experience_data.get_data()
 
-        # Use the data for training
-        observations = data["observation"]
-        actions = data["action"]
-        rewards = data["reward"]
-
-        print(f"Training on {len(observations)} samples")
+        # Unpack the data for training
+        if experiences:
+            observations, actions, rewards = zip(*experiences)
+            print(f"Training on {len(experiences)} samples")
         # ... (training logic)
 ```
 
@@ -106,52 +111,42 @@ Here's an example of a simple custom buffer:
 from pamiq_core.data import DataBuffer
 from typing import override
 
-class SimpleBuffer[T](DataBuffer[T, dict[str, list[T]]]):
-    """A simple buffer that stores data in lists."""
+class SimpleBuffer[T](DataBuffer[T, list[T]]):
+    """A simple buffer that stores data in a list."""
 
     @override
-    def __init__(self, collecting_data_names: list[str], max_size: int) -> None:
+    def __init__(self, max_size: int) -> None:
         """Initialize the buffer.
 
         Args:
-            collecting_data_names: Names of data fields to collect
             max_size: Maximum number of samples to store
         """
-        super().__init__(collecting_data_names, max_size)
-        self._data = {name: [] for name in collecting_data_names}
-        self._count = 0
+        super().__init__(max_queue_size=max_size)
+        self._data: list[T] = []
+        self._max_size = max_size
 
     @override
-    def add(self, step_data: dict[str, T]) -> None:
+    def add(self, data: T) -> None:
         """Add a new data sample to the buffer.
 
         Args:
-            step_data: Dictionary containing data for one step
+            data: Data element to add
         """
-        # Verify all required fields are present
-        for name in self._collecting_data_names:
-            if name not in step_data:
-                raise KeyError(f"Required data '{name}' not found in step_data")
-
-        # Add data to buffer
-        if self._count < self.max_size:
-            for name in self._collecting_data_names:
-                self._data[name].append(step_data[name])
-            self._count += 1
+        if len(self._data) < self._max_size:
+            self._data.append(data)
         else:
             # Replace oldest data (index 0)
-            for name in self._collecting_data_names:
-                self._data[name].pop(0)
-                self._data[name].append(step_data[name])
+            self._data.pop(0)
+            self._data.append(data)
 
     @override
-    def get_data(self) -> dict[str, list[T]]:
+    def get_data(self) -> list[T]:
         """Retrieve all stored data from the buffer.
 
         Returns:
-            Dictionary mapping data field names to lists of values
+            List of all stored data elements
         """
-        return {name: data.copy() for name, data in self._data.items()}
+        return self._data.copy()
 
     @override
     def __len__(self) -> int:
@@ -160,17 +155,20 @@ class SimpleBuffer[T](DataBuffer[T, dict[str, list[T]]]):
         Returns:
             Number of samples currently stored
         """
-        return self._count
+        return len(self._data)
+
+    # Note: Also implement save_state() and load_state() methods
+    # for state persistence (see DataBuffer base class)
 ```
 
 !!! note "DataBuffer Type Parameters"
 
     All DataBuffer implementations have two type parameters:
 
-    - `T`: The type of data stored in each step
+    - `T`: The type of individual data elements
     - `R`: The return type of the `get_data()` method
 
-    For example, `SequentialBuffer[T]` is actually `DataBuffer[T, dict[str, list[T]]]`, meaning it returns a dictionary mapping field names to lists of values.
+    For example, `SequentialBuffer[T]` is `DataBuffer[T, list[T]]`, meaning it returns a list of values.
 
 ## Built-in DataBuffers
 
@@ -183,17 +181,33 @@ The `SequentialBuffer` stores data in sequence and discards the oldest data when
 ```python
 from pamiq_core.data.impls import SequentialBuffer
 
-# Create a buffer for state, action, and reward data with max size 1000
-buffer = SequentialBuffer(["state", "action", "reward"], max_size=1000)
+# Create a buffer for experience tuples with max size 1000
+buffer = SequentialBuffer[tuple[list[float], int, float]](max_size=1000)
 
 # Add data
-buffer.add({"state": [0.1, 0.2], "action": 1, "reward": 0.5})
+experience = ([0.1, 0.2], 1, 0.5)  # (state, action, reward)
+buffer.add(experience)
 
 # Get all data
-data = buffer.get_data()
+experiences = buffer.get_data()
 ```
 
-This buffer is useful for:
+For dictionary data, use `DictSequentialBuffer`:
+
+```python
+from pamiq_core.data.impls import DictSequentialBuffer
+
+# Create a buffer for dictionary data
+buffer = DictSequentialBuffer[float](["state", "action", "reward"], max_size=1000)
+
+# Add data
+buffer.add({"state": 0.1, "action": 1.0, "reward": 0.5})
+
+# Get all data as a dictionary
+data = buffer.get_data()  # {"state": [0.1, ...], "action": [1.0, ...], ...}
+```
+
+These buffers are useful for:
 
 - Experience replay in reinforcement learning
 - Training on the most recent experiences
@@ -207,14 +221,26 @@ The `RandomReplacementBuffer` fills up to its maximum size and then randomly rep
 from pamiq_core.data.impls import RandomReplacementBuffer
 
 # Create a buffer with 80% replacement probability
-buffer = RandomReplacementBuffer(
+buffer = RandomReplacementBuffer[tuple[list[float], int, float]](
+    max_size=1000,
+    replace_probability=0.8
+)
+```
+
+For dictionary data, use `DictRandomReplacementBuffer`:
+
+```python
+from pamiq_core.data.impls import DictRandomReplacementBuffer
+
+# Create a buffer for dictionary data with replacement
+buffer = DictRandomReplacementBuffer[float](
     ["state", "action", "reward"],
     max_size=1000,
     replace_probability=0.8
 )
 ```
 
-This buffer is useful for:
+These buffers are useful for:
 
 - Maintaining diversity in training data
 - Preserving rare or important samples
@@ -229,6 +255,46 @@ The data system in PAMIQ-Core is designed to be thread-safe, with several import
 1. **Collector Acquisition**: Data collectors must be acquired before use, ensuring they can only be accessed by one component at a time
 2. **Queue-based Transfer**: Data is transferred between threads using thread-safe queues
 3. **Lock Protection**: Critical sections are protected by locks to prevent race conditions
+
+## Migration from v0.4 to v0.5
+
+### Single Value Buffers
+
+If you only need to store one type of data:
+
+```python
+# Old (v0.4)
+buffer = SequentialBuffer(["observation"], max_size=1000)
+collector.collect({"observation": obs})
+
+# New (v0.5)
+buffer = SequentialBuffer[float](max_size=1000)
+collector.collect(obs)
+```
+
+### Dictionary Data Buffers
+
+If you need to store multiple named values:
+
+```python
+# Old (v0.4)
+buffer = RandomReplacementBuffer(
+    ["state", "action", "reward"],
+    max_size=1000
+)
+collector.collect({"state": s, "action": a, "reward": r})
+
+# New (v0.5)
+buffer = DictRandomReplacementBuffer[float](
+    ["state", "action", "reward"],
+    max_size=1000
+)
+collector.collect({"state": s, "action": a, "reward": r})
+```
+
+### State Persistence
+
+State files now use `.pkl` extension automatically - no code changes needed.
 
 ______________________________________________________________________
 

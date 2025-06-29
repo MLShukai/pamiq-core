@@ -13,8 +13,8 @@ class DataBuffer[T, R](ABC, PersistentStateMixin):
     buffer of fixed maximum size.
 
     Type Parameters:
-        T: The type of individual data elements.
-        R: The return type of the get_data() method.
+        - T: The type of individual data elements.
+        - R: The return type of the get_data() method.
     """
 
     def __init__(self, max_queue_size: int | None = None) -> None:

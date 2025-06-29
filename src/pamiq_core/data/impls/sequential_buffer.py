@@ -93,12 +93,7 @@ class SequentialBuffer[T](DataBuffer[T, list[T]]):
 class DictSequentialBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
     """Buffer implementation that stores dictionary data in sequential order.
 
-    This buffer stores dictionary data where each key has its own list of values.
-    Data is maintained in FIFO order, with the oldest entries being removed when
-    the buffer reaches its maximum size.
-
-    Type Parameters:
-        T: The type of values stored for each key.
+    See: [`SequentialBuffer`][pamiq_core.data.impls.SequentialBuffer]
     """
 
     def __init__(
