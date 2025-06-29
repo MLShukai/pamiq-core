@@ -11,7 +11,7 @@ from .buffer import DataBuffer
 from .interface import DataCollector, DataUser
 
 
-class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
+class DataUsersDict(UserDict[str, DataUser[Any, Any]], PersistentStateMixin):
     """A dictionary mapping names to data users with helper methods for
     collector management.
 
@@ -37,7 +37,7 @@ class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
         return self._data_collectors_dict
 
     @override
-    def __setitem__(self, key: str, item: DataUser[Any]) -> None:
+    def __setitem__(self, key: str, item: DataUser[Any, Any]) -> None:
         """Set a data user in the dictionary and create its associated
         collector.
 
@@ -54,9 +54,9 @@ class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
     @classmethod
     def from_data_buffers(
         cls,
-        buffer_map: Mapping[str, DataBuffer[Any]] | None = None,
+        buffer_map: Mapping[str, DataBuffer[Any, Any]] | None = None,
         /,
-        **kwds: DataBuffer[Any],
+        **kwds: DataBuffer[Any, Any],
     ) -> Self:
         """Creates a DataUsersDict from a mapping of data buffers.
 
@@ -67,7 +67,7 @@ class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
         Returns:
             New DataUsersDict instance with users created from buffers.
         """
-        data: dict[str, DataBuffer[Any]] = {}
+        data: dict[str, DataBuffer[Any, Any]] = {}
         if buffer_map is not None:
             data.update(buffer_map)
         if len(kwds) > 0:
@@ -102,7 +102,7 @@ class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
             user.load_state(path / name)
 
 
-class DataCollectorsDict(UserDict[str, DataCollector[Any]]):
+class DataCollectorsDict(UserDict[str, DataCollector[Any, Any]]):
     """A dictionary for managing exclusive access to data collectors.
 
     Manages exclusive access to data collectors to ensure each collector
@@ -115,7 +115,7 @@ class DataCollectorsDict(UserDict[str, DataCollector[Any]]):
         super().__init__(*args, **kwds)
         self._acquired_collectors: set[str] = set()
 
-    def acquire(self, collector_name: str) -> DataCollector[Any]:
+    def acquire(self, collector_name: str) -> DataCollector[Any, Any]:
         """Acquires a data collector for exclusive use within a step.
 
         Args:

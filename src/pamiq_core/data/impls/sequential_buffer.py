@@ -7,7 +7,7 @@ from typing import override
 from ..buffer import DataBuffer, StepData
 
 
-class SequentialBuffer[T](DataBuffer[T]):
+class SequentialBuffer[T](DataBuffer[T, dict[str, list[T]]]):
     """Implementation of DataBuffer that maintains data in sequential order.
 
     This buffer stores collected data points in ordered queues,

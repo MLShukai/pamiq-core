@@ -8,7 +8,7 @@ from typing import override
 from pamiq_core import time
 from pamiq_core.state_persistence import PersistentStateMixin
 
-from .buffer import BufferData, DataBuffer, StepData
+from .buffer import DataBuffer, StepData
 
 
 class TimestampingQueuesDict[T]:
@@ -65,16 +65,20 @@ class TimestampingQueuesDict[T]:
         return len(self._timestamps)
 
 
-class DataUser[T](PersistentStateMixin):
+class DataUser[T, R](PersistentStateMixin):
     """A class that manages data buffering and timestamps for collected data.
 
     This class acts as a user of data buffers, handling the collection,
     storage, and retrieval of data along with their timestamps. It works
     in conjunction with a DataCollector to manage concurrent data
     collection.
+
+    Type Parameters:
+        T: The type of data stored in each step.
+        R: The return type of the buffer's get_data() method.
     """
 
-    def __init__(self, buffer: DataBuffer[T]) -> None:
+    def __init__(self, buffer: DataBuffer[T, R]) -> None:
         """Initialize DataUser with a specified buffer.
 
         Args:
@@ -107,7 +111,7 @@ class DataUser[T](PersistentStateMixin):
             self._buffer.add(data)
             self._timestamps.append(t)
 
-    def get_data(self) -> BufferData[T]:
+    def get_data(self) -> R:
         """Retrieve data from the buffer.
 
         Returns:
@@ -165,15 +169,19 @@ class DataUser[T](PersistentStateMixin):
         return len(self._buffer)
 
 
-class DataCollector[T]:
+class DataCollector[T, R]:
     """A thread-safe collector for buffered data.
 
     This class provides concurrent data collection capabilities with
     thread safety, working in conjunction with DataUser to manage data
     collection and transfer.
+
+    Type Parameters:
+        T: The type of data stored in each step.
+        R: The return type of the associated buffer's get_data() method.
     """
 
-    def __init__(self, user: DataUser[T]) -> None:
+    def __init__(self, user: DataUser[T, R]) -> None:
         """Initialize DataCollector with a specified DataUser.
 
         Args:

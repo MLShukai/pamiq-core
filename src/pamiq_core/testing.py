@@ -32,7 +32,7 @@ class ConnectedComponents(NamedTuple):
 def connect_components(
     agent: Agent[Any, Any] | None = None,
     trainers: Trainer | Mapping[str, Trainer] | None = None,
-    buffers: Mapping[str, DataBuffer[Any]] | None = None,
+    buffers: Mapping[str, DataBuffer[Any, Any]] | None = None,
     models: Mapping[str, TrainingModel[Any]] | None = None,
 ) -> ConnectedComponents:
     """Connect PAMIQ Core components for testing or development.
