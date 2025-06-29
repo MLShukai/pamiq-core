@@ -296,6 +296,15 @@ collector.collect({"state": s, "action": a, "reward": r})
 
 State files now use `.pkl` extension automatically - no code changes needed.
 
+## Type Helpers
+
+PAMIQ-Core provides convenient type aliases in `pamiq_core.typing.data` for working with data collectors and users:
+
+- `DataCollectorType[T]`: Type alias for `DataCollector[T, Any]` - useful when you only care about the input type
+- `DataUserType[R]`: Type alias for `DataUser[Any, R]` - useful when you only care about the return type
+
+These help simplify type annotations in your agents and trainers.
+
 ______________________________________________________________________
 
 ## API Reference

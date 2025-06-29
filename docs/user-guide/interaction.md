@@ -33,6 +33,23 @@ class MyAgent(Agent[list[float], int]):
             return 0
 ```
 
+### Type Annotations
+
+For cleaner type hints when working with data collectors, you can use the type helpers from `pamiq_core.typing.data`:
+
+```python
+from pamiq_core import Agent
+from pamiq_core.typing.data import DataCollectorType
+from typing import override
+
+class MyAgent(Agent[float, int]):
+    experience_collector: DataCollectorType[tuple[float, int, float]]
+
+    @override
+    def on_data_collectors_attached(self) -> None:
+        self.experience_collector = self.get_data_collector("experience")
+```
+
 ### Composite Agents
 
 Agents can contain child agents that share the parent's inference models and data collectors. This is useful for building hierarchical decision-making systems or dividing complex agent logic into modular components:
