@@ -92,7 +92,7 @@ class VAETrainer(TorchTrainer):
         computation, and backpropagation. It logs the training metrics
         to TensorBoard.
         """
-        data = self.data_user.get_data()["data"]
+        data = self.data_user.get_data()
         dataset = TensorDataset(torch.stack(list(data)))
         dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=True)
 

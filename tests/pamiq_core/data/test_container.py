@@ -11,14 +11,14 @@ from .helpers import MockDataBuffer
 
 class TestDataUsersDictAndCollectorsDict:
     @pytest.fixture
-    def buffers(self) -> dict[str, MockDataBuffer]:
+    def buffers(self) -> dict[str, MockDataBuffer[int]]:
         return {
-            "main": MockDataBuffer(["state"], 100),
-            "sub": MockDataBuffer(["action"], 100),
+            "main": MockDataBuffer[int](100),
+            "sub": MockDataBuffer[int](100),
         }
 
     @pytest.fixture
-    def users_dict(self, buffers: dict[str, MockDataBuffer]) -> DataUsersDict:
+    def users_dict(self, buffers: dict[str, MockDataBuffer[int]]) -> DataUsersDict:
         return DataUsersDict.from_data_buffers(buffers)
 
     @pytest.fixture
@@ -32,7 +32,7 @@ class TestDataUsersDictAndCollectorsDict:
         assert users_dict["sub"]._collector is collectors_dict["sub"]
 
     # DataUsersDict initialization tests
-    def test_from_data_buffers_dict(self, buffers: dict[str, MockDataBuffer]):
+    def test_from_data_buffers_dict(self, buffers: dict[str, MockDataBuffer[int]]):
         users_dict = DataUsersDict.from_data_buffers(buffers)
         assert len(users_dict) == 2
         assert all(isinstance(v, DataUser) for v in users_dict.values())
@@ -43,7 +43,7 @@ class TestDataUsersDictAndCollectorsDict:
         assert all(isinstance(v, DataCollector) for v in collectors_dict.values())
         assert set(collectors_dict.keys()) == {"main", "sub"}
 
-    def test_from_data_buffers_kwargs(self, buffers: dict[str, MockDataBuffer]):
+    def test_from_data_buffers_kwargs(self, buffers: dict[str, MockDataBuffer[int]]):
         users_dict = DataUsersDict.from_data_buffers(**buffers)
         assert len(users_dict) == 2
         assert all(isinstance(v, DataUser) for v in users_dict.values())
@@ -54,8 +54,8 @@ class TestDataUsersDictAndCollectorsDict:
         assert all(isinstance(v, DataCollector) for v in collectors_dict.values())
         assert set(collectors_dict.keys()) == {"main", "sub"}
 
-    def test_from_data_buffers_mixed(self, buffers: dict[str, MockDataBuffer]):
-        buffer3 = MockDataBuffer(["reward"], 100)
+    def test_from_data_buffers_mixed(self, buffers: dict[str, MockDataBuffer[int]]):
+        buffer3 = MockDataBuffer[int](100)
         users_dict = DataUsersDict.from_data_buffers(buffers, extra=buffer3)
         assert len(users_dict) == 3
         assert all(isinstance(v, DataUser) for v in users_dict.values())
@@ -71,7 +71,7 @@ class TestDataUsersDictAndCollectorsDict:
         self,
     ):
         users_dict = DataUsersDict()
-        user = DataUser(MockDataBuffer(["reward"], 100))
+        user = DataUser(MockDataBuffer[int](100))
         users_dict["test"] = user
 
         assert "test" in users_dict

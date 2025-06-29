@@ -1,4 +1,12 @@
-from .random_replacement_buffer import RandomReplacementBuffer
-from .sequential_buffer import SequentialBuffer
+from .random_replacement_buffer import (
+    DictRandomReplacementBuffer,
+    RandomReplacementBuffer,
+)
+from .sequential_buffer import DictSequentialBuffer, SequentialBuffer
 
-__all__ = ["SequentialBuffer", "RandomReplacementBuffer"]
+__all__ = [
+    "SequentialBuffer",
+    "RandomReplacementBuffer",
+    "DictSequentialBuffer",
+    "DictRandomReplacementBuffer",
+]

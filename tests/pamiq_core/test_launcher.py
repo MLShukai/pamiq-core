@@ -49,9 +49,9 @@ class TestLaunch:
 
     @pytest.fixture
     def mock_buffer(self, mocker: MockerFixture):
-        """Create a mock DataBuffer with zero size."""
+        """Create a mock DataBuffer with zero queue size."""
         buf = mocker.MagicMock(DataBuffer)
-        buf.max_size = 0
+        buf.max_queue_size = 0
         return buf
 
     @pytest.fixture
