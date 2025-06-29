@@ -51,7 +51,6 @@ class EncodingAgent(Agent[Tensor, Tensor]):
         self.data_collector.collect(
             {"data": observation.cpu()}
         )  # explanation of this line:
-        # The data_collector supports multiple named data stacks.
-        # Here, we add the current observation to the stack named "data".
+        # Here, we add the current observation to the stack.
         # The data stack is used in the training process in `trainer.py`.
         return self.encoder(observation)

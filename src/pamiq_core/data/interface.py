@@ -1,6 +1,5 @@
 import pickle
 from collections import deque
-from collections.abc import Iterable
 from pathlib import Path
 from threading import RLock
 from typing import override
@@ -8,51 +7,45 @@ from typing import override
 from pamiq_core import time
 from pamiq_core.state_persistence import PersistentStateMixin
 
-from .buffer import DataBuffer, StepData
+from .buffer import DataBuffer
 
 
-class TimestampingQueuesDict[T]:
-    """A dictionary of queues that stores data with timestamps.
+class TimestampingQueue[T]:
+    """A queue that stores data with timestamps.
 
-    This class maintains multiple queues for different data streams,
-    where each queue is synchronized with a timestamp queue. It provides
-    functionality to append and retrieve data along with their
-    corresponding timestamps.
+    This class maintains a single queue for data elements, synchronized
+    with a timestamp queue. It provides functionality to append and
+    retrieve data along with their corresponding timestamps.
     """
 
-    def __init__(self, queue_names: Iterable[str], max_len: int) -> None:
-        """Initialize queues for given names with specified maximum length.
+    def __init__(self, max_len: int) -> None:
+        """Initialize queue with specified maximum length.
 
         Args:
-            queue_names: Names of the queues to be created.
-            max_len: Maximum length of each queue.
+            max_len: Maximum length of the queue.
         """
-        self._queues: dict[str, deque[T]] = {
-            k: deque(maxlen=max_len) for k in queue_names
-        }
+        self._queue: deque[T] = deque(maxlen=max_len)
         self._timestamps: deque[float] = deque(maxlen=max_len)
 
-    def append(self, data: StepData[T]) -> None:
-        """Append new data to all queues with current timestamp.
+    def append(self, data: T) -> None:
+        """Append new data to the queue with current timestamp.
 
         Args:
-            data: Step data containing values for each queue.
+            data: Data element to append.
         """
-        for k, q in self._queues.items():
-            q.append(data[k])
+        self._queue.append(data)
         self._timestamps.append(time.time())
 
-    def popleft(self) -> tuple[StepData[T], float]:
-        """Remove and return the leftmost elements from all queues with
-        timestamp.
+    def popleft(self) -> tuple[T, float]:
+        """Remove and return the leftmost element with timestamp.
 
         Returns:
             A tuple containing:
-                - Dictionary mapping queue names to their leftmost values
-                - Timestamp corresponding to these values
+                - The leftmost data element
+                - Timestamp corresponding to this value
         """
         return (
-            {k: q.popleft() for k, q in self._queues.items()},
+            self._queue.popleft(),
             self._timestamps.popleft(),
         )
 
@@ -89,15 +82,13 @@ class DataUser[T, R](PersistentStateMixin):
         # DataCollector instance is only accessed from DataUser and Container classes
         self._collector = DataCollector(self)
 
-    def create_empty_queues(self) -> TimestampingQueuesDict[T]:
-        """Create empty timestamping queues for data collection.
+    def create_empty_queue(self) -> TimestampingQueue[T]:
+        """Create empty timestamping queue for data collection.
 
         Returns:
-            New instance of TimestampingQueuesDict with appropriate configuration.
+            New instance of TimestampingQueue with the buffer's max_size.
         """
-        return TimestampingQueuesDict(
-            self._buffer.collecting_data_names, self._buffer.max_size
-        )
+        return TimestampingQueue(self._buffer.max_size)
 
     def update(self) -> None:
         """Update buffer with collected data from the collector.
@@ -105,9 +96,9 @@ class DataUser[T, R](PersistentStateMixin):
         Moves all collected data from the collector to the buffer and
         records their timestamps.
         """
-        queues = self._collector._move_data()  # pyright: ignore[reportPrivateUsage]
-        for _ in range(len(queues)):
-            data, t = queues.popleft()
+        queue = self._collector._move_data()  # pyright: ignore[reportPrivateUsage]
+        for _ in range(len(queue)):
+            data, t = queue.popleft()
             self._buffer.add(data)
             self._timestamps.append(t)
 
@@ -188,27 +179,27 @@ class DataCollector[T, R]:
             user: DataUser instance this collector is associated with.
         """
         self._user = user
-        self._queues_dict = user.create_empty_queues()
+        self._queue = user.create_empty_queue()
         self._lock = RLock()
 
-    def collect(self, step_data: StepData[T]) -> None:
-        """Collect step data in a thread-safe manner.
+    def collect(self, data: T) -> None:
+        """Collect data in a thread-safe manner.
 
         Args:
-            step_data: Data to be collected.
+            data: Data to be collected.
         """
         with self._lock:
-            self._queues_dict.append(step_data)
+            self._queue.append(data)
 
-    def _move_data(self) -> TimestampingQueuesDict[T]:
+    def _move_data(self) -> TimestampingQueue[T]:
         """Move collected data to a new queue and reset the collector.
 
         This method is intended to be called only by the associated DataUser.
 
         Returns:
-            TimestampingQueuesDict containing the collected data.
+            TimestampingQueue containing the collected data.
         """
         with self._lock:
-            data = self._queues_dict
-            self._queues_dict = self._user.create_empty_queues()
+            data = self._queue
+            self._queue = self._user.create_empty_queue()
             return data
