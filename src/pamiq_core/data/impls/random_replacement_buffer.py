@@ -1,6 +1,7 @@
 import math
 import pickle
 import random
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import override
 
@@ -161,3 +162,87 @@ class RandomReplacementBuffer[T](DataBuffer[T, list[T]]):
         with open(path.with_suffix(".pkl"), "rb") as f:
             self._data_list = list(pickle.load(f))[: self._max_size]
         self._current_size = len(self._data_list)
+
+
+class DictRandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
+    """Buffer implementation that stores dictionary data with random
+    replacement.
+
+    This buffer stores dictionary data where each key has its own list of values.
+    When the buffer is full, new data may randomly replace existing entries based
+    on the configured replacement probability.
+
+    Type Parameters:
+        T: The type of values stored for each key.
+    """
+
+    def __init__(
+        self,
+        keys: Iterable[str],
+        max_size: int,
+        replace_probability: float | None = None,
+        expected_survival_length: int | None = None,
+    ) -> None:
+        """Initialize a DictRandomReplacementBuffer.
+
+        Args:
+            keys: The keys that must be present in all data dictionaries.
+
+            Other arguments are same as `RandomReplacementBuffer`.
+        """
+        self._buffer = RandomReplacementBuffer[Mapping[str, T]](
+            max_size, replace_probability, expected_survival_length
+        )
+        super().__init__(self._buffer.max_queue_size)
+
+        self._keys = set(keys)
+
+        self.save_state = self._buffer.save_state
+        self.load_state = self._buffer.load_state
+
+    @property
+    def max_size(self) -> int:
+        """Returns the maximum number of data points that can be stored in the
+        buffer."""
+        return self._buffer.max_size
+
+    @override
+    def add(self, data: Mapping[str, T]) -> None:
+        """Add a new data sample to the buffer.
+
+        The data must contain exactly the keys specified during initialization.
+
+        Args:
+            data: Dictionary containing data for each key.
+
+        Raises:
+            ValueError: If the data keys don't match the expected keys.
+        """
+        if set(data.keys()) != self._keys:
+            raise ValueError(
+                f"Data keys {set(data.keys())} do not match expected keys {self._keys}"
+            )
+        return self._buffer.add(data)
+
+    @override
+    def get_data(self) -> dict[str, list[T]]:
+        """Retrieve all stored data from the buffer.
+
+        Returns:
+            Dictionary mapping each key to a list of its stored values.
+            The lists maintain the order in which data was added/replaced.
+        """
+        out = {k: list[T]() for k in self._keys}
+        for data in self._buffer.get_data():
+            for k, v in data.items():
+                out[k].append(v)
+        return out
+
+    @override
+    def __len__(self) -> int:
+        """Returns the current number of samples in the buffer.
+
+        Returns:
+            int: The number of samples currently stored in the buffer.
+        """
+        return len(self._buffer)
