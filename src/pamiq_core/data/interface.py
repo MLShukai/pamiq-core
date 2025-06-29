@@ -201,6 +201,5 @@ class DataCollector[T, R]:
             TimestampingQueue containing the collected data.
         """
         with self._lock:
-            data = self._queue
-            self._queue = self._user.create_empty_queue()
-            return data
+            out, self._queue = self._queue, self._user.create_empty_queue()
+        return out
