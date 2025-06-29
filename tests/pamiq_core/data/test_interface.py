@@ -165,6 +165,20 @@ class TestDataUserAndCollector:
         # Test public len() interface
         assert len(data_user) == 1
 
+    def test_implict_update(self, data_user: DataUser[int, list[int]], mocker):
+        """Test the public interfaces for accessing collected data."""
+        mock_time = mocker.patch("pamiq_core.time.time")
+        mock_time.return_value = 100.0
+
+        # Collect and update data
+        data_user._collector.collect(self.SAMPLE_DATA)
+
+        # Test public get_data() interface
+        buffer_data = data_user.get_data()
+        assert isinstance(buffer_data, list)
+        assert len(buffer_data) == 1
+        assert buffer_data[0] == self.SAMPLE_DATA
+
     def test_save_and_load_state(
         self,
         data_user: DataUser[int, list[int]],

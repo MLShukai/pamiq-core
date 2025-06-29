@@ -103,11 +103,12 @@ class DataUser[T, R](PersistentStateMixin):
             self._timestamps.append(t)
 
     def get_data(self) -> R:
-        """Retrieve data from the buffer.
+        """Update and retrieve data from the buffer.
 
         Returns:
             Current data stored in the buffer.
         """
+        self.update()
         return self._buffer.get_data()
 
     def count_data_added_since(self, timestamp: float) -> int:
