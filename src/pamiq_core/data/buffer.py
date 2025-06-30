@@ -22,6 +22,7 @@ class DataBuffer[T, R](ABC, PersistentStateMixin):
 
         Args:
             max_queue_size: Maximum number of samples to store in the collector's queue.
+                When the queue size exceeds this limit, old data will be deleted.
                 If None, the queue will have unlimited size (may cause memory issues).
 
         Raises:
