@@ -181,7 +181,7 @@ The `SequentialBuffer` stores data in sequence and discards the oldest data when
 ```python
 from pamiq_core.data.impls import SequentialBuffer
 
-# Create a buffer for experience tuples with max size 1000
+# Create a buffer for experiences with max size 1000
 buffer = SequentialBuffer[tuple[list[float], int, float]](max_size=1000)
 
 # Add data
@@ -221,7 +221,7 @@ The `RandomReplacementBuffer` fills up to its maximum size and then randomly rep
 from pamiq_core.data.impls import RandomReplacementBuffer
 
 # Create a buffer with 80% replacement probability
-buffer = RandomReplacementBuffer[tuple[list[float], int, float]](
+buffer = RandomReplacementBuffer[int](
     max_size=1000,
     replace_probability=0.8
 )
