@@ -2,7 +2,7 @@ import pickle
 from collections import deque
 from pathlib import Path
 from threading import RLock
-from typing import override
+from typing import Any, override
 
 from pamiq_core import time
 from pamiq_core.state_persistence import PersistentStateMixin
@@ -58,7 +58,7 @@ class TimestampingQueue[T]:
         return len(self._timestamps)
 
 
-class DataUser[T, R](PersistentStateMixin):
+class DataUser[R](PersistentStateMixin):
     """A class that manages data buffering and timestamps for collected data.
 
     This class acts as a user of data buffers, handling the collection,
@@ -67,11 +67,10 @@ class DataUser[T, R](PersistentStateMixin):
     collection.
 
     Type Parameters:
-        T: The type of individual data elements.
         R: The return type of the buffer's get_data() method.
     """
 
-    def __init__(self, buffer: DataBuffer[T, R]) -> None:
+    def __init__(self, buffer: DataBuffer[Any, R]) -> None:
         """Initialize DataUser with a specified buffer.
 
         Args:
@@ -80,15 +79,7 @@ class DataUser[T, R](PersistentStateMixin):
         self._buffer = buffer
         self._timestamps: deque[float] = deque(maxlen=buffer.max_queue_size)
         # DataCollector instance is only accessed from DataUser and Container classes
-        self._collector = DataCollector(self)
-
-    def create_empty_queue(self) -> TimestampingQueue[T]:
-        """Create empty timestamping queue for data collection.
-
-        Returns:
-            New instance of TimestampingQueue with the buffer's max_queue_size.
-        """
-        return TimestampingQueue(self._buffer.max_queue_size)
+        self._collector = DataCollector[Any](buffer.max_queue_size)
 
     def update(self) -> None:
         """Update buffer with collected data from the collector.
@@ -161,7 +152,7 @@ class DataUser[T, R](PersistentStateMixin):
         return len(self._buffer)
 
 
-class DataCollector[T, R]:
+class DataCollector[T]:
     """A thread-safe collector for buffered data.
 
     This class provides concurrent data collection capabilities with
@@ -170,17 +161,16 @@ class DataCollector[T, R]:
 
     Type Parameters:
         T: The type of individual data elements.
-        R: The return type of the associated buffer's get_data() method.
     """
 
-    def __init__(self, user: DataUser[T, R]) -> None:
-        """Initialize DataCollector with a specified DataUser.
+    def __init__(self, max_queue_size: int | None) -> None:
+        """Initialize DataCollector with a specified queue size.
 
         Args:
-            user: DataUser instance this collector is associated with.
+            max_queue_size: Maximum size of the collection queue. If None, queue has no size limit.
         """
-        self._user = user
-        self._queue = user.create_empty_queue()
+        self._max_queue_size = max_queue_size
+        self._queue = TimestampingQueue[T](max_queue_size)
         self._lock = RLock()
 
     def collect(self, data: T) -> None:
@@ -201,5 +191,5 @@ class DataCollector[T, R]:
             TimestampingQueue containing the collected data.
         """
         with self._lock:
-            out, self._queue = self._queue, self._user.create_empty_queue()
+            out, self._queue = self._queue, TimestampingQueue[T](self._max_queue_size)
         return out

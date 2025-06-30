@@ -47,23 +47,6 @@ class MyTrainer(Trainer):
         # Model parameters will be automatically synchronized after training
 ```
 
-### Type Annotations
-
-For cleaner type hints when working with data users, you can use the type helpers from `pamiq_core.typing.data`:
-
-```python
-from pamiq_core import Trainer
-from pamiq_core.typing.data import DataUserType
-from typing import override
-
-class MyTrainer(Trainer):
-    experience_data: DataUserType[list[tuple[float, int, float]]]
-
-    @override
-    def on_data_users_attached(self) -> None:
-        self.experience_data = self.get_data_user("experience")
-```
-
 ### Training Conditions
 
 PAMIQ-Core trainers can be configured with conditions to determine when training should occur:

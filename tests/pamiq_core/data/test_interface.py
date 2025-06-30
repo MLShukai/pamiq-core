@@ -86,12 +86,12 @@ class TestDataUserAndCollector:
         return MockDataBuffer[int](self.MAX_SIZE)
 
     @pytest.fixture
-    def data_user(self, buffer: MockDataBuffer[int]) -> DataUser[int, list[int]]:
+    def data_user(self, buffer: MockDataBuffer[int]) -> DataUser[list[int]]:
         """Fixture providing DataUser instance."""
         return DataUser(buffer)
 
     def test_basic_collection_and_update(
-        self, data_user: DataUser[int, list[int]], buffer: MockDataBuffer[int], mocker
+        self, data_user: DataUser[list[int]], buffer: MockDataBuffer[int], mocker
     ):
         """Test the collection and update workflow between collector and
         user."""
@@ -112,7 +112,7 @@ class TestDataUserAndCollector:
         assert len(buffer.data) == 1
         assert buffer.data[0] == self.SAMPLE_DATA
 
-    def test_timestamp_counting(self, data_user: DataUser[int, list[int]], mocker):
+    def test_timestamp_counting(self, data_user: DataUser[list[int]], mocker):
         """Test counting of data points added since a timestamp."""
         mock_time = mocker.patch("pamiq_core.time.time")
         collector = data_user._collector
@@ -130,7 +130,7 @@ class TestDataUserAndCollector:
         assert data_user.count_data_added_since(104.0) == 0
 
     def test_max_size_constraint(
-        self, data_user: DataUser[int, list[int]], buffer: MockDataBuffer[int], mocker
+        self, data_user: DataUser[list[int]], buffer: MockDataBuffer[int], mocker
     ):
         """Test maximum size constraint is respected."""
         mock_time = mocker.patch("pamiq_core.time.time")
@@ -146,7 +146,7 @@ class TestDataUserAndCollector:
         assert len(buffer.data) == self.MAX_SIZE
 
     def test_public_interface_for_data_access(
-        self, data_user: DataUser[int, list[int]], mocker
+        self, data_user: DataUser[list[int]], mocker
     ):
         """Test the public interfaces for accessing collected data."""
         mock_time = mocker.patch("pamiq_core.time.time")
@@ -165,7 +165,7 @@ class TestDataUserAndCollector:
         # Test public len() interface
         assert len(data_user) == 1
 
-    def test_implict_update(self, data_user: DataUser[int, list[int]], mocker):
+    def test_implict_update(self, data_user: DataUser[list[int]], mocker):
         """Test the public interfaces for accessing collected data."""
         mock_time = mocker.patch("pamiq_core.time.time")
         mock_time.return_value = 100.0
@@ -181,7 +181,7 @@ class TestDataUserAndCollector:
 
     def test_save_and_load_state(
         self,
-        data_user: DataUser[int, list[int]],
+        data_user: DataUser[list[int]],
         mocker,
         buffer: MockDataBuffer[int],
         tmp_path: Path,
