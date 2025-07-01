@@ -37,7 +37,7 @@ class TestConnectComponents:
     def mock_buffer(self, mocker: MockerFixture) -> DataBuffer:
         """Fixture for a mock data buffer."""
         buffer = mocker.MagicMock(spec=DataBuffer)
-        buffer.max_size = 0
+        buffer.max_queue_size = 0
         return buffer
 
     @pytest.fixture
@@ -220,14 +220,14 @@ class TestCreateMockBuffer:
         buffer = create_mock_buffer()
 
         # Verify buffer is correctly configured
-        assert buffer.max_size == 1
+        assert buffer.max_queue_size == 1
         assert isinstance(buffer, MagicMock)
         assert isinstance(buffer, DataBuffer)
 
-    def test_custom_max_size(self) -> None:
-        """Test create_mock_buffer with custom max_size."""
+    def test_custom_max_queue_size(self) -> None:
+        """Test create_mock_buffer with custom max_queue_size."""
         custom_size = 100
-        buffer = create_mock_buffer(max_size=custom_size)
+        buffer = create_mock_buffer(max_queue_size=custom_size)
 
-        # Verify buffer has the specified max_size
-        assert buffer.max_size == custom_size
+        # Verify buffer has the specified max_queue_size
+        assert buffer.max_queue_size == custom_size

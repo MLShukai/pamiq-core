@@ -84,7 +84,7 @@ class Trainer(ABC, PersistentStateMixin, ThreadEventMixin):
         self._retrieved_model_names.add(name)
         return model
 
-    def get_data_user(self, name: str) -> DataUser[Any, Any]:
+    def get_data_user(self, name: str) -> DataUser[Any]:
         """Retrieves the data user."""
         return self._data_users[name]
 

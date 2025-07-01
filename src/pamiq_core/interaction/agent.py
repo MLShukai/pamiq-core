@@ -116,7 +116,7 @@ class Agent[ObsType, ActType](
         """
         return self._inference_models[name]
 
-    def get_data_collector(self, name: str) -> DataCollector[Any, Any]:
+    def get_data_collector(self, name: str) -> DataCollector[Any]:
         """Acquires a data collector by name for exclusive use.
 
         This method acquires a data collector for exclusive use within

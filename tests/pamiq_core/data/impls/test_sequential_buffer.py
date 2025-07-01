@@ -2,108 +2,87 @@ from pathlib import Path
 
 import pytest
 
-from pamiq_core.data.buffer import StepData
-from pamiq_core.data.impls.sequential_buffer import SequentialBuffer
+from pamiq_core.data.impls.sequential_buffer import (
+    DictSequentialBuffer,
+    SequentialBuffer,
+)
 
 
 class TestSequentialBuffer:
     """Test suite for SequentialBuffer."""
 
     @pytest.fixture
-    def buffer(self) -> SequentialBuffer:
+    def buffer(self) -> SequentialBuffer[int]:
         """Fixture providing a standard SequentialBuffer for tests."""
-        return SequentialBuffer(["state", "action", "reward"], 100)
+        return SequentialBuffer(100)
 
     def test_init(self):
         """Test SequentialBuffer initialization with various parameters."""
         # Test with standard parameters
-        data_names = ["state", "action", "reward"]
         max_size = 50
-        buffer = SequentialBuffer(data_names, max_size)
+        buffer = SequentialBuffer[int](max_size)
 
         assert buffer.max_size == max_size
-        assert buffer.collecting_data_names == set(data_names)
 
-    def test_add_and_get_data(self, buffer: SequentialBuffer):
+    def test_add_and_get_data(self, buffer: SequentialBuffer[int]):
         """Test adding data to the buffer and retrieving it."""
-        # Sample data
-        sample1: StepData = {"state": [1.0, 0.0], "action": 1, "reward": 0.5}
-        sample2: StepData = {"state": [0.0, 1.0], "action": 0, "reward": -0.5}
-
         # Add data
-        buffer.add(sample1)
+        buffer.add(1)
 
         # Check data retrieval after adding one sample
         data = buffer.get_data()
-        assert data["state"] == [[1.0, 0.0]]
-        assert data["action"] == [1]
-        assert data["reward"] == [0.5]
+        assert data == [1]
 
         # Add another sample
-        buffer.add(sample2)
+        buffer.add(2)
 
         # Check data retrieval after adding second sample
         data = buffer.get_data()
-        assert data["state"] == [[1.0, 0.0], [0.0, 1.0]]
-        assert data["action"] == [1, 0]
-        assert data["reward"] == [0.5, -0.5]
+        assert data == [1, 2]
 
     def test_max_size_constraint(self):
         """Test the buffer respects its maximum size constraint."""
         max_size = 3
-        buffer = SequentialBuffer(["value"], max_size)
+        buffer = SequentialBuffer[int](max_size)
 
         # Add more items than the max size
         for i in range(5):
-            buffer.add({"value": i})
+            buffer.add(i)
 
         # Check only the most recent max_size items are kept
         data = buffer.get_data()
-        assert data["value"] == [2, 3, 4]
-        assert len(data["value"]) == max_size
+        assert data == [2, 3, 4]
+        assert len(data) == max_size
 
-    def test_missing_data_field(self, buffer: SequentialBuffer):
-        """Test adding data with missing required fields raises KeyError."""
-        incomplete_data: StepData = {
-            "state": [1.0, 0.0],
-            "action": 1,
-        }  # Missing 'reward'
-
-        with pytest.raises(
-            KeyError, match="Required data 'reward' not found in step_data"
-        ):
-            buffer.add(incomplete_data)
-
-    def test_get_data_returns_copy(self, buffer: SequentialBuffer):
+    def test_get_data_returns_copy(self, buffer: SequentialBuffer[int]):
         """Test that get_data returns a copy that doesn't affect the internal
         state."""
-        buffer.add({"state": [1.0], "action": 1, "reward": 0.5})
+        buffer.add(1)
 
         # Get data and modify it
         data = buffer.get_data()
-        data["state"].append([2.0])
+        data.append(2)
 
         # Verify internal state is unchanged
         new_data = buffer.get_data()
-        assert new_data["state"] == [[1.0]]
-        assert len(new_data["state"]) == 1
+        assert new_data == [1]
+        assert len(new_data) == 1
 
-    def test_save_and_load_state(self, buffer: SequentialBuffer, tmp_path: Path):
+    def test_save_and_load_state(self, buffer: SequentialBuffer[int], tmp_path: Path):
         """Test saving and loading the buffer state."""
         # Add some data to the buffer
-        buffer.add({"state": [1.0, 0.0], "action": 1, "reward": 0.5})
-        buffer.add({"state": [0.0, 1.0], "action": 0, "reward": -0.5})
+        buffer.add(1)
+        buffer.add(2)
 
         # Save state
         save_path = tmp_path / "test_buffer"
         buffer.save_state(save_path)
 
-        # Verify files were created
-        for name in buffer.collecting_data_names:
-            assert (save_path / f"{name}.pkl").is_file()
+        # Verify file was created with .pkl extension
+        assert save_path.with_suffix(".pkl").is_file()
 
         # Create a new buffer and load state
-        new_buffer = SequentialBuffer(buffer.collecting_data_names, buffer.max_size)
+        new_buffer = SequentialBuffer[int](buffer.max_size)
         new_buffer.load_state(save_path)
 
         # Check that loaded data matches original
@@ -112,15 +91,120 @@ class TestSequentialBuffer:
 
         assert loaded_data == original_data
 
-        for name in buffer.collecting_data_names:
-            assert loaded_data[name] == original_data[name]
-
-    def test_len(self, buffer: SequentialBuffer):
+    def test_len(self, buffer: SequentialBuffer[int]):
         """Test the __len__ method returns the correct buffer size."""
         assert len(buffer) == 0
 
-        buffer.add({"state": [1.0, 0.0], "action": 1, "reward": 0.5})
+        buffer.add(1)
         assert len(buffer) == 1
 
-        buffer.add({"state": [0.0, 1.0], "action": 0, "reward": -0.5})
+        buffer.add(2)
         assert len(buffer) == 2
+
+
+class TestDictSequentialBuffer:
+    """Test suite for DictSequentialBuffer class."""
+
+    @pytest.mark.parametrize(
+        "max_size,expected",
+        [
+            (10, 10),
+            (100, 100),
+            (1, 1),
+        ],
+    )
+    def test_init_with_max_size(self, max_size, expected):
+        """Test initialization with different max_size values."""
+        buffer = DictSequentialBuffer[int](["a", "b"], max_size=max_size)
+        assert buffer.max_size == expected
+        assert len(buffer) == 0
+
+    def test_init_with_empty_keys(self):
+        """Test initialization with empty keys is allowed."""
+        buffer = DictSequentialBuffer[int]([], max_size=10)
+        assert len(buffer) == 0
+        assert buffer.get_data() == {}
+
+    @pytest.mark.parametrize(
+        "keys,data",
+        [
+            (["a", "b"], {"a": 1, "b": 2}),
+            ([], {}),  # Empty keys and data
+        ],
+    )
+    def test_add_valid_data(self, keys, data):
+        """Test adding valid data to buffer."""
+        buffer = DictSequentialBuffer[int](keys, max_size=10)
+        buffer.add(data)
+        assert len(buffer) == 1
+
+    @pytest.mark.parametrize(
+        "keys,data",
+        [
+            (["a", "b"], {"a": 1}),  # Missing key
+            (["a", "b"], {"a": 1, "b": 2, "c": 3}),  # Extra key
+            (["a"], {"b": 1}),  # Different key
+        ],
+    )
+    def test_add_invalid_data_raises(self, keys, data):
+        """Test adding invalid data raises ValueError."""
+        buffer = DictSequentialBuffer[int](keys, max_size=10)
+        with pytest.raises(ValueError, match="Data keys.*do not match expected keys"):
+            buffer.add(data)
+
+    def test_get_data_structure(self):
+        """Test get_data returns correct structure."""
+        buffer = DictSequentialBuffer[int](["x", "y"], max_size=3)
+
+        # Empty buffer
+        assert buffer.get_data() == {"x": [], "y": []}
+
+        # Add data
+        buffer.add({"x": 1, "y": 10})
+        buffer.add({"x": 2, "y": 20})
+
+        result = buffer.get_data()
+        assert result == {"x": [1, 2], "y": [10, 20]}
+
+    def test_sequential_order_preserved(self):
+        """Test that data maintains FIFO order."""
+        buffer = DictSequentialBuffer[int](["a"], max_size=5)
+
+        # Add data in order
+        for i in range(5):
+            buffer.add({"a": i})
+
+        assert buffer.get_data()["a"] == [0, 1, 2, 3, 4]
+
+    def test_oldest_removed_when_full(self):
+        """Test that oldest entries are removed when buffer is full."""
+        buffer = DictSequentialBuffer[int](["x", "y"], max_size=3)
+
+        # Add more than capacity
+        for i in range(5):
+            buffer.add({"x": i, "y": i * 10})
+
+        # Should keep only last 3
+        result = buffer.get_data()
+        assert result == {"x": [2, 3, 4], "y": [20, 30, 40]}
+        assert len(buffer) == 3
+
+    def test_save_and_load_state(self, tmp_path):
+        """Test state persistence."""
+        keys = ["a", "b"]
+        buffer = DictSequentialBuffer[float](keys, max_size=10)
+
+        # Add data
+        buffer.add({"a": 1.0, "b": 2.0})
+        buffer.add({"a": 3.0, "b": 4.0})
+
+        # Save
+        path = tmp_path / "state"
+        buffer.save_state(path)
+
+        # Load into new buffer
+        new_buffer = DictSequentialBuffer[float](keys, max_size=10)
+        new_buffer.load_state(path)
+
+        assert new_buffer.get_data() == buffer.get_data()
+        assert len(new_buffer) == len(buffer)

@@ -11,7 +11,7 @@ from .buffer import DataBuffer
 from .interface import DataCollector, DataUser
 
 
-class DataUsersDict(UserDict[str, DataUser[Any, Any]], PersistentStateMixin):
+class DataUsersDict(UserDict[str, DataUser[Any]], PersistentStateMixin):
     """A dictionary mapping names to data users with helper methods for
     collector management.
 
@@ -37,7 +37,7 @@ class DataUsersDict(UserDict[str, DataUser[Any, Any]], PersistentStateMixin):
         return self._data_collectors_dict
 
     @override
-    def __setitem__(self, key: str, item: DataUser[Any, Any]) -> None:
+    def __setitem__(self, key: str, item: DataUser[Any]) -> None:
         """Set a data user in the dictionary and create its associated
         collector.
 
@@ -102,7 +102,7 @@ class DataUsersDict(UserDict[str, DataUser[Any, Any]], PersistentStateMixin):
             user.load_state(path / name)
 
 
-class DataCollectorsDict(UserDict[str, DataCollector[Any, Any]]):
+class DataCollectorsDict(UserDict[str, DataCollector[Any]]):
     """A dictionary for managing exclusive access to data collectors.
 
     Manages exclusive access to data collectors to ensure each collector
@@ -115,7 +115,7 @@ class DataCollectorsDict(UserDict[str, DataCollector[Any, Any]]):
         super().__init__(*args, **kwds)
         self._acquired_collectors: set[str] = set()
 
-    def acquire(self, collector_name: str) -> DataCollector[Any, Any]:
+    def acquire(self, collector_name: str) -> DataCollector[Any]:
         """Acquires a data collector for exclusive use within a step.
 
         Args:
