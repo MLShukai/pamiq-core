@@ -20,7 +20,7 @@ interaction = Interaction(agent, environment)
 launch(
     interaction=interaction,
     models={"model_name": your_model},
-    data={"buffer_name": your_data_buffer},
+    buffers={"buffer_name": your_data_buffer},
     trainers={"trainer_name": your_trainer},
     config=LaunchConfig(
         states_dir="./saved_states",
@@ -63,7 +63,7 @@ from pamiq_core.state_persistence import PeriodicSaveCondition, LatestStatesKeep
 launch(
     interaction=interaction,
     models=models,
-    data=data,
+    buffers=buffers,
     trainers=trainers,
     config=LaunchConfig(
         states_dir="./saved_states",
@@ -80,7 +80,7 @@ latest_state = list(Path("./saved_states").glob("*.state"))[-1]
 launch(
     interaction=interaction,
     models=models,
-    data=data,
+    buffers=buffers,
     trainers=trainers,
     config=LaunchConfig(
         states_dir="./saved_states",

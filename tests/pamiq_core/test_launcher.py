@@ -86,7 +86,7 @@ class TestLaunch:
         launch(
             interaction=interaction,
             models={"model": mock_model},
-            data={"buffer": mock_buffer},
+            buffers={"buffer": mock_buffer},
             trainers={"trainer": mock_trainer},
             config=cfg,
         )
@@ -138,7 +138,7 @@ class TestLaunch:
             launch(
                 interaction=interaction,
                 models={},
-                data={},
+                buffers={},
                 trainers={"trainer": mock_trainer},
                 config=cfg,
             )

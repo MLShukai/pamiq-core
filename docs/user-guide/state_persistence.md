@@ -129,7 +129,7 @@ from pamiq_core.state_persistence import PeriodicSaveCondition, LatestStatesKeep
 launch(
     interaction=interaction,
     models=models,
-    data=data,
+    buffers=buffers,
     trainers=trainers,
     config=LaunchConfig(
         states_dir="./saved_states",
