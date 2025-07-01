@@ -2,6 +2,30 @@
 
 The `launch` function is the entry point for starting a PAMIQ-Core system. It initializes all components, connects them together, and manages the system's lifecycle.
 
+!!! warning "Breaking Changes in v0.5"
+
+    The `launch` function parameter `data` has been renamed to `buffers` for better clarity. If you're upgrading from v0.4, update your code:
+
+    ```python
+    # Before (v0.4)
+    launch(
+        interaction=interaction,
+        models=models,
+        data={"buffer": my_buffer},  # Old parameter name
+        trainers=trainers,
+        config=config
+    )
+
+    # After (v0.5)
+    launch(
+        interaction=interaction,
+        models=models,
+        buffers={"buffer": my_buffer},  # New parameter name
+        trainers=trainers,
+        config=config
+    )
+    ```
+
 ## Basic Usage
 
 To launch a PAMIQ-Core system, you need to provide your interaction components, models, data buffers, trainers, and configuration settings:
