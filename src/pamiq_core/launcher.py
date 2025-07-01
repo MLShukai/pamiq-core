@@ -60,7 +60,7 @@ class LaunchConfig:
 def launch(
     interaction: Interaction[Any, Any],
     models: Mapping[str, TrainingModel[Any]],
-    data: Mapping[str, DataBuffer[Any, Any]],
+    buffers: Mapping[str, DataBuffer[Any, Any]],
     trainers: Mapping[str, Trainer],
     config: Mapping[str, Any] | LaunchConfig | None = None,
 ) -> None:
@@ -76,7 +76,7 @@ def launch(
     Args:
         interaction: Agent-environment interaction procedure.
         models: Dictionary mapping names to training models.
-        data: Dictionary mapping names to data buffers.
+        buffers: Dictionary mapping names to data buffers.
         trainers: Dictionary mapping names to trainers.
         config: Configuration parameters, either as a LaunchConfig instance
             or a dictionary of parameter values. If None, default configuration
@@ -92,7 +92,7 @@ def launch(
 
     # Initialize system components with proper containers
     training_models = TrainingModelsDict(models)
-    data_users = DataUsersDict.from_data_buffers(data)
+    data_users = DataUsersDict.from_data_buffers(buffers)
     trainers_dict = TrainersDict(trainers)
 
     interaction.agent.attach_inference_models(training_models.inference_models_dict)

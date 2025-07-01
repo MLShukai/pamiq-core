@@ -56,7 +56,7 @@ interaction = Interaction(YourAgent(), YourEnvironment())
 launch(
     interaction=interaction,
     models=your_models,
-    data=your_data_buffers,
+    buffers=your_data_buffers,
     trainers=your_trainers,
     config=LaunchConfig(
         web_api_address=("localhost", 8391),

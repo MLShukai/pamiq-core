@@ -2,6 +2,30 @@
 
 The `launch` function is the entry point for starting a PAMIQ-Core system. It initializes all components, connects them together, and manages the system's lifecycle.
 
+!!! warning "Breaking Changes in v0.5"
+
+    The `launch` function parameter `data` has been renamed to `buffers` for better clarity. If you're upgrading from v0.4, update your code:
+
+    ```python
+    # Before (v0.4)
+    launch(
+        interaction=interaction,
+        models=models,
+        data={"buffer": my_buffer},  # Old parameter name
+        trainers=trainers,
+        config=config
+    )
+
+    # After (v0.5)
+    launch(
+        interaction=interaction,
+        models=models,
+        buffers={"buffer": my_buffer},  # New parameter name
+        trainers=trainers,
+        config=config
+    )
+    ```
+
 ## Basic Usage
 
 To launch a PAMIQ-Core system, you need to provide your interaction components, models, data buffers, trainers, and configuration settings:
@@ -20,7 +44,7 @@ interaction = Interaction(agent, environment)
 launch(
     interaction=interaction,
     models={"model_name": your_model},
-    data={"buffer_name": your_data_buffer},
+    buffers={"buffer_name": your_data_buffer},
     trainers={"trainer_name": your_trainer},
     config=LaunchConfig(
         states_dir="./saved_states",
@@ -63,7 +87,7 @@ from pamiq_core.state_persistence import PeriodicSaveCondition, LatestStatesKeep
 launch(
     interaction=interaction,
     models=models,
-    data=data,
+    buffers=buffers,
     trainers=trainers,
     config=LaunchConfig(
         states_dir="./saved_states",
@@ -80,7 +104,7 @@ latest_state = list(Path("./saved_states").glob("*.state"))[-1]
 launch(
     interaction=interaction,
     models=models,
-    data=data,
+    buffers=buffers,
     trainers=trainers,
     config=LaunchConfig(
         states_dir="./saved_states",
