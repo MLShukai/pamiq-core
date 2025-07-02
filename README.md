@@ -12,6 +12,8 @@
 
 **pamiq-core** is a framework for building AI agents. Developed for P-AMI\<Q>, it enables train and inference in parallel, allowing agents to adapt continuously during interaction with their environment.
 
+[**📚 Documentation site is here.**](https://mlshukai.github.io/pamiq-core/)
+
 ## ✨ Features
 
 - 🔄 **Parallel Architecture**: Simultaneous inference and training in separate threads
@@ -78,10 +80,6 @@ pamiq-console --host localhost --port 8391
 # Connect to remote system
 pamiq-console --host 192.168.1.100 --port 8391
 ```
-
-## 📚 Documentation
-
-For comprehensive API documentation and detailed tutorials, please visit the [documentation website](https://mlshukai.github.io/pamiq-core/).
 
 ## 🧩 Architecture
 
