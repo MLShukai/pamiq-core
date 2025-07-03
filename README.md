@@ -12,6 +12,8 @@
 
 **pamiq-core** is a framework for building AI agents. Developed for P-AMI\<Q>, it enables train and inference in parallel, allowing agents to adapt continuously during interaction with their environment.
 
+[**📚 Documentation site is here.**](https://mlshukai.github.io/pamiq-core/)
+
 ## ✨ Features
 
 - 🔄 **Parallel Architecture**: Simultaneous inference and training in separate threads
@@ -19,6 +21,7 @@
 - 🧵 **Thread-safe Design**: Robust synchronization mechanisms for parameter sharing and data transfers
 - 🔌 **Modular Components**: Easy-to-extend agent, environment, and model interfaces
 - 🛠️ **Comprehensive Tools**: Built-in state persistence, time control, and monitoring
+- 🏋️ **Gymnasium Integration**: Seamless compatibility with [Gymnasium](https://gymnasium.farama.org/) environments
 - 🌍 **Cross Platform**: Linux is the primary focus, but Windows and macOS are also supported. (However, some older macOS and Windows systems may have significantly less accurate time control.)
 
 ## 📋 Requirements
@@ -36,6 +39,9 @@ pip install pamiq-core
 
 # Optional PyTorch integration
 pip install pamiq-core[torch]
+
+# Optional Gymnasium integration
+pip install pamiq-core[gym]
 ```
 
 ### Basic Example
@@ -52,7 +58,7 @@ interaction = Interaction(YourAgent(), YourEnvironment())
 launch(
     interaction=interaction,
     models=your_models,
-    data=your_data_buffers,
+    buffers=your_data_buffers,
     trainers=your_trainers,
     config=LaunchConfig(
         web_api_address=("localhost", 8391),
@@ -74,10 +80,6 @@ pamiq-console --host localhost --port 8391
 # Connect to remote system
 pamiq-console --host 192.168.1.100 --port 8391
 ```
-
-## 📚 Documentation
-
-For comprehensive API documentation and detailed tutorials, please visit the [documentation website](https://mlshukai.github.io/pamiq-core/).
 
 ## 🧩 Architecture
 

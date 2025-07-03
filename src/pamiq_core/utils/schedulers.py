@@ -93,7 +93,7 @@ class TimeIntervalScheduler(Scheduler):
         if interval < 0:
             raise ValueError("Interval must be non-negative")
         self._interval = interval
-        self._previous_available_time = float("-inf")
+        self._previous_available_time = time.time()
 
     @override
     def is_available(self) -> bool:

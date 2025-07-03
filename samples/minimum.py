@@ -82,7 +82,7 @@ def main() -> None:
         launch(
             interaction=Interaction(MinimalAgent(), MinimalEnvironment()),
             models={},
-            data={},
+            buffers={},
             trainers={},
             config=LaunchConfig(
                 states_dir=tmp_dir, web_api_address=("localhost", 8391)

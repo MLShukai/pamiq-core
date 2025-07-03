@@ -44,13 +44,13 @@ def main():
         ),
     }
 
-    data = {"observation": RandomReplacementBuffer(["data"], max_size=1024)}
+    buffers = {"observation": RandomReplacementBuffer(max_size=1024)}
     trainers = {"vae": VAETrainer(max_epochs=3, batch_size=32)}
 
     launch(
         interaction=interaction,
         models=models,
-        data=data,
+        buffers=buffers,
         trainers=trainers,
         config=LaunchConfig(
             states_dir=Path(__file__).parent / "states",

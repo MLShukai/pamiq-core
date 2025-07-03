@@ -117,25 +117,124 @@ This organized structure makes it easy to inspect and manage saved states.
 
 The state persistence system in PAMIQ-Core automatically manages state directories:
 
-- States are saved at regular intervals as specified in the `LaunchConfig`
-- Old states can be automatically cleaned up based on the `max_keep_states` parameter
+- States are saved based on the `save_state_condition` specified in the `LaunchConfig`
+- Old states can be automatically cleaned up using a `StatesKeeper` instance
 - States can be loaded during system launch using the `saved_state_path` parameter
 
 ```python
 from pamiq_core import launch, LaunchConfig
+from pamiq_core.state_persistence import PeriodicSaveCondition, LatestStatesKeeper
 
 # Launch with automatic state saving every 5 minutes, keeping the 10 most recent states
 launch(
     interaction=interaction,
     models=models,
-    data=data,
+    buffers=buffers,
     trainers=trainers,
     config=LaunchConfig(
         states_dir="./saved_states",
-        save_state_interval=300.0,  # 5 minutes
-        max_keep_states=10
+        save_state_condition=PeriodicSaveCondition(300.0),  # Save every 5 minutes
+        states_keeper=LatestStatesKeeper(
+            states_dir="./saved_states",
+            max_keep=10
+        )
     )
 )
+```
+
+### Save State Conditions
+
+The `save_state_condition` parameter accepts any callable that returns a boolean. When `True`, the system will save its state. PAMIQ-Core provides built-in conditions:
+
+**PeriodicSaveCondition**: Saves state at regular time intervals
+
+```python
+from pamiq_core.state_persistence import PeriodicSaveCondition
+
+config = LaunchConfig(
+    save_state_condition=PeriodicSaveCondition(300.0)  # Every 5 minutes
+)
+```
+
+**Custom Conditions**: You can create custom conditions
+
+```python
+from pamiq_core import time
+
+# Save state at specific wall clock times (e.g., every hour on the hour)
+def save_on_the_hour():
+    current_time = time.time()
+    minutes_elapsed = (current_time % 3600) / 60  # Minutes past the hour
+    return minutes_elapsed < 0.1  # True for the first 6 seconds of each hour
+
+config = LaunchConfig(
+    save_state_condition=save_on_the_hour
+)
+```
+
+### State Cleanup with StatesKeeper
+
+The `StatesKeeper` is an abstract base class that manages the retention and cleanup of saved state directories. PAMIQ-Core provides a built-in implementation:
+
+**LatestStatesKeeper**: Keeps only the N most recent state directories based on modification time
+
+```python
+from pamiq_core.state_persistence import LatestStatesKeeper
+
+# Keep only the 5 most recent states
+states_keeper = LatestStatesKeeper(
+    states_dir="./saved_states",
+    max_keep=5,
+    state_name_pattern="*.state"  # Optional: pattern to match state directories
+)
+
+config = LaunchConfig(
+    states_keeper=states_keeper
+)
+```
+
+You can also implement custom state retention policies by subclassing `StatesKeeper`:
+
+```python
+from pamiq_core.state_persistence import StatesKeeper
+from pathlib import Path
+from collections.abc import Iterable
+from typing import override
+
+class SizeBasedStatesKeeper(StatesKeeper):
+    """Keep states until total size exceeds a limit."""
+
+    def __init__(self, states_dir: Path, max_total_size_mb: float):
+        super().__init__()
+        self.states_dir = states_dir
+        self.max_total_size_bytes = max_total_size_mb * 1024 * 1024
+        self._state_paths: list[Path] = []
+
+    @override
+    def append(self, path: Path) -> None:
+        self._state_paths.append(path)
+
+    @override
+    def select_removal_states(self) -> Iterable[Path]:
+        # Calculate total size and remove oldest states if exceeding limit
+        total_size = 0
+        removal_states = []
+
+        # Sort by modification time (oldest first)
+        sorted_paths = sorted(self._state_paths, key=lambda p: p.stat().st_mtime)
+
+        for path in reversed(sorted_paths):
+            if path.exists():
+                size = sum(f.stat().st_size for f in path.rglob('*') if f.is_file())
+                total_size += size
+                if total_size > self.max_total_size_bytes:
+                    removal_states.append(path)
+
+        # Remove selected paths from our tracking
+        for path in removal_states:
+            self._state_paths.remove(path)
+
+        return removal_states
 ```
 
 ## Thread Safety

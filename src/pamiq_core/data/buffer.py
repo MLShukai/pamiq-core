@@ -1,65 +1,67 @@
+import warnings
 from abc import ABC, abstractmethod
-from collections.abc import Iterable, Mapping
 
 from pamiq_core.state_persistence import PersistentStateMixin
 
-type StepData[T] = Mapping[str, T]
-type BufferData[T] = Mapping[str, Iterable[T]]
 
-
-class DataBuffer[T](ABC, PersistentStateMixin):
+class DataBuffer[T, R](ABC, PersistentStateMixin):
     """Interface for managing experience data collected during system
     execution.
 
     DataBuffer provides an interface for collecting and managing
     experience data generated during system execution. It maintains a
-    buffer of fixed maximum size that stores data for specified data
-    names.
+    buffer of fixed maximum size.
+
+    Type Parameters:
+        - T: The type of individual data elements.
+        - R: The return type of the get_data() method.
     """
 
-    def __init__(self, collecting_data_names: Iterable[str], max_size: int) -> None:
+    def __init__(self, max_queue_size: int | None = None) -> None:
         """Initializes the DataBuffer.
 
         Args:
-            collecting_data_names: Names of data fields to collect and store.
-            max_size: Maximum number of samples to store in the buffer.
+            max_queue_size: Maximum number of samples to store in the collector's queue.
+                When the queue size exceeds this limit, old data will be deleted.
+                If None, the queue will have unlimited size (may cause memory issues).
 
         Raises:
-            ValueError: If max_size is negative.
+            ValueError: If max_queue_size is negative.
         """
         super().__init__()
-        self._collecting_data_names = set(collecting_data_names)
-        if max_size < 0:
-            raise ValueError("max_size must be non-negative")
-        self._max_size = max_size
+        if max_queue_size is not None:
+            if max_queue_size < 0:
+                raise ValueError("max_queue_size must be non-negative")
+        else:
+            warnings.warn(
+                "max_queue_size is None. The collector's queue will have unlimited size, "
+                "which may cause memory issues if data collection is faster than processing.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        self._max_queue_size = max_queue_size
 
     @property
-    def collecting_data_names(self) -> set[str]:
-        """Returns the set of data field names being collected."""
-        return self._collecting_data_names.copy()
-
-    @property
-    def max_size(self) -> int:
-        """Returns the maximum number of samples that can be stored."""
-        return self._max_size
+    def max_queue_size(self) -> int | None:
+        """Returns the maximum number of samples that can be stored in the
+        collector's queue."""
+        return self._max_queue_size
 
     @abstractmethod
-    def add(self, step_data: StepData[T]) -> None:
+    def add(self, data: T) -> None:
         """Adds a new data sample to the buffer.
 
         Args:
-            step_data: Dictionary containing data for one step. Must contain
-                all fields specified in collecting_data_names.
+            data: Data element to add to the buffer.
         """
         pass
 
     @abstractmethod
-    def get_data(self) -> BufferData[T]:
+    def get_data(self) -> R:
         """Retrieves all stored data from the buffer.
 
         Returns:
-            Dictionary mapping data field names to sequences of their values.
-            Each sequence has the same length.
+            Data structure containing all stored samples.
         """
         pass
 

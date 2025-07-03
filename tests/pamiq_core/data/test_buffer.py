@@ -1,9 +1,39 @@
+from collections import deque
+from typing import Any, override
+
 import pytest
 
 from pamiq_core.data.buffer import DataBuffer
 from pamiq_core.state_persistence import PersistentStateMixin
 
-from .helpers import DataBufferImpl
+
+class DataBufferImpl(DataBuffer[Any, deque[Any]]):
+    """Reference implementation of DataBuffer using deque.
+
+    This implementation is closer to production usage and is used for
+    testing the DataBuffer interface itself.
+    """
+
+    def __init__(self, max_queue_size: int | None = None) -> None:
+        super().__init__(max_queue_size)
+        # For testing purposes, use a fixed buffer size
+        self._max_size = 1000 if max_queue_size is None else max_queue_size
+        self._buffer: deque[Any] = deque(maxlen=self._max_size)
+        self._current_size = 0
+
+    @override
+    def add(self, data: Any) -> None:
+        self._buffer.append(data)
+        if self._current_size < self._max_size:
+            self._current_size += 1
+
+    @override
+    def get_data(self) -> deque[Any]:
+        return self._buffer.copy()
+
+    @override
+    def __len__(self) -> int:
+        return self._current_size
 
 
 class TestDataBuffer:
@@ -20,38 +50,23 @@ class TestDataBuffer:
 
     def test_init(self):
         """Test DataBuffer initialization with valid parameters."""
-        data_names = ["state", "action", "reward"]
-        max_size = 1000
-        buffer = DataBufferImpl(data_names, max_size)
+        max_queue_size = 1000
+        buffer = DataBufferImpl(max_queue_size)
 
-        assert buffer.max_size == max_size
-        assert buffer.collecting_data_names == set(data_names)
+        assert buffer.max_queue_size == max_queue_size
 
     def test_init_negative_size(self):
-        """Test DataBuffer initialization with negative max_size raises
+        """Test DataBuffer initialization with negative max_queue_size raises
         ValueError."""
-        data_names = ["state", "action"]
-        max_size = -1
+        max_queue_size = -1
 
-        with pytest.raises(ValueError, match="max_size must be non-negative"):
-            DataBufferImpl(data_names, max_size)
+        with pytest.raises(ValueError, match="max_queue_size must be non-negative"):
+            DataBufferImpl(max_queue_size)
 
-    def test_collecting_data_names_immutable(self):
-        """Test that collecting_data_names property returns a copy that cannot
-        affect the internal state."""
-        data_names = ["state", "action"]
-        buffer = DataBufferImpl(data_names, 100)
+    def test_init_with_none_warns(self):
+        """Test DataBuffer initialization with None max_queue_size warns about
+        memory."""
+        with pytest.warns(RuntimeWarning, match="max_queue_size is None"):
+            buffer = DataBufferImpl(None)
 
-        # Get the data names and try to modify them
-        names = buffer.collecting_data_names
-        names.add("reward")
-
-        # Original internal state should be unchanged
-        assert buffer.collecting_data_names == set(data_names)
-
-    def test_max_size_property(self):
-        """Test that max_size property returns the correct value."""
-        max_size = 500
-        buffer = DataBufferImpl(["state"], max_size)
-
-        assert buffer.max_size == max_size
+        assert buffer.max_queue_size is None

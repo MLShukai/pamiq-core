@@ -1,11 +1,11 @@
 import math
+from collections.abc import Callable
 from functools import partial
 from typing import override
 
 from pamiq_core import time
 from pamiq_core.console import ControlCommands, SystemStatusProvider, WebApiServer
-from pamiq_core.state_persistence import StateStore
-from pamiq_core.utils.schedulers import TimeIntervalScheduler
+from pamiq_core.state_persistence import StatesKeeper, StateStore
 
 from ..thread_control import (
     ReadOnlyController,
@@ -25,18 +25,23 @@ class ControlThread(Thread):
     def __init__(
         self,
         state_store: StateStore,
-        save_state_interval: float = math.inf,
+        save_state_condition: Callable[[], bool] | None = None,
+        states_keeper: StatesKeeper | None = None,
         timeout_for_all_threads_pause: float = 60.0,
         max_attempts_to_pause_all_threads: int = 3,
         max_uptime: float = math.inf,
-        web_api_address: tuple[str, int] = ("localhost", 8391),
+        web_api_address: tuple[str, int] | None = ("localhost", 8391),
         web_api_command_queue_size: int = 1,
     ) -> None:
         """Initialize the control thread.
 
         Args:
             state_store: Store for saving and loading system state.
-            save_state_interval: Interval in seconds between automatic state saves.
+            save_state_condition: Callable that returns True when state should be saved.
+                If None, state will never be saved automatically.
+            states_keeper: Optional StatesKeeper instance for managing saved state retention.
+                If provided, it will handle automatic cleanup of old states based on its
+                retention policy. If None, no automatic state cleanup will be performed.
             timeout_for_all_threads_pause: Maximum time in seconds to wait for
                 all threads to pause before timing out a pause attempt.
             max_attempts_to_pause_all_threads: Maximum number of retry attempts
@@ -44,27 +49,33 @@ class ControlThread(Thread):
             max_uptime: Maximum time in seconds the system is allowed to run before
                 automatic shutdown. Default is infinity (no time limit).
             web_api_address: Tuple of (host, port) specifying where the Web API
-                should listen for commands.
+                should listen for commands. If None, the Web API server will be disabled.
             web_api_command_queue_size: Maximum number of commands that can be
                 queued from the Web API.
         """
         super().__init__()
 
         self._state_store = state_store
-        self._save_state_scheduler = TimeIntervalScheduler(
-            save_state_interval, self.save_state
-        )
+        if save_state_condition is None:
+            self._save_state_condition = lambda: False
+        else:
+            self._save_state_condition = save_state_condition
+        self._states_keeper = states_keeper
 
         self._timeout_for_all_threads_pause = timeout_for_all_threads_pause
         self._max_attempts_to_pause_all_threads = max_attempts_to_pause_all_threads
         self._max_uptime = max_uptime
         self._system_start_time = -math.inf
 
-        self._partial_web_api_server = partial(
-            WebApiServer,
-            host=web_api_address[0],
-            port=web_api_address[1],
-            max_queue_size=web_api_command_queue_size,
+        self._partial_web_api_server = (
+            None
+            if web_api_address is None
+            else partial(
+                WebApiServer,
+                host=web_api_address[0],
+                port=web_api_address[1],
+                max_queue_size=web_api_command_queue_size,
+            )
         )
 
         self._controller = ThreadController()
@@ -165,6 +176,8 @@ class ControlThread(Thread):
             return
         saved_path = self._state_store.save_state()
         self._logger.info(f"Saved a state to '{saved_path}'")
+        if self._states_keeper is not None:
+            self._states_keeper.append(saved_path)
         if not already_paused:
             self.resume()
 
@@ -182,8 +195,10 @@ class ControlThread(Thread):
         """Process any pending commands received from the Web API.
 
         Retrieves and processes all available commands from the Web API
-        handler.
+        handler. Does nothing if the Web API server is disabled.
         """
+        if self._web_api_server is None:
+            return
         while self._web_api_server.has_commands():
             match self._web_api_server.receive_command():
                 case ControlCommands.PAUSE:
@@ -220,10 +235,12 @@ class ControlThread(Thread):
             f"in time scale x{time.get_time_scale():.1f})"
         )
 
-        self._web_api_server = self._partial_web_api_server(
-            SystemStatusProvider(self.controller, self._thread_statuses_monitor),
-        )
-        self._web_api_server.run_in_background()
+        self._web_api_server = None
+        if self._partial_web_api_server is not None:
+            self._web_api_server = self._partial_web_api_server(
+                SystemStatusProvider(self.controller, self._thread_statuses_monitor),
+            )
+            self._web_api_server.run_in_background()
 
     @override
     def on_tick(self) -> None:
@@ -233,7 +250,11 @@ class ControlThread(Thread):
         initiates shutdown if needed.
         """
         super().on_tick()
-        self._save_state_scheduler.update()
+        if self._save_state_condition():
+            self.save_state()
+
+        if self._states_keeper is not None:
+            self._states_keeper.cleanup()
 
         self.process_received_web_api_commands()
 

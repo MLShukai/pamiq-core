@@ -1,13 +1,17 @@
 import time
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
+from typing import override
 
 import pytest
 from pytest_mock import MockerFixture
 
 from pamiq_core.state_persistence import (
     LatestStatesKeeper,
+    PeriodicSaveCondition,
     PersistentStateMixin,
+    StatesKeeper,
     StateStore,
     load_pickle,
     save_pickle,
@@ -128,6 +132,77 @@ class TestPickleFunctions:
             load_pickle(tmp_path / "non_existent_file.pkl")
 
 
+class TestStatesKeeper:
+    """Test suite for StatesKeeper abstract base class."""
+
+    class ImplStatesKeeper(StatesKeeper):
+        """Test implementation of StatesKeeper."""
+
+        def __init__(self, paths_to_remove: list[Path] | None = None) -> None:
+            super().__init__()
+            self._paths_to_remove = paths_to_remove or []
+            self.appended_paths: list[Path] = []
+
+        @override
+        def append(self, path: Path) -> None:
+            """Track appended paths for testing."""
+            self.appended_paths.append(path)
+
+        @override
+        def select_removal_states(self) -> Iterable[Path]:
+            return self._paths_to_remove
+
+    @pytest.fixture
+    def states_dir(self, tmp_path: Path) -> Path:
+        """Create a temporary directory for test state directories."""
+        return tmp_path / "states"
+
+    def test_cleanup_removes_selected_paths(self, states_dir: Path) -> None:
+        """Test that cleanup removes directories selected by
+        select_removal_states."""
+        states_dir.mkdir(exist_ok=True)
+
+        # Create test state directories
+        state1 = states_dir / "state1"
+        state2 = states_dir / "state2"
+        state3 = states_dir / "state3"
+
+        for state_dir in [state1, state2, state3]:
+            state_dir.mkdir()
+            (state_dir / "test.txt").write_text("test")
+
+        # Create keeper that will remove state1 and state2
+        keeper = self.ImplStatesKeeper([state1, state2])
+
+        # Track all states
+        keeper.append(state1)
+        keeper.append(state2)
+        keeper.append(state3)
+
+        # Cleanup should remove state1 and state2
+        removed = keeper.cleanup()
+
+        # Verify removal
+        assert not state1.exists()
+        assert not state2.exists()
+        assert state3.exists()
+
+        # Verify the correct paths were removed
+        assert set(removed) == {state1, state2}
+
+    def test_cleanup_logs_removed_paths(self, states_dir: Path, caplog) -> None:
+        """Test that cleanup logs removed paths."""
+        states_dir.mkdir(exist_ok=True)
+
+        state_dir = states_dir / "state_to_remove"
+        state_dir.mkdir()
+
+        keeper = self.ImplStatesKeeper([state_dir])
+        keeper.cleanup()
+
+        check_log_message(f"Removed: '{state_dir}'", "INFO", caplog)
+
+
 class TestLatestStatesKeeper:
     """Test suite for LatestStatesKeeper class."""
 
@@ -157,7 +232,7 @@ class TestLatestStatesKeeper:
     def test_init_creates_dir_if_not_exists(self, tmp_path: Path) -> None:
         """Test that init creates directory if it doesn't exist."""
         states_dir = tmp_path / "nonexistent"
-        LatestStatesKeeper(states_dir)
+        LatestStatesKeeper(states_dir, 10)
 
         assert states_dir.exists()
         assert states_dir.is_dir()
@@ -202,50 +277,72 @@ class TestLatestStatesKeeper:
         assert len(removed) == 5
         assert len(list(states_dir.glob("*.state"))) == 0
 
-    def test_cleanup_with_max_keep_negative(
-        self, states_dir: Path, setup_test_states: list[Path]
-    ) -> None:
-        """Test that cleanup do nothing when max_keep is negative."""
-        keeper = LatestStatesKeeper(states_dir, max_keep=-1)
+    def test_state_tracking_with_append(self, states_dir: Path) -> None:
+        """Test that LatestStatesKeeper properly tracks appended states."""
+        states_dir.mkdir(exist_ok=True)
+        keeper = LatestStatesKeeper(states_dir, max_keep=2)
+
+        # Create and append state paths
+        state1 = states_dir / "state1.state"
+        state2 = states_dir / "state2.state"
+        state3 = states_dir / "state3.state"
+
+        for state in [state1, state2, state3]:
+            state.mkdir()
+            time.sleep(0.01)  # Ensure different timestamps
+            keeper.append(state)
+
+        # Cleanup should remove the oldest (state1)
         removed = keeper.cleanup()
 
-        # All directories should exists.
-        assert len(removed) == 0
-        assert len(list(states_dir.glob("*.state"))) == 5
+        assert len(removed) == 1
+        assert state1 in removed
+        assert not state1.exists()
+        assert state2.exists()
+        assert state3.exists()
 
-    def test_start_and_stop_background_thread(
-        self, states_dir: Path, mocker: MockerFixture, caplog
-    ) -> None:
-        """Test that background thread starts and stops correctly."""
-        # Mock the cleanup method to avoid actual execution
-        mock_cleanup = mocker.patch.object(LatestStatesKeeper, "cleanup")
 
-        # Create keeper
-        keeper = LatestStatesKeeper(states_dir, cleanup_interval=0.001)
+class TestPeriodicSaveCondition:
+    """Test the PeriodicSaveCondition class."""
 
-        # Start the keeper in background
-        keeper.start(background=True)
+    def test_initial_state_returns_false(self) -> None:
+        """Test that condition returns False initially."""
+        condition = PeriodicSaveCondition(interval=1.0)
+        assert condition() is False
 
-        time.sleep(0.05)
-        # Stop the keeper
-        keeper.stop()
+    def test_returns_true_after_interval(self) -> None:
+        """Test that condition returns True after interval has elapsed."""
+        import time
 
-        mock_cleanup.assert_called_with()
-        assert mock_cleanup.call_count > 1
-        check_log_message(
-            "Started background state cleanup thread. Max keep: 10", "INFO", caplog
-        )
+        # Use very short interval for testing
+        interval = 0.01
+        condition = PeriodicSaveCondition(interval=interval)
 
-    def test_start_foreground(self, states_dir: Path, mocker: MockerFixture) -> None:
-        """Test that start in foreground directly calls cleanup."""
-        # Mock the _cleanup method
-        mock_cleanup = mocker.patch.object(LatestStatesKeeper, "_cleanup")
+        # First call should return False
+        assert condition() is False
 
-        # Create keeper
-        keeper = LatestStatesKeeper(states_dir)
+        # Wait for interval to elapse
+        time.sleep(interval * 1.5)
 
-        # Start in foreground
-        keeper.start(background=False)
+        # Should now return True
+        assert condition() is True
 
-        # Verify cleanup was called directly
-        mock_cleanup.assert_called_once()
+    def test_multiple_intervals(self) -> None:
+        """Test behavior across multiple intervals."""
+        import time
+
+        interval = 0.01
+        condition = PeriodicSaveCondition(interval=interval)
+
+        # Initial state
+        assert condition() is False
+
+        # First interval
+        time.sleep(interval * 1.5)
+        assert condition() is True
+        assert condition() is False
+
+        # Second interval
+        time.sleep(interval * 1.5)
+        assert condition() is True
+        assert condition() is False

@@ -1,6 +1,6 @@
 [project]
 name = "pamiq-core"
-version = "0.4.0"
+version = "0.5.0"
 description = "Framework for building AI agents with real-time adaptive learning capabilities."
 license = {file = "LICENSE"}
 readme = "README.md"
@@ -52,6 +52,9 @@ torch = [
 kbctl = [
     "pynput>=1.8.1",
 ]
+gym = [
+    "gymnasium>=1.1.1",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -72,6 +75,9 @@ dev = [
     "pytest-mock>=3.14.0",
     "ruff>=0.11.6",
 ]
+
+[tool.uv]
+python-preference = "only-managed"
 
 [tool.uv.sources]
 pamiq-core = { workspace = true }

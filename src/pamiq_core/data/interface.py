@@ -1,58 +1,51 @@
 import pickle
 from collections import deque
-from collections.abc import Iterable
 from pathlib import Path
 from threading import RLock
-from typing import override
+from typing import Any, override
 
 from pamiq_core import time
 from pamiq_core.state_persistence import PersistentStateMixin
 
-from .buffer import BufferData, DataBuffer, StepData
+from .buffer import DataBuffer
 
 
-class TimestampingQueuesDict[T]:
-    """A dictionary of queues that stores data with timestamps.
+class TimestampingQueue[T]:
+    """A queue that stores data with timestamps.
 
-    This class maintains multiple queues for different data streams,
-    where each queue is synchronized with a timestamp queue. It provides
-    functionality to append and retrieve data along with their
-    corresponding timestamps.
+    This class maintains a single queue for data elements, synchronized
+    with a timestamp queue. It provides functionality to append and
+    retrieve data along with their corresponding timestamps.
     """
 
-    def __init__(self, queue_names: Iterable[str], max_len: int) -> None:
-        """Initialize queues for given names with specified maximum length.
+    def __init__(self, max_len: int | None = None) -> None:
+        """Initialize queue with specified maximum length.
 
         Args:
-            queue_names: Names of the queues to be created.
-            max_len: Maximum length of each queue.
+            max_len: Maximum length of the queue.
         """
-        self._queues: dict[str, deque[T]] = {
-            k: deque(maxlen=max_len) for k in queue_names
-        }
+        self._queue: deque[T] = deque(maxlen=max_len)
         self._timestamps: deque[float] = deque(maxlen=max_len)
 
-    def append(self, data: StepData[T]) -> None:
-        """Append new data to all queues with current timestamp.
+    def append(self, data: T) -> None:
+        """Append new data to the queue with current timestamp.
 
         Args:
-            data: Step data containing values for each queue.
+            data: Data element to append.
         """
-        for k, q in self._queues.items():
-            q.append(data[k])
+        self._queue.append(data)
         self._timestamps.append(time.time())
 
-    def popleft(self) -> tuple[StepData[T], float]:
-        """Remove and return the leftmost elements from all queues with
-        timestamp.
+    def popleft(self) -> tuple[T, float]:
+        """Remove and return the leftmost element with timestamp.
 
         Returns:
             A tuple containing:
-                - Dictionary mapping queue names to their leftmost values
-                - Timestamp corresponding to these values
+                - The leftmost data element
+                - Timestamp corresponding to this value
         """
         return (
-            {k: q.popleft() for k, q in self._queues.items()},
+            self._queue.popleft(),
             self._timestamps.popleft(),
         )
 
@@ -65,35 +58,28 @@ class TimestampingQueuesDict[T]:
         return len(self._timestamps)
 
 
-class DataUser[T](PersistentStateMixin):
+class DataUser[R](PersistentStateMixin):
     """A class that manages data buffering and timestamps for collected data.
 
     This class acts as a user of data buffers, handling the collection,
     storage, and retrieval of data along with their timestamps. It works
     in conjunction with a DataCollector to manage concurrent data
     collection.
+
+    Type Parameters:
+        R: The return type of the buffer's get_data() method.
     """
 
-    def __init__(self, buffer: DataBuffer[T]) -> None:
+    def __init__(self, buffer: DataBuffer[Any, R]) -> None:
         """Initialize DataUser with a specified buffer.
 
         Args:
             buffer: Data buffer instance to store collected data.
         """
         self._buffer = buffer
-        self._timestamps: deque[float] = deque(maxlen=buffer.max_size)
+        self._timestamps: deque[float] = deque(maxlen=buffer.max_queue_size)
         # DataCollector instance is only accessed from DataUser and Container classes
-        self._collector = DataCollector(self)
-
-    def create_empty_queues(self) -> TimestampingQueuesDict[T]:
-        """Create empty timestamping queues for data collection.
-
-        Returns:
-            New instance of TimestampingQueuesDict with appropriate configuration.
-        """
-        return TimestampingQueuesDict(
-            self._buffer.collecting_data_names, self._buffer.max_size
-        )
+        self._collector = DataCollector[Any](buffer.max_queue_size)
 
     def update(self) -> None:
         """Update buffer with collected data from the collector.
@@ -101,18 +87,19 @@ class DataUser[T](PersistentStateMixin):
         Moves all collected data from the collector to the buffer and
         records their timestamps.
         """
-        queues = self._collector._move_data()  # pyright: ignore[reportPrivateUsage]
-        for _ in range(len(queues)):
-            data, t = queues.popleft()
+        queue = self._collector._move_data()  # pyright: ignore[reportPrivateUsage]
+        for _ in range(len(queue)):
+            data, t = queue.popleft()
             self._buffer.add(data)
             self._timestamps.append(t)
 
-    def get_data(self) -> BufferData[T]:
-        """Retrieve data from the buffer.
+    def get_data(self) -> R:
+        """Update and retrieve data from the buffer.
 
         Returns:
             Current data stored in the buffer.
         """
+        self.update()
         return self._buffer.get_data()
 
     def count_data_added_since(self, timestamp: float) -> int:
@@ -158,7 +145,7 @@ class DataUser[T](PersistentStateMixin):
         """
         self._buffer.load_state(path / "buffer")
         with open(path / "timestamps.pkl", "rb") as f:
-            self._timestamps = deque(pickle.load(f), maxlen=self._buffer.max_size)
+            self._timestamps = deque(pickle.load(f), maxlen=self._buffer.max_queue_size)
 
     def __len__(self) -> int:
         """Returns the current number of samples in the buffer."""
@@ -171,36 +158,38 @@ class DataCollector[T]:
     This class provides concurrent data collection capabilities with
     thread safety, working in conjunction with DataUser to manage data
     collection and transfer.
+
+    Type Parameters:
+        T: The type of individual data elements.
     """
 
-    def __init__(self, user: DataUser[T]) -> None:
-        """Initialize DataCollector with a specified DataUser.
+    def __init__(self, max_queue_size: int | None) -> None:
+        """Initialize DataCollector with a specified queue size.
 
         Args:
-            user: DataUser instance this collector is associated with.
+            max_queue_size: Maximum size of the collection queue. If None, queue has no size limit.
         """
-        self._user = user
-        self._queues_dict = user.create_empty_queues()
+        self._max_queue_size = max_queue_size
+        self._queue = TimestampingQueue[T](max_queue_size)
         self._lock = RLock()
 
-    def collect(self, step_data: StepData[T]) -> None:
-        """Collect step data in a thread-safe manner.
+    def collect(self, data: T) -> None:
+        """Collect data in a thread-safe manner.
 
         Args:
-            step_data: Data to be collected.
+            data: Data to be collected.
         """
         with self._lock:
-            self._queues_dict.append(step_data)
+            self._queue.append(data)
 
-    def _move_data(self) -> TimestampingQueuesDict[T]:
+    def _move_data(self) -> TimestampingQueue[T]:
         """Move collected data to a new queue and reset the collector.
 
         This method is intended to be called only by the associated DataUser.
 
         Returns:
-            TimestampingQueuesDict containing the collected data.
+            TimestampingQueue containing the collected data.
         """
         with self._lock:
-            data = self._queues_dict
-            self._queues_dict = self._user.create_empty_queues()
-            return data
+            out, self._queue = self._queue, TimestampingQueue[T](self._max_queue_size)
+        return out

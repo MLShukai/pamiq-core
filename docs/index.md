@@ -11,6 +11,7 @@
 - 🧵 **Thread-safe Design**: Robust synchronization mechanisms for parameter sharing and data transfers
 - 🔌 **Modular Components**: Easy-to-extend agent, environment, and model interfaces
 - 🛠️ **Comprehensive Tools**: Built-in state persistence, time control, and monitoring
+- 🏋️ **Gymnasium Integration**: Seamless compatibility with Gymnasium environments
 - 🌍 **Cross Platform**: Linux is the primary focus, but Windows and macOS are also supported. (However, some older macOS and Windows systems may have significantly less accurate time control.)
 
 ![System Architecture](images/system-architecture.svg)
@@ -23,6 +24,9 @@ pip install pamiq-core
 
 # With PyTorch support
 pip install pamiq-core[torch]
+
+# With Gymnasium support
+pip install pamiq-core[gym]
 ```
 
 ## Basic Example
@@ -39,10 +43,10 @@ interaction = Interaction(YourAgent(), YourEnvironment())
 launch(
     interaction=interaction,
     models=your_models,
-    data=your_data_buffers,
+    buffers=your_data_buffers,
     trainers=your_trainers,
     config=LaunchConfig(
-        web_api_address=("localhost", 8391),
+        web_api_address=("localhost", 8391),  # Or None to disable web API
         max_uptime=300.0,  # 5 minutes
     ),
 )

@@ -1,5 +1,5 @@
 import logging
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -8,7 +8,7 @@ from . import time
 from .data import DataBuffer, DataUsersDict
 from .interaction import Interaction
 from .model import TrainingModel, TrainingModelsDict
-from .state_persistence import LatestStatesKeeper, StateStore
+from .state_persistence import StatesKeeper, StateStore
 from .thread.threads import ControlThread, InferenceThread, TrainingThread
 from .trainer import Trainer, TrainersDict
 
@@ -25,13 +25,10 @@ class LaunchConfig:
         states_dir: Directory path where states will be saved.
         state_name_format: Format string for state directory names.
         saved_state_path: Optional path to a previously saved state to load at startup.
-        save_state_interval: Interval in seconds between automatic state saves.
-            Use infinity for no automatic saves.
-        max_keep_states: Maximum number of state directories to keep in the states directory.
-            Older state directories beyond this number will be automatically removed.
-            Use -1 to disable this feature (no automatic removal).
-        state_name_pattern: Glob pattern to identify state directories for management.
-        states_cleanup_interval: Interval in seconds between automatic state cleanup.
+        save_state_condition: Optional callable that returns True when state should be saved.
+            If None, state will never be saved automatically.
+        states_keeper: Optional StatesKeeper instance for managing saved state retention.
+            If None, no automatic state cleanup will be performed.
         timeout_for_all_threads_pause: Maximum time in seconds to wait for all
             threads to pause before timing out.
         max_attempts_to_pause_all_threads: Maximum number of retry attempts
@@ -39,6 +36,7 @@ class LaunchConfig:
         max_uptime: Maximum time in seconds the system is allowed to run.
             Use infinity for no time limit.
         web_api_address: Tuple of (host, port) for the web API server.
+            If None, the web API server will be disabled.
         web_api_command_queue_size: Maximum size of the command queue for the web API.
         log_tick_time_statistics_interval: Interval in seconds for logging
             step time statistics in inference thread.
@@ -48,14 +46,12 @@ class LaunchConfig:
     states_dir: str | Path = Path("./states")
     state_name_format: str = "%Y-%m-%d_%H-%M-%S,%f.state"
     saved_state_path: str | Path | None = None
-    save_state_interval: float = float("inf")
-    max_keep_states: int = -1
-    state_name_pattern: str = "*.state"
-    states_cleanup_interval: float = 60.0
+    save_state_condition: Callable[[], bool] | None = None
+    states_keeper: StatesKeeper | None = None
     timeout_for_all_threads_pause: float = 60.0
     max_attempts_to_pause_all_threads: int = 3
     max_uptime: float = float("inf")
-    web_api_address: tuple[str, int] = ("localhost", 8319)
+    web_api_address: tuple[str, int] | None = ("localhost", 8319)
     web_api_command_queue_size: int = 1
     log_tick_time_statistics_interval: float = 60.0
     time_scale: float = 1.0
@@ -64,7 +60,7 @@ class LaunchConfig:
 def launch(
     interaction: Interaction[Any, Any],
     models: Mapping[str, TrainingModel[Any]],
-    data: Mapping[str, DataBuffer[Any]],
+    buffers: Mapping[str, DataBuffer[Any, Any]],
     trainers: Mapping[str, Trainer],
     config: Mapping[str, Any] | LaunchConfig | None = None,
 ) -> None:
@@ -80,7 +76,7 @@ def launch(
     Args:
         interaction: Agent-environment interaction procedure.
         models: Dictionary mapping names to training models.
-        data: Dictionary mapping names to data buffers.
+        buffers: Dictionary mapping names to data buffers.
         trainers: Dictionary mapping names to trainers.
         config: Configuration parameters, either as a LaunchConfig instance
             or a dictionary of parameter values. If None, default configuration
@@ -96,7 +92,7 @@ def launch(
 
     # Initialize system components with proper containers
     training_models = TrainingModelsDict(models)
-    data_users = DataUsersDict.from_data_buffers(data)
+    data_users = DataUsersDict.from_data_buffers(buffers)
     trainers_dict = TrainersDict(trainers)
 
     interaction.agent.attach_inference_models(training_models.inference_models_dict)
@@ -114,13 +110,6 @@ def launch(
     state_store.register("trainers", trainers_dict)
     state_store.register("time", time.get_global_time_controller())
 
-    states_keeper = LatestStatesKeeper(
-        states_dir=config.states_dir,
-        state_name_pattern=config.state_name_pattern,
-        max_keep=config.max_keep_states,
-        cleanup_interval=config.states_cleanup_interval,
-    )
-
     # Load state if specified
     if config.saved_state_path is not None:
         logger.info(f"Loading state from '{config.saved_state_path}'")
@@ -129,7 +118,8 @@ def launch(
     # Initialize threads
     control_thread = ControlThread(
         state_store,
-        save_state_interval=config.save_state_interval,
+        save_state_condition=config.save_state_condition,
+        states_keeper=config.states_keeper,
         timeout_for_all_threads_pause=config.timeout_for_all_threads_pause,
         max_attempts_to_pause_all_threads=config.max_attempts_to_pause_all_threads,
         max_uptime=config.max_uptime,
@@ -157,8 +147,6 @@ def launch(
         logger.info(f"Setting time scale to {config.time_scale}")
         time.set_time_scale(config.time_scale)
 
-        states_keeper.start()
-
         inference_thread.start()
         training_thread.start()
         control_thread.run()  # Blocking until shutdown or KeyboardInterrupt
@@ -175,6 +163,3 @@ def launch(
         logger.info("Saving final system state")
         state_path = state_store.save_state()
         logger.info(f"Final state saved to '{state_path}'")
-
-        states_keeper.stop()
-        states_keeper.cleanup()
