@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://mlshukai.github.io/pamiq-core/user-guide/console/">
+        <link rel="canonical" href="https://mlshukai.github.io/pamiq-core/user-guide/gym/">
       
       
-        <link rel="prev" href="../launch/">
+        <link rel="prev" href="../torch/">
       
       
-        <link rel="next" href="../interaction/">
+        <link rel="next" href="../state_persistence/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Console - PAMIQ-Core</title>
+        <title>Gym🏋️ - PAMIQ-Core</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#console" class="md-skip">
+        <a href="#gymnasium-integration" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Console
+              Gym🏋️
             
           </span>
         </div>
@@ -466,32 +466,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Console
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../console/" class="md-nav__link">
         
   
   
@@ -502,170 +480,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#pamiq-console" class="md-nav__link">
-    <span class="md-ellipsis">
-      PAMIQ Console
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="PAMIQ Console">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#available-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      Available Commands
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#launch-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      Launch Options
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#web-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      Web API
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Web API">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#api-endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      API Endpoints
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-api-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example API Usage
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#system-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      System Status
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#keyboard-shortcut-controller" class="md-nav__link">
-    <span class="md-ellipsis">
-      Keyboard Shortcut Controller
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Keyboard Shortcut Controller">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#default-shortcuts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default Shortcuts
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Installation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#macos-accessibility-permissions" class="md-nav__link">
-    <span class="md-ellipsis">
-      macOS Accessibility Permissions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#command-line-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      Command-line Options
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      API Reference
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -790,10 +604,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../gym/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Gym🏋️
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -804,6 +640,110 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Components
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Components">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gymenvironment" class="md-nav__link">
+    <span class="md-ellipsis">
+      GymEnvironment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gymagent" class="md-nav__link">
+    <span class="md-ellipsis">
+      GymAgent
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manual-environment-reset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Environment Reset
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1264,100 +1204,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#pamiq-console" class="md-nav__link">
-    <span class="md-ellipsis">
-      PAMIQ Console
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="PAMIQ Console">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#available-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      Available Commands
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#launch-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      Launch Options
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#web-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      Web API
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Web API">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#api-endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      API Endpoints
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-api-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example API Usage
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#system-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      System Status
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#keyboard-shortcut-controller" class="md-nav__link">
-    <span class="md-ellipsis">
-      Keyboard Shortcut Controller
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Keyboard Shortcut Controller">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#default-shortcuts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default Shortcuts
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
       Installation
@@ -1365,29 +1211,63 @@
   </a>
   
 </li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Components
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Components">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#gymenvironment" class="md-nav__link">
     <span class="md-ellipsis">
-      Usage
+      GymEnvironment
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#macos-accessibility-permissions" class="md-nav__link">
+  <a href="#gymagent" class="md-nav__link">
     <span class="md-ellipsis">
-      macOS Accessibility Permissions
+      GymAgent
     </span>
   </a>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#command-line-options" class="md-nav__link">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-features" class="md-nav__link">
     <span class="md-ellipsis">
-      Command-line Options
+      Advanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manual-environment-reset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Environment Reset
     </span>
   </a>
   
@@ -1426,108 +1306,55 @@
   
 
 
-<h1 id="console">Console<a class="headerlink" href="#console" title="Permanent link">&para;</a></h1>
-<p>The <code>console</code> module provides the interactive command-line interface. It can control PAMIQ-Core system externally.</p>
-<h2 id="pamiq-console">PAMIQ Console<a class="headerlink" href="#pamiq-console" title="Permanent link">&para;</a></h2>
-<p>After launching a PAMIQ-Core system, you can connect to it using the <code>pamiq-console</code> command-line tool:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>$<span class="w"> </span>pamiq-console
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Welcome<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>PAMIQ<span class="w"> </span>console.<span class="w"> </span><span class="s2">&quot;help&quot;</span><span class="w"> </span>lists<span class="w"> </span>commands.
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>pamiq-console<span class="w"> </span><span class="o">(</span>active<span class="o">)</span><span class="w"> </span>&gt;
+<h1 id="gymnasium-integration">🏋️ Gymnasium Integration<a class="headerlink" href="#gymnasium-integration" title="Permanent link">&para;</a></h1>
+<p>This guide explains how to use Gymnasium environments with PAMIQ Core framework.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<p>To use the Gymnasium integration, install PAMIQ Core with the gym extra:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>pamiq-core<span class="o">[</span>gym<span class="o">]</span>
 </code></pre></div>
-<p>The console prompt shows the current system state (e.g., <code>active</code>, <code>paused</code>, <code>shutting down</code>) in parentheses.</p>
-<h3 id="available-commands">Available Commands<a class="headerlink" href="#available-commands" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>h</code> or <code>help</code> - Show all available commands and their descriptions</li>
-<li><code>p</code> or <code>pause</code> - Pause the system</li>
-<li><code>r</code> or <code>resume</code> - Resume the system</li>
-<li><code>save</code> - Save a checkpoint of the current system state</li>
-<li><code>shutdown</code> - Shutdown the system (requires confirmation)</li>
-<li><code>q</code> or <code>quit</code> - Exit the console (does not affect the running system)</li>
-</ul>
-<h3 id="launch-options">Launch Options<a class="headerlink" href="#launch-options" title="Permanent link">&para;</a></h3>
-<p>The <code>pamiq-console</code> command accepts the following options:</p>
-<ul>
-<li><code>--host</code>: Hostname or IP address of the PAMIQ system (default: localhost)</li>
-<li><code>--port</code>: Port number for the web API connection (default: 8391)</li>
-</ul>
-<p>Example with custom connection settings:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$<span class="w"> </span>pamiq-console<span class="w"> </span>--host<span class="w"> </span><span class="m">192</span>.168.1.100<span class="w"> </span>--port<span class="w"> </span><span class="m">9000</span>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The <code>pamiq_core.gym</code> module provides seamless integration between <a href="https://gymnasium.farama.org/">Gymnasium</a> (the fork of OpenAI Gym) and PAMIQ Core's interaction system. This allows you to use any Gymnasium environment as a PAMIQ Core environment.</p>
+<h2 id="key-components">Key Components<a class="headerlink" href="#key-components" title="Permanent link">&para;</a></h2>
+<h3 id="gymenvironment">GymEnvironment<a class="headerlink" href="#gymenvironment" title="Permanent link">&para;</a></h3>
+<p><code>GymEnvironment</code> wraps any Gymnasium environment to make it compatible with PAMIQ Core's <code>Environment</code> interface:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pamiq_core.gym</span><span class="w"> </span><span class="kn">import</span> <span class="n">GymEnvironment</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Create from environment ID</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">env</span> <span class="o">=</span> <span class="n">GymEnvironment</span><span class="p">(</span><span class="s2">&quot;CartPole-v1&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Or use existing Gymnasium environment</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">gym_env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;CartPole-v1&quot;</span><span class="p">,</span> <span class="n">render_mode</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">env</span> <span class="o">=</span> <span class="n">GymEnvironment</span><span class="p">(</span><span class="n">gym_env</span><span class="p">)</span>
 </code></pre></div>
-<p>NOTE: You can modify the default address used by the system by changing the <code>web_api_address</code> parameter in <a href="../../api/launch/">LaunchConfig</a>. To disable the web API entirely, set <code>web_api_address=None</code>.</p>
-<h2 id="web-api">Web API<a class="headerlink" href="#web-api" title="Permanent link">&para;</a></h2>
-<p>PAMIQ-Core exposes a RESTful API that allows controlling the system over a network connection. This enables integration with external applications, monitoring tools, or custom interfaces.</p>
-<h3 id="api-endpoints">API Endpoints<a class="headerlink" href="#api-endpoints" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>GET /api/status</code> - Retrieve the current system status</li>
-<li><code>POST /api/pause</code> - Pause the system</li>
-<li><code>POST /api/resume</code> - Resume the system</li>
-<li><code>POST /api/shutdown</code> - Shutdown the system</li>
-<li><code>POST /api/save-state</code> - Save the current system state</li>
-</ul>
-<h3 id="example-api-usage">Example API Usage<a class="headerlink" href="#example-api-usage" title="Permanent link">&para;</a></h3>
-<p>Using <code>curl</code> to interact with the API:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Get current status</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>http://localhost:8391/api/status
+<h3 id="gymagent">GymAgent<a class="headerlink" href="#gymagent" title="Permanent link">&para;</a></h3>
+<p><code>GymAgent</code> is an abstract base class for implementing agents that interact with Gymnasium environments:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pamiq_core.gym</span><span class="w"> </span><span class="kn">import</span> <span class="n">GymAgent</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Pause the system</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8391/api/pause
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Save current state</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8391/api/save-state
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyCartPoleAgent</span><span class="p">(</span><span class="n">GymAgent</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">]):</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Called when environment resets.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="k">return</span> <span class="mi">0</span>  <span class="c1"># Initial action</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Called at each environment step.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="c1"># Simple policy: move right if pole is tilting right</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">obs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
 </code></pre></div>
-<p>Response format is JSON, for example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">}</span><span class="w">  </span><span class="c1">// For status endpoint</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="p">{</span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ok&quot;</span><span class="p">}</span><span class="w">      </span><span class="c1">// For action endpoints</span>
+<h2 id="advanced-features">Advanced Features<a class="headerlink" href="#advanced-features" title="Permanent link">&para;</a></h2>
+<h3 id="manual-environment-reset">Manual Environment Reset<a class="headerlink" href="#manual-environment-reset" title="Permanent link">&para;</a></h3>
+<p>Agents can request environment reset by setting the <code>need_reset</code> flag:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">EarlyStoppingAgent</span><span class="p">(</span><span class="n">GymAgent</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">]):</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="c1"># Request reset if pole angle is too large</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">need_reset</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">obs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
 </code></pre></div>
-<h3 id="system-status">System Status<a class="headerlink" href="#system-status" title="Permanent link">&para;</a></h3>
-<p>The status endpoint returns one of the following values:</p>
-<ul>
-<li><code>active</code> - System is running normally</li>
-<li><code>pausing</code> - System is in the process of pausing</li>
-<li><code>paused</code> - System is fully paused</li>
-<li><code>resuming</code> - System is in the process of resuming</li>
-<li><code>shutting down</code> - System is shutting down</li>
-</ul>
-<h2 id="keyboard-shortcut-controller">Keyboard Shortcut Controller<a class="headerlink" href="#keyboard-shortcut-controller" title="Permanent link">&para;</a></h2>
-<p>PAMIQ-Core provides a keyboard shortcut controller. Users can pause/resume a agent by keyboard shortcuts.</p>
-<h3 id="default-shortcuts">Default Shortcuts<a class="headerlink" href="#default-shortcuts" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Windows/Linux: <code>Alt+Shift+P</code> (Pause) and <code>Alt+Shift+R</code> (Resume)</li>
-<li>macOS: <code>Option+Shift+P</code> (Pause) and <code>Option+Shift+R</code> (Resume)</li>
-<li>Windows also supports <code>Alt+Shift+Q</code> to quit the controller</li>
-</ul>
-<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pip<span class="w"> </span>install<span class="w"> </span>pamiq-core<span class="o">[</span>kbctl<span class="o">]</span>
-</code></pre></div>
-<p><strong>Note for Linux users</strong>: The following dependencies may be required:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libevdev-dev<span class="w"> </span>build-essential
-</code></pre></div>
-<h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>pamiq-kbctl
-</code></pre></div>
-<h3 id="macos-accessibility-permissions">macOS Accessibility Permissions<a class="headerlink" href="#macos-accessibility-permissions" title="Permanent link">&para;</a></h3>
-<p>On macOS, you must grant Accessibility permissions to your terminal application before using <code>pamiq-kbctl</code>:</p>
-<ol>
-<li>Go to System Settings → Privacy &amp; Security → Accessibility</li>
-<li>Click the "+" button</li>
-<li>Add your terminal application (Terminal, iTerm2, VS Code Terminal, etc.)</li>
-<li>Restart your terminal application after granting permissions</li>
-</ol>
-<p>Without these permissions, macOS will prevent keyboard monitoring and <code>pamiq-kbctl</code> will not function properly.</p>
-<h3 id="command-line-options">Command-line Options<a class="headerlink" href="#command-line-options" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>--host</code>: Hostname of the PAMIQ system (default: localhost)</li>
-<li><code>--port</code>: Port number for the web API (default: 8391)</li>
-<li><code>--pause-key</code>: Custom key combination for pause</li>
-<li><code>--resume-key</code>: Custom key combination for resume</li>
-<li><code>--quit-key</code>: Custom key combination to exit the controller</li>
-</ul>
-<p>Example with custom shortcuts:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>pamiq-kbctl<span class="w"> </span>--pause-key<span class="w"> </span><span class="s2">&quot;ctrl+p&quot;</span><span class="w"> </span>--resume-key<span class="w"> </span><span class="s2">&quot;ctrl+r&quot;</span>
-</code></pre></div>
+<hr />
 <h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
-<p>For detailed information about the classes and methods in the console module, check out the <a href="../../api/console/">API Reference</a>.</p>
+<p>More details, Checkout to the <a href="../../api/gym/">API Reference</a></p>
 
 
 

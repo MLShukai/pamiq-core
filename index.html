@@ -487,6 +487,8 @@
       
         
       
+        
+      
     
     
     
@@ -700,6 +702,29 @@
   
   
     <li class="md-nav__item">
+      <a href="user-guide/gym/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Gym🏋️
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="user-guide/state_persistence/" class="md-nav__link">
         
   
@@ -777,6 +802,8 @@
   
     
     
+      
+        
       
         
       
@@ -1004,6 +1031,29 @@
   
   
     <li class="md-nav__item">
+      <a href="api/gym/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Gym🏋️
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="api/state_persistence/" class="md-nav__link">
         
   
@@ -1211,6 +1261,7 @@
 <li>🧵 <strong>Thread-safe Design</strong>: Robust synchronization mechanisms for parameter sharing and data transfers</li>
 <li>🔌 <strong>Modular Components</strong>: Easy-to-extend agent, environment, and model interfaces</li>
 <li>🛠️ <strong>Comprehensive Tools</strong>: Built-in state persistence, time control, and monitoring</li>
+<li>🏋️ <strong>Gymnasium Integration</strong>: Seamless compatibility with Gymnasium environments</li>
 <li>🌍 <strong>Cross Platform</strong>: Linux is the primary focus, but Windows and macOS are also supported. (However, some older macOS and Windows systems may have significantly less accurate time control.)</li>
 </ul>
 <p><img alt="System Architecture" src="images/system-architecture.svg" /></p>
@@ -1220,6 +1271,9 @@
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># With PyTorch support</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>pip<span class="w"> </span>install<span class="w"> </span>pamiq-core<span class="o">[</span>torch<span class="o">]</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># With Gymnasium support</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>pip<span class="w"> </span>install<span class="w"> </span>pamiq-core<span class="o">[</span>gym<span class="o">]</span>
 </code></pre></div>
 <h2 id="basic-example">Basic Example<a class="headerlink" href="#basic-example" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pamiq_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch</span><span class="p">,</span> <span class="n">Interaction</span><span class="p">,</span> <span class="n">LaunchConfig</span>
@@ -1233,10 +1287,10 @@
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">launch</span><span class="p">(</span>
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">interaction</span><span class="o">=</span><span class="n">interaction</span><span class="p">,</span>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">models</span><span class="o">=</span><span class="n">your_models</span><span class="p">,</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">data</span><span class="o">=</span><span class="n">your_data_buffers</span><span class="p">,</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">buffers</span><span class="o">=</span><span class="n">your_data_buffers</span><span class="p">,</span>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">trainers</span><span class="o">=</span><span class="n">your_trainers</span><span class="p">,</span>
 <a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">config</span><span class="o">=</span><span class="n">LaunchConfig</span><span class="p">(</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="n">web_api_address</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">8391</span><span class="p">),</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="n">web_api_address</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">8391</span><span class="p">),</span>  <span class="c1"># Or None to disable web API</span>
 <a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="n">max_uptime</span><span class="o">=</span><span class="mf">300.0</span><span class="p">,</span>  <span class="c1"># 5 minutes</span>
 <a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="p">),</span>
 <a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="p">)</span>

@@ -389,6 +389,8 @@
       
         
       
+        
+      
     
     
     
@@ -516,6 +518,15 @@
   <a href="#accelerated-learning" class="md-nav__link">
     <span class="md-ellipsis">
       Accelerated Learning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disabling-web-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Disabling Web API
     </span>
   </a>
   
@@ -698,6 +709,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../gym/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Gym🏋️
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../state_persistence/" class="md-nav__link">
         
   
@@ -775,6 +809,8 @@
   
     
     
+      
+        
       
         
       
@@ -1002,6 +1038,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/gym/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Gym🏋️
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/state_persistence/" class="md-nav__link">
         
   
@@ -1149,6 +1208,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#disabling-web-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Disabling Web API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#resumable-training" class="md-nav__link">
     <span class="md-ellipsis">
       Resumable Training
@@ -1192,64 +1260,97 @@
 
 <h1 id="launch">Launch<a class="headerlink" href="#launch" title="Permanent link">&para;</a></h1>
 <p>The <code>launch</code> function is the entry point for starting a PAMIQ-Core system. It initializes all components, connects them together, and manages the system's lifecycle.</p>
-<h2 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h2>
-<p>To launch a PAMIQ-Core system, you need to provide your interaction components, models, data buffers, trainers, and configuration settings:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pamiq_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch</span><span class="p">,</span> <span class="n">LaunchConfig</span><span class="p">,</span> <span class="n">Interaction</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Create your agent and environment</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">YourAgent</span><span class="p">()</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">environment</span> <span class="o">=</span> <span class="n">YourEnvironment</span><span class="p">()</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Create an interaction between them</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">interaction</span> <span class="o">=</span> <span class="n">Interaction</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">environment</span><span class="p">)</span>
+<div class="admonition warning">
+<p class="admonition-title">Breaking Changes in v0.5</p>
+<p>The <code>launch</code> function parameter <code>data</code> has been renamed to <code>buffers</code> for better clarity. If you're upgrading from v0.4, update your code:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Before (v0.4)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">launch</span><span class="p">(</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">interaction</span><span class="o">=</span><span class="n">interaction</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;buffer&quot;</span><span class="p">:</span> <span class="n">my_buffer</span><span class="p">},</span>  <span class="c1"># Old parameter name</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">trainers</span><span class="o">=</span><span class="n">trainers</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">config</span><span class="o">=</span><span class="n">config</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># Launch the system</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># After (v0.5)</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">launch</span><span class="p">(</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">interaction</span><span class="o">=</span><span class="n">interaction</span><span class="p">,</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">models</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;model_name&quot;</span><span class="p">:</span> <span class="n">your_model</span><span class="p">},</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;buffer_name&quot;</span><span class="p">:</span> <span class="n">your_data_buffer</span><span class="p">},</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">trainers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;trainer_name&quot;</span><span class="p">:</span> <span class="n">your_trainer</span><span class="p">},</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">config</span><span class="o">=</span><span class="n">LaunchConfig</span><span class="p">(</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>        <span class="n">states_dir</span><span class="o">=</span><span class="s2">&quot;./saved_states&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        <span class="n">max_uptime</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>  <span class="c1"># Run for 1 hour</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="n">time_scale</span><span class="o">=</span><span class="mf">2.0</span>    <span class="c1"># Run at 2x speed</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="p">)</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="p">)</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">buffers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;buffer&quot;</span><span class="p">:</span> <span class="n">my_buffer</span><span class="p">},</span>  <span class="c1"># New parameter name</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">trainers</span><span class="o">=</span><span class="n">trainers</span><span class="p">,</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">config</span><span class="o">=</span><span class="n">config</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">)</span>
+</code></pre></div>
+</div>
+<h2 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h2>
+<p>To launch a PAMIQ-Core system, you need to provide your interaction components, models, data buffers, trainers, and configuration settings:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pamiq_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch</span><span class="p">,</span> <span class="n">LaunchConfig</span><span class="p">,</span> <span class="n">Interaction</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Create your agent and environment</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">YourAgent</span><span class="p">()</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">environment</span> <span class="o">=</span> <span class="n">YourEnvironment</span><span class="p">()</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Create an interaction between them</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">interaction</span> <span class="o">=</span> <span class="n">Interaction</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">environment</span><span class="p">)</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># Launch the system</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">launch</span><span class="p">(</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">interaction</span><span class="o">=</span><span class="n">interaction</span><span class="p">,</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">models</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;model_name&quot;</span><span class="p">:</span> <span class="n">your_model</span><span class="p">},</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">buffers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;buffer_name&quot;</span><span class="p">:</span> <span class="n">your_data_buffer</span><span class="p">},</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">trainers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;trainer_name&quot;</span><span class="p">:</span> <span class="n">your_trainer</span><span class="p">},</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="n">config</span><span class="o">=</span><span class="n">LaunchConfig</span><span class="p">(</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>        <span class="n">states_dir</span><span class="o">=</span><span class="s2">&quot;./saved_states&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>        <span class="n">max_uptime</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>  <span class="c1"># Run for 1 hour</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="n">time_scale</span><span class="o">=</span><span class="mf">2.0</span>    <span class="c1"># Run at 2x speed</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="p">)</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="p">)</span>
 </code></pre></div>
 <h2 id="common-configuration-scenarios">Common Configuration Scenarios<a class="headerlink" href="#common-configuration-scenarios" title="Permanent link">&para;</a></h2>
 <h3 id="accelerated-learning">Accelerated Learning<a class="headerlink" href="#accelerated-learning" title="Permanent link">&para;</a></h3>
 <p>To speed up time for faster training:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">config</span> <span class="o">=</span> <span class="n">LaunchConfig</span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">time_scale</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>  <span class="c1"># Run at 10x speed</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">save_state_interval</span><span class="o">=</span><span class="mf">300.0</span>  <span class="c1"># Save every 5 minutes</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">config</span> <span class="o">=</span> <span class="n">LaunchConfig</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">time_scale</span><span class="o">=</span><span class="mf">10.0</span>  <span class="c1"># Run at 10x speed</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span>
+</code></pre></div>
+<h3 id="disabling-web-api">Disabling Web API<a class="headerlink" href="#disabling-web-api" title="Permanent link">&para;</a></h3>
+<p>To run the system without remote control capabilities:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">config</span> <span class="o">=</span> <span class="n">LaunchConfig</span><span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">web_api_address</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Disable web API server</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="resumable-training">Resumable Training<a class="headerlink" href="#resumable-training" title="Permanent link">&para;</a></h3>
 <p>To save system state for later resumption:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Initial run</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">launch</span><span class="p">(</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">interaction</span><span class="o">=</span><span class="n">interaction</span><span class="p">,</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">trainers</span><span class="o">=</span><span class="n">trainers</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">config</span><span class="o">=</span><span class="n">LaunchConfig</span><span class="p">(</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="n">states_dir</span><span class="o">=</span><span class="s2">&quot;./saved_states&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="n">save_state_interval</span><span class="o">=</span><span class="mf">600.0</span>  <span class="c1"># Save every 10 minutes</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="p">)</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">)</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1"># Later, resume from the last saved state</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="n">latest_state</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./saved_states&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.state&quot;</span><span class="p">))[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="n">launch</span><span class="p">(</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">interaction</span><span class="o">=</span><span class="n">interaction</span><span class="p">,</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">trainers</span><span class="o">=</span><span class="n">trainers</span><span class="p">,</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="n">config</span><span class="o">=</span><span class="n">LaunchConfig</span><span class="p">(</span>
-<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>        <span class="n">states_dir</span><span class="o">=</span><span class="s2">&quot;./saved_states&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>        <span class="n">saved_state_path</span><span class="o">=</span><span class="n">latest_state</span>
-<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="p">)</span>
-<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pamiq_core.state_persistence</span><span class="w"> </span><span class="kn">import</span> <span class="n">PeriodicSaveCondition</span><span class="p">,</span> <span class="n">LatestStatesKeeper</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># Initial run with automatic state management</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">launch</span><span class="p">(</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">interaction</span><span class="o">=</span><span class="n">interaction</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">buffers</span><span class="o">=</span><span class="n">buffers</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">trainers</span><span class="o">=</span><span class="n">trainers</span><span class="p">,</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">config</span><span class="o">=</span><span class="n">LaunchConfig</span><span class="p">(</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="n">states_dir</span><span class="o">=</span><span class="s2">&quot;./saved_states&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="n">save_state_condition</span><span class="o">=</span><span class="n">PeriodicSaveCondition</span><span class="p">(</span><span class="mf">600.0</span><span class="p">),</span>  <span class="c1"># Save every 10 minutes</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="n">states_keeper</span><span class="o">=</span><span class="n">LatestStatesKeeper</span><span class="p">(</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>            <span class="n">states_dir</span><span class="o">=</span><span class="s2">&quot;./saved_states&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>            <span class="n">max_keep</span><span class="o">=</span><span class="mi">5</span>  <span class="c1"># Keep only the 5 most recent states</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>        <span class="p">)</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="p">)</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="p">)</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="c1"># Later, resume from the last saved state</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="n">latest_state</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./saved_states&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.state&quot;</span><span class="p">))[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="n">launch</span><span class="p">(</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>    <span class="n">interaction</span><span class="o">=</span><span class="n">interaction</span><span class="p">,</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>    <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    <span class="n">buffers</span><span class="o">=</span><span class="n">buffers</span><span class="p">,</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>    <span class="n">trainers</span><span class="o">=</span><span class="n">trainers</span><span class="p">,</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>    <span class="n">config</span><span class="o">=</span><span class="n">LaunchConfig</span><span class="p">(</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>        <span class="n">states_dir</span><span class="o">=</span><span class="s2">&quot;./saved_states&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>        <span class="n">saved_state_path</span><span class="o">=</span><span class="n">latest_state</span>
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>    <span class="p">)</span>
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="p">)</span>
 </code></pre></div>
 <h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
 <p>More details, Checkout to the <a href="../../api/launch/">API Reference</a></p>
