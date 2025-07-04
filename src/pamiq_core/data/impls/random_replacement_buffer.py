@@ -185,7 +185,7 @@ class DictRandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[
 
         Other arguments are same as [`RandomReplacementBuffer`][pamiq_core.data.impls.RandomReplacementBuffer].
         """
-        self._buffer = RandomReplacementBuffer[Mapping[str, T]](
+        self._buffer = RandomReplacementBuffer[dict[str, T]](
             max_size, replace_probability, expected_survival_length
         )
         super().__init__(self._buffer.max_queue_size)
@@ -217,7 +217,7 @@ class DictRandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[
             raise ValueError(
                 f"Data keys {set(data.keys())} do not match expected keys {self._keys}"
             )
-        return self._buffer.add(data)
+        return self._buffer.add(dict(data))
 
     @override
     def get_data(self) -> dict[str, list[T]]:
