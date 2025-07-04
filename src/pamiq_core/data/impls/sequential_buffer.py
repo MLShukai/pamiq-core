@@ -25,7 +25,6 @@ class SequentialBuffer[T](DataBuffer[T, list[T]]):
 
         self._queue: deque[T] = deque(maxlen=max_size)
 
-        self._current_size = 0
         self._max_size = max_size
 
     @property
@@ -43,9 +42,6 @@ class SequentialBuffer[T](DataBuffer[T, list[T]]):
         """
         self._queue.append(data)
 
-        if self._current_size < self._max_size:
-            self._current_size += 1
-
     @override
     def get_data(self) -> list[T]:
         """Retrieve all stored data from the buffer.
@@ -62,7 +58,7 @@ class SequentialBuffer[T](DataBuffer[T, list[T]]):
         Returns:
             int: The number of samples currently stored in the buffer.
         """
-        return self._current_size
+        return len(self._queue)
 
     @override
     def save_state(self, path: Path) -> None:
@@ -87,7 +83,6 @@ class SequentialBuffer[T](DataBuffer[T, list[T]]):
         """
         with open(path.with_suffix(".pkl"), "rb") as f:
             self._queue = deque(pickle.load(f), maxlen=self._max_size)
-        self._current_size = len(self._queue)
 
 
 class DictSequentialBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
@@ -107,7 +102,7 @@ class DictSequentialBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
             keys: The keys that must be present in all data dictionaries.
             max_size: Maximum number of data points to store.
         """
-        self._buffer = SequentialBuffer[Mapping[str, T]](max_size)
+        self._buffer = SequentialBuffer[dict[str, T]](max_size)
         super().__init__(self._buffer.max_queue_size)
 
         self._keys = set(keys)
@@ -138,7 +133,7 @@ class DictSequentialBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[T]]]):
             raise ValueError(
                 f"Data keys {set(data.keys())} do not match expected keys {self._keys}"
             )
-        return self._buffer.add(data)
+        return self._buffer.add(dict(data))
 
     @override
     def get_data(self) -> dict[str, list[T]]:

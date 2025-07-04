@@ -208,3 +208,26 @@ class TestDictSequentialBuffer:
 
         assert new_buffer.get_data() == buffer.get_data()
         assert len(new_buffer) == len(buffer)
+
+    def test_add_creates_shallow_copy(self):
+        """Test that add creates a shallow copy of the input dictionary."""
+        buffer = DictSequentialBuffer[int](["x", "y"], max_size=5)
+
+        # Create original data
+        original_data = {"x": 1, "y": 2}
+
+        # Add to buffer
+        buffer.add(original_data)
+
+        # Modify original data by adding new key (which should not affect buffer)
+        original_data["z"] = 999
+        # Modify values
+        original_data["x"] = 999
+        original_data["y"] = 999
+
+        # Get data from buffer
+        buffer_data = buffer.get_data()
+
+        # Buffer should have the original values
+        assert buffer_data == {"x": [1], "y": [2]}
+        assert "z" not in buffer_data
