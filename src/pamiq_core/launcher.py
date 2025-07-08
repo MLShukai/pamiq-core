@@ -51,7 +51,7 @@ class LaunchConfig:
     timeout_for_all_threads_pause: float = 60.0
     max_attempts_to_pause_all_threads: int = 3
     max_uptime: float = float("inf")
-    web_api_address: tuple[str, int] | None = ("localhost", 8319)
+    web_api_address: tuple[str, int] | None = ("localhost", 8391)
     web_api_command_queue_size: int = 1
     log_tick_time_statistics_interval: float = 60.0
     time_scale: float = 1.0
