@@ -40,12 +40,12 @@ class TorchAgent[O, A](Agent[O, A]):
         """
         inference_model = self.get_inference_model(name)
         if not isinstance(inference_model, TorchInferenceModel):
-            raise ValueError(f"Model {name} is not a instance of TorchInferenceModel")
+            raise ValueError(f"Model {name} is not an instance of TorchInferenceModel")
 
         inference_model = cast(TorchInferenceModel[T], inference_model)
 
         if not isinstance(inference_model._raw_model, module_cls):  # pyright: ignore[reportPrivateUsage, ]
             raise TypeError(
-                f"Internal model is not a instance of {module_cls.__name__}"
+                f"Internal model is not an instance of {module_cls.__name__}"
             )
         return inference_model
