@@ -118,6 +118,6 @@ class TestTorchAgent:
             pass
 
         with pytest.raises(
-            TypeError, match="Internal model is not a instance of WrongModel"
+            TypeError, match="Internal model is not an instance of WrongModel"
         ):
             agent_with_models.get_torch_inference_model("torch_model", WrongModel)
