@@ -1,3 +1,4 @@
+::: pamiq_core.torch.TorchAgent
 ::: pamiq_core.torch.TorchTrainingModel
 ::: pamiq_core.torch.TorchInferenceModel
 ::: pamiq_core.torch.TorchTrainer
