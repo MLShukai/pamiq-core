@@ -148,7 +148,7 @@ When using PyTorch models in PAMIQ-Core, be aware of the following:
 
 3. **Thread Safety**: The model synchronization ensures thread safety, but you should not directly access the models from multiple threads
 
-4. **Context Manager Usage**: Always use the context manager when accessing the raw model to ensure proper locking and thread safety
+4. **Context Manager Usage**: Use the context manager when accessing the raw model for thread safety
 
 ## Using TorchAgent
 
