@@ -152,6 +152,25 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
         with self._lock:
             return self._inference_procedure(self._model, *args, **kwds)
 
+    def __enter__(self) -> T:
+        """Enter the context manager for direct model access.
+
+        Acquires the lock and returns the raw PyTorch model for direct access.
+
+        Returns:
+            The raw PyTorch model instance.
+        """
+        self._lock.acquire()
+        return self._raw_model
+
+    def __exit__(
+        self,
+        *args: Any,
+        **kwds: Any,
+    ) -> None:
+        """Exit the context manager and release the lock."""
+        self._lock.release()
+
 
 class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
     """PyTorch model wrapper for parallel training and inference.

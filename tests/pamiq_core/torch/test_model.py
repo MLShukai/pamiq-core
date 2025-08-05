@@ -118,6 +118,14 @@ class TestTorchInferenceModel:
         with pytest.raises(RuntimeError):
             output_tensor.mean().backward()
 
+    def test_context_manager(
+        self, torch_inference_model: TorchInferenceModel, model: nn.Module
+    ) -> None:
+        """Test context manager functionality for direct model access."""
+        # Test basic context manager usage
+        with torch_inference_model as accessed_model:
+            assert accessed_model is model
+
 
 class TestTorchTrainingModel:
     @pytest.fixture
