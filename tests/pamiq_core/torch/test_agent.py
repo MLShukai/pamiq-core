@@ -105,7 +105,7 @@ class TestTorchAgent:
         TorchInferenceModel."""
         with pytest.raises(
             ValueError,
-            match="Model non_torch_model is not a instance of TorchInferenceModel",
+            match="Model non_torch_model is not an instance of TorchInferenceModel",
         ):
             agent_with_models.get_torch_inference_model("non_torch_model")
 
