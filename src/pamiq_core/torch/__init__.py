@@ -8,6 +8,7 @@ except ModuleNotFoundError:
     )
 
 
+from .agent import TorchAgent
 from .model import (
     TorchInferenceModel,
     TorchTrainingModel,
@@ -32,4 +33,5 @@ __all__ = [
     "OptimizersSetup",
     "StateDict",
     "TorchTrainer",
+    "TorchAgent",
 ]

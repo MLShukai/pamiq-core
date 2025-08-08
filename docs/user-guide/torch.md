@@ -11,6 +11,10 @@ PyTorch integration in PAMIQ-Core includes specialized implementations of:
     - `TorchInferenceModel`: Wrapper for PyTorch models in the inference thread
     - `TorchTrainingModel`: Wrapper for PyTorch models in the training thread
 
+- **Agent Class**:
+
+    - `TorchAgent`: Specialized agent class for type-safe PyTorch model access
+
 - **Trainer Class**:
 
     - `TorchTrainer`: Base class for implementing PyTorch training algorithms
@@ -121,6 +125,16 @@ def custom_inference_procedure(model: nn.Module, x: torch.Tensor) -> torch.Tenso
         return model(x)
 ```
 
+### Direct Model Access with Context Manager
+
+The `TorchInferenceModel` provides a context manager for direct, thread-safe access to the underlying PyTorch model:
+
+```python
+with inference_model as raw_model:
+    # Direct access to the model within a thread-safe context
+    output = raw_model(input_tensor)
+```
+
 ### ⚠️ Important Considerations
 
 When using PyTorch models in PAMIQ-Core, be aware of the following:
@@ -133,6 +147,23 @@ When using PyTorch models in PAMIQ-Core, be aware of the following:
 2. **Device Management**: Models are automatically moved to the specified device, but input tensors in custom code must be moved explicitly
 
 3. **Thread Safety**: The model synchronization ensures thread safety, but you should not directly access the models from multiple threads
+
+4. **Context Manager Usage**: Use the context manager when accessing the raw model for thread safety
+
+## Using TorchAgent
+
+The `TorchAgent` class provides type-safe access to PyTorch models in agents:
+
+```python
+from pamiq_core.torch import TorchAgent
+
+class MyPyTorchAgent(TorchAgent[torch.Tensor, torch.Tensor]):
+    def on_inference_models_attached(self):
+        # Get model with type checking
+        self.policy = self.get_torch_inference_model("policy", PolicyNetwork)
+        # Get model without specific type checking
+        self.value = self.get_torch_inference_model("value")
+```
 
 ## Implementing PyTorch Trainers
 
@@ -275,4 +306,4 @@ model = TorchTrainingModel(
 
 ## API Reference
 
-More details, Checkout to the [API Reference](../api/trainer.md)
+For more details, check out the [API Reference](../api/torch.md)
