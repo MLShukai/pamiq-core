@@ -119,12 +119,22 @@ class TestTorchInferenceModel:
             output_tensor.mean().backward()
 
     def test_context_manager(
-        self, torch_inference_model: TorchInferenceModel, model: nn.Module
+        self,
+        torch_inference_model: TorchInferenceModel,
+        model: nn.Module,
+        mocker: MockerFixture,
     ) -> None:
         """Test context manager functionality for direct model access."""
         # Test basic context manager usage
+        mock_lock = mocker.patch.object(torch_inference_model, "_lock")
+
         with torch_inference_model as accessed_model:
+            mock_lock.acquire.assert_called_once_with()
+            mock_lock.release.assert_not_called()
+
             assert accessed_model is model
+
+        mock_lock.release.assert_called_once_with()
 
 
 class TestTorchTrainingModel:
