@@ -126,6 +126,7 @@ class UnwrappedContextManager[T: nn.Module]:
         """
         self._torch_inference_mode.__exit__(*args, **kwds)
         self.lock.release()
+        self._torch_inference_mode.__exit__(*args, **kwds)
 
 
 class TorchInferenceModel[T: nn.Module](InferenceModel):
