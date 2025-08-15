@@ -127,13 +127,23 @@ def custom_inference_procedure(model: nn.Module, x: torch.Tensor) -> torch.Tenso
 
 ### Direct Model Access with Context Manager
 
-The `TorchInferenceModel` provides a context manager for direct, thread-safe access to the underlying PyTorch model:
+The `TorchInferenceModel` provides an `unwrap()` method that returns a context manager for direct, thread-safe access to the underlying PyTorch model:
 
 ```python
-with inference_model as raw_model:
+# Access with inference mode enabled (default)
+with inference_model.unwrap() as raw_model:
     # Direct access to the model within a thread-safe context
+    # Gradients are disabled for better performance
     output = raw_model(input_tensor)
+    hidden_states = raw_model.hidden_layer.weight
 ```
+
+This feature is useful when you need to:
+
+- Access model attributes or methods not exposed through the inference interface
+- Perform custom forward passes with non-standard inputs
+- Inspect internal model state (weights, buffers, etc.)
+- Perform gradient-based analysis (with `inference_mode=False`)
 
 ### ⚠️ Important Considerations
 
@@ -148,7 +158,7 @@ When using PyTorch models in PAMIQ-Core, be aware of the following:
 
 3. **Thread Safety**: The model synchronization ensures thread safety, but you should not directly access the models from multiple threads
 
-4. **Context Manager Usage**: Use the context manager when accessing the raw model for thread safety
+4. **Context Manager Usage**: Always use the `unwrap()` method when accessing the raw model to ensure thread safety. The context manager handles proper locking and optionally manages inference mode for you
 
 ## Using TorchAgent
 
