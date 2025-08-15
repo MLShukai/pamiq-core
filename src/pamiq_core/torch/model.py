@@ -101,7 +101,7 @@ class UnwrappedContextManager[T: nn.Module]:
                 gradients will be computed normally.
         """
         self.model = model
-        self.lock = lock
+        self._lock = lock
         self.inference_mode = inference_mode
 
     def __enter__(self) -> T:
@@ -115,7 +115,7 @@ class UnwrappedContextManager[T: nn.Module]:
         """
         self._torch_inference_mode = torch.inference_mode(self.inference_mode)
         self._torch_inference_mode.__enter__()
-        self.lock.acquire()
+        self._lock.acquire()
         return self.model
 
     def __exit__(self, *args: Any, **kwds: Any) -> None:
@@ -125,7 +125,7 @@ class UnwrappedContextManager[T: nn.Module]:
         lock.
         """
         self._torch_inference_mode.__exit__(*args, **kwds)
-        self.lock.release()
+        self._lock.release()
         self._torch_inference_mode.__exit__(*args, **kwds)
 
 

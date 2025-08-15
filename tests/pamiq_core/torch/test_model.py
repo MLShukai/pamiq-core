@@ -105,7 +105,7 @@ class TestUnwrappedContextManager:
         """Test UnwrappedContextManager initialization."""
         ctx_manager = UnwrappedContextManager(model, lock, inference_mode=True)
         assert ctx_manager.model is model
-        assert ctx_manager.lock is lock
+        assert ctx_manager._lock is lock
         assert ctx_manager.inference_mode is True
 
         ctx_manager_no_inference = UnwrappedContextManager(
