@@ -82,6 +82,52 @@ def default_infer_procedure(model: nn.Module, *args: Any, **kwds: Any) -> Any:
     return model(*new_args, **new_kwds)
 
 
+class UnwrappedContextManager[T: nn.Module]:
+    """Context manager for accessing the raw PyTorch model with thread safety.
+
+    This context manager provides direct access to the underlying
+    PyTorch model while ensuring thread safety through locking and
+    optionally enabling/disabling inference mode.
+    """
+
+    def __init__(self, model: T, lock: RLock, inference_mode: bool) -> None:
+        """Initialize the context manager.
+
+        Args:
+            model: The PyTorch model to provide access to.
+            lock: The lock to use for thread synchronization.
+            inference_mode: If True, torch.inference_mode will be enabled
+                during the context, disabling gradient computation. If False,
+                gradients will be computed normally.
+        """
+        self.model = model
+        self.lock = lock
+        self.inference_mode = inference_mode
+
+    def __enter__(self) -> T:
+        """Enter the context and return the model.
+
+        Acquires the lock and optionally enables inference mode before
+        returning the model for direct access.
+
+        Returns:
+            The PyTorch model for direct manipulation.
+        """
+        self._torch_inference_mode = torch.inference_mode(self.inference_mode)
+        self._torch_inference_mode.__enter__()
+        self.lock.acquire()
+        return self.model
+
+    def __exit__(self, *args: Any, **kwds: Any) -> None:
+        """Exit the context and release resources.
+
+        Exits the inference mode context (if enabled) and releases the
+        lock.
+        """
+        self._torch_inference_mode.__exit__(*args, **kwds)
+        self.lock.release()
+
+
 class TorchInferenceModel[T: nn.Module](InferenceModel):
     """Thread-safe wrapper for PyTorch models used in inference.
 
@@ -152,24 +198,34 @@ class TorchInferenceModel[T: nn.Module](InferenceModel):
         with self._lock:
             return self._inference_procedure(self._model, *args, **kwds)
 
-    def __enter__(self) -> T:
-        """Enter the context manager for direct model access.
+    def unwrap(self, inference_mode: bool = True) -> UnwrappedContextManager[T]:
+        """Get a context manager for direct access to the underlying model.
 
-        Acquires the lock and returns the raw PyTorch model for direct access.
+        This method returns a context manager that provides thread-safe direct
+        access to the raw PyTorch model. This is useful when you need to perform
+        operations that are not exposed through the standard inference interface.
+
+        Args:
+            inference_mode: If True (default), the context will have
+                torch.inference_mode enabled, which disables gradient computation
+                for better performance.
 
         Returns:
-            The raw PyTorch model instance.
-        """
-        self._lock.acquire()
-        return self._raw_model
+            A context manager that yields the raw PyTorch model when entered.
 
-    def __exit__(
-        self,
-        *args: Any,
-        **kwds: Any,
-    ) -> None:
-        """Exit the context manager and release the lock."""
-        self._lock.release()
+        Example:
+            >>> inference_model = TorchInferenceModel(my_model, procedure)
+            >>> with inference_model.unwrap() as model:
+            ...     # Direct access to the model with inference mode enabled
+            ...     output = model.some_custom_method(input)
+            ...     hidden_state = model.hidden_layer.weight
+
+        Note:
+            The context manager ensures thread safety by acquiring a lock
+            for the duration of the context. Avoid holding the context for
+            extended periods to prevent blocking other threads.
+        """
+        return UnwrappedContextManager(self._raw_model, self._lock, inference_mode)
 
 
 class TorchTrainingModel[T: nn.Module](TrainingModel[TorchInferenceModel[T]]):
