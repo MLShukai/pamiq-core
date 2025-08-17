@@ -231,3 +231,16 @@ class TestDictSequentialBuffer:
         # Buffer should have the original values
         assert buffer_data == {"x": [1], "y": [2]}
         assert "z" not in buffer_data
+
+    def test_keys_property(self):
+        """Test that keys property returns correct keys."""
+        keys = {"a", "b", "c"}
+        buffer = DictSequentialBuffer[int](keys, max_size=10)
+
+        # Check keys property returns same keys
+        assert buffer.keys == keys
+
+        # Check keys property returns a copy
+        returned_keys = buffer.keys
+        returned_keys.add("d")
+        assert buffer.keys == keys  # Should be unchanged

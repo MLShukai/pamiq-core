@@ -201,6 +201,11 @@ class DictRandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[
         buffer."""
         return self._buffer.max_size
 
+    @property
+    def keys(self) -> set[str]:
+        """Returns the set of keys required for all data dictionaries."""
+        return self._keys.copy()
+
     @override
     def add(self, data: Mapping[str, T]) -> None:
         """Add a new data sample to the buffer.
