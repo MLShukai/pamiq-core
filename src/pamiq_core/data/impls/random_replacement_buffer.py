@@ -203,9 +203,11 @@ class DictRandomReplacementBuffer[T](DataBuffer[Mapping[str, T], dict[str, list[
 
     @property
     def keys(self) -> set[str]:
-        """Returns a copy of the set of keys required for all data dictionaries.
+        """Returns a copy of the set of keys required for all data
+        dictionaries.
 
-        A copy is returned to prevent external modification of the internal key set.
+        A copy is returned to prevent external modification of the
+        internal key set.
         """
         return self._keys.copy()
 
