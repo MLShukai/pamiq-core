@@ -100,9 +100,9 @@ class UnwrappedContextManager[T: nn.Module]:
                 during the context, disabling gradient computation. If False,
                 gradients will be computed normally.
         """
-        self.model = model
+        self._model = model
         self._lock = lock
-        self.inference_mode = inference_mode
+        self._inference_mode = inference_mode
 
     def __enter__(self) -> T:
         """Enter the context and return the model.
@@ -113,20 +113,19 @@ class UnwrappedContextManager[T: nn.Module]:
         Returns:
             The PyTorch model for direct manipulation.
         """
-        self._torch_inference_mode = torch.inference_mode(self.inference_mode)
+        self._torch_inference_mode = torch.inference_mode(self._inference_mode)
         self._torch_inference_mode.__enter__()
         self._lock.acquire()
-        return self.model
+        return self._model
 
-    def __exit__(self, *args: Any, **kwds: Any) -> None:
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         """Exit the context and release resources.
 
         Exits the inference mode context (if enabled) and releases the
         lock.
         """
-        self._torch_inference_mode.__exit__(*args, **kwds)
         self._lock.release()
-        self._torch_inference_mode.__exit__(*args, **kwds)
+        self._torch_inference_mode.__exit__(exc_type, exc_value, traceback)
 
 
 class TorchInferenceModel[T: nn.Module](InferenceModel):

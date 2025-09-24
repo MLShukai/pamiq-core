@@ -101,18 +101,6 @@ class TestUnwrappedContextManager:
     def lock(self) -> RLock:
         return RLock()
 
-    def test_init(self, model: nn.Module, lock: RLock) -> None:
-        """Test UnwrappedContextManager initialization."""
-        ctx_manager = UnwrappedContextManager(model, lock, inference_mode=True)
-        assert ctx_manager.model is model
-        assert ctx_manager._lock is lock
-        assert ctx_manager.inference_mode is True
-
-        ctx_manager_no_inference = UnwrappedContextManager(
-            model, lock, inference_mode=False
-        )
-        assert ctx_manager_no_inference.inference_mode is False
-
     def test_context_manager_with_inference_mode(
         self, model: nn.Module, lock: RLock
     ) -> None:
@@ -211,14 +199,18 @@ class TestTorchInferenceModel:
         # Test with default inference_mode=True
         ctx_manager = torch_inference_model.unwrap()
         assert isinstance(ctx_manager, UnwrappedContextManager)
-        assert ctx_manager.model is model
-        assert ctx_manager.inference_mode is True
+        assert torch.is_inference_mode_enabled() is False
+        with ctx_manager as m:
+            assert m is model
+            assert torch.is_inference_mode_enabled() is True
+        assert torch.is_inference_mode_enabled() is False
 
         # Test with inference_mode=False
         ctx_manager_no_inference = torch_inference_model.unwrap(inference_mode=False)
         assert isinstance(ctx_manager_no_inference, UnwrappedContextManager)
-        assert ctx_manager_no_inference.model is model
-        assert ctx_manager_no_inference.inference_mode is False
+        with ctx_manager_no_inference as m:
+            assert m is model
+            assert torch.is_inference_mode_enabled() is False
 
 
 class TestTorchTrainingModel:
