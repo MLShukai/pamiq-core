@@ -10,7 +10,15 @@
 [![Type Check](https://github.com/MLShukai/pamiq-core/actions/workflows/type-check.yml/badge.svg)](https://github.com/MLShukai/pamiq-core/actions/workflows/type-check.yml)
 [![Format & Lint (pre-commit)](https://github.com/MLShukai/pamiq-core/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/MLShukai/pamiq-core/actions/workflows/pre-commit.yml)
 
-**pamiq-core** is a framework for building AI agents. Developed for P-AMI\<Q>, it enables train and inference in parallel, allowing agents to adapt continuously during interaction with their environment.
+**pamiq-core** is a minimal machine learning framework for asynchronous execution of inference and training.
+
+## 🎯 Design Philosophy
+
+- **Simplicity** — Clean, intuitive APIs that just work
+- **Lightweight** — Minimal dependencies, maximum performance
+- **Complete Thread Abstraction** — Complex threading handled internally, simple interface externally
+
+> When you set out to build a dynamic continuous learning system, PAMIQ Core will be your steadfast foundation.
 
 [**📚 Documentation site is here.**](https://mlshukai.github.io/pamiq-core/)
 

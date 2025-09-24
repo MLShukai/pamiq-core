@@ -2,7 +2,15 @@
 
 # Welcome to PAMIQ-Core Documentation!
 
-**PAMIQ-Core** is a framework for building AI agents with real-time learning capabilities through parallel training and inference.
+**pamiq-core** is a minimal machine learning framework for asynchronous execution of inference and training.
+
+## 🎯 Design Philosophy
+
+- **Simplicity** — Clean, intuitive APIs that just work
+- **Lightweight** — Minimal dependencies, maximum performance
+- **Complete Thread Abstraction** — Complex threading handled internally, simple interface externally
+
+> When you set out to build a dynamic continuous learning system, PAMIQ Core will be your steadfast foundation.
 
 ## ✨ Features
 

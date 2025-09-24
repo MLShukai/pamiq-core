@@ -1,6 +1,7 @@
 import copy
 import logging
 from pathlib import Path
+from threading import RLock
 from typing import override
 
 import pytest
@@ -8,9 +9,10 @@ import torch
 import torch.nn as nn
 from pytest_mock import MockerFixture
 
-from pamiq_core.torch import (
+from pamiq_core.torch.model import (
     TorchInferenceModel,
     TorchTrainingModel,
+    UnwrappedContextManager,
     default_infer_procedure,
     get_device,
 )
@@ -88,6 +90,75 @@ def test_default_infer_procedure(device: torch.device) -> None:
     assert output_tensor.device == device
 
 
+class TestUnwrappedContextManager:
+    """Test UnwrappedContextManager class functionality."""
+
+    @pytest.fixture
+    def model(self) -> nn.Module:
+        return nn.Linear(3, 5)
+
+    @pytest.fixture
+    def lock(self) -> RLock:
+        return RLock()
+
+    def test_context_manager_with_inference_mode(
+        self, model: nn.Module, lock: RLock
+    ) -> None:
+        """Test context manager with inference mode enabled."""
+        ctx_manager = UnwrappedContextManager(model, lock, inference_mode=True)
+
+        with ctx_manager as accessed_model:
+            assert accessed_model is model
+            # Test that model works in inference mode
+            input_tensor = torch.randn(2, 3)
+            output = accessed_model(input_tensor)
+            assert output.shape == (2, 5)
+            assert not output.requires_grad  # Inference mode disables gradients
+
+    def test_context_manager_without_inference_mode(
+        self, model: nn.Module, lock: RLock
+    ) -> None:
+        """Test context manager with inference mode disabled."""
+        ctx_manager = UnwrappedContextManager(model, lock, inference_mode=False)
+
+        with ctx_manager as accessed_model:
+            assert accessed_model is model
+            # Test that gradients work when inference_mode=False
+            input_tensor = torch.randn(2, 3, requires_grad=True)
+            output = accessed_model(input_tensor)
+            assert output.shape == (2, 5)
+            assert output.requires_grad
+            # Verify backward pass works
+            output.mean().backward()
+            assert input_tensor.grad is not None
+
+    def test_lock_acquisition_and_release(
+        self, model: nn.Module, mocker: MockerFixture
+    ) -> None:
+        """Test that lock is properly acquired and released."""
+        mock_lock = mocker.Mock()
+        ctx_manager = UnwrappedContextManager(model, mock_lock, inference_mode=True)
+
+        # Enter context
+        returned_model = ctx_manager.__enter__()
+        mock_lock.acquire.assert_called_once()
+        assert returned_model is model
+
+        # Exit context
+        ctx_manager.__exit__(None, None, None)
+        mock_lock.release.assert_called_once()
+
+    def test_nested_context_with_rlock(self, model: nn.Module, lock: RLock) -> None:
+        """Test nested contexts work properly with RLock."""
+        ctx1 = UnwrappedContextManager(model, lock, inference_mode=True)
+        ctx2 = UnwrappedContextManager(model, lock, inference_mode=True)
+
+        with ctx1 as model1:
+            with ctx2 as model2:
+                assert model1 is model
+                assert model2 is model
+
+
 class TestTorchInferenceModel:
     @pytest.fixture
     def model(self) -> nn.Module:
@@ -117,6 +188,29 @@ class TestTorchInferenceModel:
         # check if backward results in an error.
         with pytest.raises(RuntimeError):
             output_tensor.mean().backward()
+
+    def test_unwrap_returns_correct_context_manager(
+        self,
+        torch_inference_model: TorchInferenceModel,
+        model: nn.Module,
+    ) -> None:
+        """Test that unwrap returns an UnwrappedContextManager with correct
+        parameters."""
+        # Test with default inference_mode=True
+        ctx_manager = torch_inference_model.unwrap()
+        assert isinstance(ctx_manager, UnwrappedContextManager)
+        assert torch.is_inference_mode_enabled() is False
+        with ctx_manager as m:
+            assert m is model
+            assert torch.is_inference_mode_enabled() is True
+        assert torch.is_inference_mode_enabled() is False
+
+        # Test with inference_mode=False
+        ctx_manager_no_inference = torch_inference_model.unwrap(inference_mode=False)
+        assert isinstance(ctx_manager_no_inference, UnwrappedContextManager)
+        with ctx_manager_no_inference as m:
+            assert m is model
+            assert torch.is_inference_mode_enabled() is False
 
 
 class TestTorchTrainingModel:
