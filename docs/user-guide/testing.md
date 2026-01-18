@@ -82,7 +82,8 @@ When testing an Agent implementation, you need to follow this sequence to ensure
 1. Connect components
 2. Call setup
 3. Test the step method
-4. Call teardown
+4. Transfer data from collectors to buffers (if needed)
+5. Call teardown
 
 For example:
 
@@ -93,7 +94,7 @@ def test_my_agent():
     buffer = MyDataBuffer(["state", "action"], max_size=100)
     model = MyTrainingModel()
 
-    connect_components(
+    components = connect_components(
         agent=agent,
         buffers={"experience": buffer},
         models={"policy": model}
@@ -109,9 +110,39 @@ def test_my_agent():
     # Verify the action is as expected
     assert action == 1
 
+    # Transfer collected data from DataCollector to DataBuffer
+    # This simulates what happens in the training thread
+    data_user = components.data_users["experience"]
+    data_user.update()  # Transfers data: Collector -> Buffer
+
+    # Now verify the data was collected correctly
+    assert len(buffer) == 1
+
     # Clean up
     agent.teardown()
 ```
+
+### Understanding Data Flow in Tests
+
+When an Agent calls `collector.collect(...)`, the data is queued in the DataCollector. To transfer this data to the DataBuffer, you must call `data_user.update()`:
+
+```python
+# 1. Agent collects data during step()
+action = agent.step(observation)  # internally calls collector.collect({...})
+
+# 2. Data is now in the DataCollector's queue, NOT in the buffer yet
+assert len(buffer) == 0  # Buffer is still empty!
+
+# 3. Call update() to transfer data from Collector to Buffer
+data_user = components.data_users["experience"]
+data_user.update()
+
+# 4. Now the data is in the buffer
+assert len(buffer) == 1  # Data has been transferred!
+collected_data = buffer.get_data()
+```
+
+This is the same mechanism used in the Training Thread, where Trainers call `self.data_user.update()` before accessing the data.
 
 Remember that the `step` method can only be properly tested after components have been connected and `setup` has been called.
 
